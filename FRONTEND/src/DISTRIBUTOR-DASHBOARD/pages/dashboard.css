@@ -1,0 +1,172 @@
+@import url("../../custom.css");
+
+.imgLogo {
+	width: 36px;
+	height: 36px;
+}
+
+.search-input {
+	height: 36px !important;
+	max-width: 350px !important;
+	width: 100% !important;
+}
+
+.search {
+	top: 5px !important;
+	left: 7px !important;
+	cursor: pointer;
+}
+
+.search-input input {
+	padding-left: 2.3rem !important;
+}
+
+.search-input input::placeholder {
+	color: var(--content-dark) !important;
+}
+
+.icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.chevron {
+	cursor: pointer;
+}
+
+.dashboard-container {
+	max-width: 250px !important;
+	width: 100% !important;
+	height: 100dvh !important;
+}
+
+.item-icon {
+	font-size: 20px !important;
+}
+
+.grid-template-columns {
+   grid-template-columns: repeat(12, 1fr);
+}
+
+.overview-span-full {
+   grid-column: 1 / -1;
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 0;
+}
+
+.metric-card {
+   padding-inline: 1.7rem;
+}
+
+.metric-card:not(:last-child) {
+   border-right: 1px solid #e5e7eb;
+}
+
+.chart-card-wide {
+   grid-column: 1 / 9;
+}
+
+.chart-card-short {
+   grid-column: 9 / 13;
+}
+
+.chart-card-wider {
+   grid-column: 1 / 10;
+}
+
+.chart-card-shorter {
+   grid-column: 10 / 13;
+   /* width: 90%; */
+}
+
+.chart-card-shortest {
+   grid-column: 1 / 4;
+}
+
+.chart-card-widest {
+   grid-column: 4 / 13;
+}
+
+.form-select {
+	border: 1.5px solid var(--content-dark) !important;
+	transition: none !important;
+	padding: 0.375rem 0.75rem !important;
+}
+
+.form-select:active,
+.form-select:focus {
+	box-shadow: none !important;
+}
+
+.fs-v-small {
+	font-size: 12px !important;
+}
+
+/* Legend Styling For Chart */
+.custom-legend {
+   position: absolute;
+   top: -490px;
+   right: 110px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 20px;
+	padding: 20px 0;
+	margin-top: 20px;
+}
+
+.legend-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	transition: opacity 0.2s;
+}
+
+.legend-item:hover {
+	opacity: 0.7;
+}
+
+.legend-icon {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+}
+
+.legend-text {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--content-dark);
+}
+
+/* Tooltip Styling for chart */
+.custom-tooltip::after {
+   content: '';
+   position: absolute;
+   bottom: -10px;
+   left: 50%;
+   transform: translateX(-50%);
+   width: 0;
+   height: 0;
+   border-left: 10px solid transparent;
+   border-right: 10px solid transparent;
+   border-top: 10px solid white;
+}
+ 
+ .tooltip-item {
+   margin: 0;
+   margin-top: 4px;
+   font-size: 13px;
+ }
+ 
+ .tooltip-icon {
+   display: inline-block;
+   margin-right: 4px;
+ }
+ 
+ .tooltip-text {
+   /* Add any text styling you want */
+ }

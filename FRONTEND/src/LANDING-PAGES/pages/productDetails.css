@@ -1,0 +1,157 @@
+@import url("../../custom.css");
+
+.product-details {
+	margin-top: 100px;
+}
+
+.product-details .row {
+	height: 100% !important;
+}
+
+.product-details .col-6 {
+   /* min-height: 10% !important; */
+	min-height: 500px !important;
+}
+
+.product-details .image {
+	width: 100%;
+	height: 80% !important;
+}
+
+.product-details .image img{
+	height: 100% !important;
+}
+
+.product-details .subname {
+	font-size: 14px;
+}
+
+.product-details .name {
+	font-size: 40px;
+	color: var(--main-accent);
+}
+
+.product-details strike + span,
+.product-details .w-50 h4 {
+	font-size: 24px;
+}
+
+.product-details .rating,
+.w-50 p,
+.w-50 ul {
+	margin-bottom: 2rem;
+}
+
+.product-details .description {
+	margin-block: 2.5rem;
+}
+
+.product-details .flex-column button {
+	padding-block: 0.7rem;
+	transition: all 0.3s ease;
+}
+
+.variant-thumb.active {
+	border-color: var(--main-accent) !important;
+	box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.product-details .fas.fs-3 {
+   cursor: pointer;
+   color: #3E012F;
+}
+
+.handleQuantity {
+   cursor: pointer;
+   background-color: #C4D1D0;
+}
+
+.reviews  h4 {
+	font-size: 20px;
+}
+
+.rating .line {
+	height: 2px;
+	width: 70%;
+	background-color: #C4D1D0;
+	position: relative;
+}
+
+.rating .line::before {
+	content: '';
+	position: absolute;
+	height: 100%;
+	background-color: #404b4b;
+	/* width: 100%; */
+}
+
+.rating .line-1::before{
+	width: 71.51%;
+}
+
+.rating .line-2::before{
+	width: 54.51%;
+}
+
+.rating .line-3::before{
+	width: 46.51%;
+}
+
+.rating .line-4::before{
+	width: 30.51%;
+}
+
+.rating .line-5::before{
+	width: 0%;
+}
+
+.form-control, textarea.form-control {
+	padding: 0.975rem 1rem !important;
+	border: 1px solid #C4D1D0 !important;
+}
+
+.form-control::placeholder, textarea.form-control::placeholder {
+	color: #4d4d4d !important;
+}
+
+.form-control:active {
+	box-shadow: 0px 0px 0px rgba(0, 0, 0, 0) !important;
+	outline: none !important;
+}
+
+.form-control:focus {
+	box-shadow: 0 0 0 .15rem rgba(68, 110, 173, 0.25) !important;
+}
+
+.submit {
+	padding-block: 0.75rem !important;
+	padding-inline: 2rem !important;
+	transition: all ease-in-out 0.3s;
+}
+
+.testimonial-container {
+	margin-block: 5rem !important;
+}
+
+.testimonials {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2rem;
+}
+
+.testimonial {
+	padding: 1.5rem;
+}
+
+.testimonial:hover {
+	box-shadow: 0px 20px 70px 0px rgba(0, 0, 0, 0.07);
+	border: none !important;
+}
+
+/* .testimonial-content {
+	width: 91%;
+} */
+
+.review-product {
+	font-size: 20px;
+}

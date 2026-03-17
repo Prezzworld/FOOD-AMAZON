@@ -1,0 +1,4 @@
+.env
+node_modules
+*.log
+# mongodb://localhost:27017/food-amazon-database

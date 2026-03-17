@@ -1,0 +1,69 @@
+@import url("/src/custom.css");
+
+.cart-page {
+	margin-top: 5rem;
+}
+
+.cart-page .offset-md-7 {
+	margin-left: 57% !important;
+}
+
+#cartModal.show ~ .modal-backdrop,
+.modal-backdrop.show {
+	background-color: var(--primary) !important;
+	opacity: 0.8 !important;
+}
+
+.item-img {
+	width: 100px;
+	height: 100px;
+}
+
+.item-count {
+	font-size: 14px !important;
+}
+
+.modal-content 	 {
+	border-radius: 0 !important;
+	border: none !important;
+}
+
+.modal-xl {
+	max-width: 1150px !important;
+}
+
+.modal-body {
+	padding: 1rem 5.5rem;
+}
+
+.modal-dialog {
+	display: flex;
+	align-items: center;
+}
+
+.modal-close:hover {
+	background-color: var(--secondary) !important;
+	color: white;
+}
+
+.congrat {
+	color: #566363;
+}
+
+.cart-content .border-bottom, .cart-summary .border-bottom {
+	border-bottom: 2.5px solid #e5e5e5 !important;
+}
+
+button.text-decoration-none {
+	border-bottom: 1px solid var(--content-accent) !important;
+	/* padding-bottom: 10px !important; */
+}
+
+span.border-content {
+	border: 1px solid var(--content) !important;
+	padding-inline: 0.8rem !important;
+}
+
+/* .item-details {
+	height: 100px;
+} */

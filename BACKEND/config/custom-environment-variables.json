@@ -1,0 +1,9 @@
+{
+   "jwtPrivateKey": "JWT_PRIVATE_KEY",
+   "jwtRefreshKey": "JWT_REFRESH_KEY",
+   "emailUser": "EMAIL_USER",
+   "emailPassword": "EMAIL_PASSWORD",
+   "frontendUrl": "FRONTEND_URL",
+   "mongoURI": "MONGODB_URL",
+   "port": "PORT"
+}
