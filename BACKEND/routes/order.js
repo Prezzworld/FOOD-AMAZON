@@ -98,7 +98,7 @@ router.post("/create", auth, async (req, res) => {
 			if (!process.env.PAYSTACK_SECRET_KEY) {
 				return res.status(500).send("Paystack secret key is not configured");
 			}
-			const callbackUrl = "http://localhost:3000/payment-status";
+			const callbackUrl = `${config.get("frontendUrl")}/payment-status`;
 			// Initialize Paystack
 			const response = await axios.post(
 				"https://api.paystack.co/transaction/initialize",
