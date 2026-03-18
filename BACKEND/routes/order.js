@@ -6,6 +6,7 @@ const { Order, validate } = require("../models/order");
 const { Cart } = require("../models/cart");
 const auth = require("../middleware/auth");
 const crypto = require("crypto");
+const config = require("config")
 const { assignDistributorByCity } = require("../utils/assign-distributor");
 // const admin = require("../middleware/admin");
 
