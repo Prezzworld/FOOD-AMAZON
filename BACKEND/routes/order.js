@@ -141,7 +141,7 @@ router.post("/create", auth, async (req, res) => {
 		}
 		res
 			.status(500)
-			.send("Unable to initialize payment, please try again later", paystackError);
+			.send("Unable to initialize payment, please try again later: " + paystackError);
 	}
 });
 
