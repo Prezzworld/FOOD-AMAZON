@@ -4,6 +4,6 @@
    "emailUser": "EMAIL_USER",
    "emailPassword": "EMAIL_PASSWORD",
    "frontendUrl": "FRONTEND_URL",
-   "mongoURI": "MONGODB_URL",
+   "mongoURI": "MONGODB_URI",
    "port": "PORT"
 }
