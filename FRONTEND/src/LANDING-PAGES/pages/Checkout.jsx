@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import OrderSummary from "../components/OrderSummary";
+import './checkout.css';
 import { cartService } from "../utils/cartService";
 import axiosInstance from "../utils/axiosInstance";
 
@@ -165,7 +166,7 @@ const Checkout = () => {
 	return (
 		<>
 			<Header shadow="shadow" />
-			<div className="container my-5">
+			<div className="container my-5 py-3">
 				{error && (
 					<div
 						className="alert alert-danger alert-dismissible fade show"
@@ -180,7 +181,7 @@ const Checkout = () => {
 						></button>
 					</div>
 				)}
-				<div className="row">
+				<div className="row g-4">
 					<div className="col-12 col-md-6">
 						<h4
 							className="font-nichrome fw-bold text-main-acent mb-4"
@@ -188,7 +189,7 @@ const Checkout = () => {
 						>
 							Billing Details
 						</h4>
-						<form className="row row-gap-4" onSubmit={handlePlaceOrder}>
+						<form className="row g-3" onSubmit={handlePlaceOrder}>
 							<div className="col-12">
 								{/* <label htmlFor="email" className="form-label"></label> */}
 								<input
@@ -206,7 +207,7 @@ const Checkout = () => {
 								</label>
 								<select
 									id="residence"
-									className="form-select form-control"
+									className="form-control"
 									value={formData.residence}
 									onChange={handleInputChange}
 								>
@@ -219,7 +220,7 @@ const Checkout = () => {
 								<label htmlFor="country" className="form-label">
 									Country
 								</label>
-								<select id="country" className="form-select form-control" value={formData.country} onChange={handleInputChange}>
+								<select id="country" className="form-control" value={formData.country} onChange={handleInputChange}>
 									<option selected>Nigeria</option>
 									<option>United States of America</option>
 								</select>
@@ -277,7 +278,7 @@ const Checkout = () => {
 							<div className="col-4 mt-0">
 								{/* <label htmlFor="LGA" className="form-label">
 								</label> */}
-								<select id="LGA" className="form-select form-control" value={formData.state} onChange={handleInputChange}>
+								<select id="LGA" className="form-control" value={formData.state} onChange={handleInputChange}>
 									<option>Lagos</option>
 									<option>Ogun</option>
 								</select>
@@ -319,7 +320,7 @@ const Checkout = () => {
 							</div>
 						</form>
 					</div>
-					<div className="col-12 col-md-5 offset-md-1">
+					<div className="col-12 col-md-6 col-lg-5 offset-md-1">
 						<OrderSummary title="Your Order" buttonText={submitting ? 'Processing...' : 'Place Order'} onPlaceOrder={handlePlaceOrder} disabled={submitting} />
 					</div>
 				</div>

@@ -4,14 +4,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap');
 @import url("custom.css");
 
-/* *, *::before, *::after{
+*, *::before, *::after{
 	margin: 0 !important;
 	padding: 0 !important;
 	box-sizing: border-box !important;
-} */
+	/* outline: 1px solid red; */
+}
+
+.row.g-1 > *,
+.row.g-2 > *,
+.row.g-3 > *,
+.row.g-4 > *,
+.row.g-5 > * {
+    padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
+    padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
+    padding-top: calc(var(--bs-gutter-y)) !important;
+}
+
+.row.g-1 { --bs-gutter-x: 0.25rem; --bs-gutter-y: 0.25rem; }
+.row.g-2 { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; }
+.row.g-3 { --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; }
+.row.g-4 { --bs-gutter-x: 1.6rem; --bs-gutter-y: 1.6rem; }
+.row.g-5 { --bs-gutter-x: 3rem; --bs-gutter-y: 3rem; }
 
 body {
+	width: 100%;
 	overflow-x: hidden !important;
+}
+
+.container {
+	margin-inline: auto !important;
 }
 
 .font-nichrome {
@@ -35,7 +57,7 @@ body {
 }
 
 .navbar-nav {
-	gap: 32px !important;
+	gap: 2rem !important;
 }
 
 nav *,
@@ -45,6 +67,10 @@ nav *,
 .about-text,
 .quote-name {
 	color: var(--text-main-accent) !important;
+}
+
+.navbar-brand {
+	width: 150px;
 }
 
 .navbar-toggler:focus {
@@ -86,6 +112,8 @@ nav *,
 }
 
 #hero {
+	max-width: 100% !important;
+	width: 100% !important;
 	padding-bottom: 30px;
 }
 
@@ -94,7 +122,7 @@ nav *,
 }
 
 #hero .image img {
-	width: 105% !important;
+	width: 100% !important;
 	overflow-x: hidden !important;
 }
 
@@ -104,6 +132,8 @@ nav *,
 	height: 300px !important;
 	bottom: -30px;
 	z-index: -1;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
 }
 
 .vector-2 {
@@ -112,6 +142,8 @@ nav *,
 	height: 200px !important;
 	bottom: -32px;
 	z-index: -1;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
 }
 
 .rectangle {
@@ -198,9 +230,12 @@ p.fs-sm {
 	align-self: stretch !important;
 }
 
-.product-image-container {
+.product-image-container, .product-bulk-image {
 	position: relative;
+	max-width: 100%;
 	width: 100%;
+	height: 310px;
+	/* height: 100%; */
 	padding-bottom: 80%;
 	overflow: hidden;
 	border-radius: 8px !important;
@@ -215,6 +250,15 @@ p.fs-sm {
 	object-fit: cover;
 	object-position: center;
 	transition: transform 0.3s ease;
+}
+
+.product-bulk-image {
+	height: 150px;
+}
+
+.product-card .bulk-description {
+	width: 80%;
+	margin-inline: auto !important;
 }
 
 .product-image-container:hover .product-image {
@@ -329,11 +373,11 @@ p.fs-sm {
 	max-height: 9em; 
 } */
 
-.bulk-card-inner > div:last-child {
+/* .bulk-card-inner > div:last-child {
 	flex: 0 0 auto !important;
 	margin-top: auto !important;
 	padding-top: 1rem;
-}
+} */
 
 .bulk-card-inner .product-card-details {
 	flex: 1 1 auto !important;
@@ -380,8 +424,9 @@ p.fs-sm {
 	flex-direction: column !important;
 	align-items: center !important;
 	justify-content: center !important;
+	width: 100%;
 	height: 100%;
-	min-height: 100% !important;
+	/* min-height: 100% !important; */
 	/* Smooth transition for any hover effects */
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -424,7 +469,27 @@ p.fs-sm {
 
 .offers-grid .grid-col:first-child {
 	grid-column: 1/3;
+	/* position: relative;
+	align-self: stretch;
+	min-height: 400px; */
 }
+
+.offers-grid .grid-col:first-child img {
+	/* position: absolute;
+	top: 0;
+	left: 0; */
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	/* border-radius: 8px; */
+}
+
+/* .offers-cards-grid {
+	display: grid;
+	grid-column: 3/4;
+	grid-template-columns: 1fr;
+	gap: 25px;
+} */
 
 .offers-grid .product-card {
 	height: 100%; /* Makes all cards the same height */
@@ -448,7 +513,7 @@ p.fs-sm {
 }
 
 #newsletter {
-	padding: 130px 0 80px 0;
+	padding: 5rem 0 5rem 0 !important;
 }
 
 #newsletter .container {
@@ -510,9 +575,9 @@ p.fs-sm {
 	font-size: 32px;
 }
 
-.footer-grid ul {
+/* .footer-grid ul {
 	width: 94% !important;
-}
+} */
 
 .footer-grid h4 {
 	font-size: 20px;
@@ -530,76 +595,3 @@ p.fs-sm {
 .copyright p {
 	font-size: 13px;
 }
-
-@media (min-width: 576px) and (max-width: 768px) {
-	.container {
-		max-width: 600px !important;
-	}
-}
-
-@media (max-width: 650px) {
-	.container {
-		max-width: 520px !important;
-		width: 90% !important;
-	}
-
-	#hero .image {
-		margin-left: 0px !important;
-	}
-
-	.numbers h3 {
-		font-size: 30px;
-	}
-
-	.number-bg {
-		padding-block: 50px !important;
-	}
-}
-
-@media (max-width: 992px) {
-	#bulkOrders .row .col-lg-3 {
-		width: 50% !important;
-	}
-}
-
-@media (max-width: 768px) {
-	#bulkOrders .row .col-lg-3 {
-		width: 100% !important;
-	}
-}
-
-/* Easiest fix - add this to the end of your index.css */
-/* 
-#bulkOrders .row.align-items-center {
-	display: grid !important;
-	grid-template-columns: repeat(4, 1fr) !important;
-	gap: 1.5rem !important;
-}
-
-#bulkOrders .row.align-items-center > * {
-	grid-column: span 1 !important;
-	display: flex !important;
-	flex-direction: column !important;
-}
-
-#bulkOrders .row.align-items-center .product-card {
-	height: 100% !important;
-}
-
-#bulkOrders .row.align-items-center .bulk-card-inner,
-#bulkOrders .row.align-items-center .see-others-inner {
-	height: 100% !important;
-	min-height: 400px !important;
-}
-
-@media (max-width: 992px) {
-	#bulkOrders .row.align-items-center {
-		grid-template-columns: repeat(2, 1fr) !important;
-	}
-}
-
-@media (max-width: 768px) {
-	#bulkOrders .row.align-items-center {
-		grid-template-columns: 1fr !important;
-	}
-} */

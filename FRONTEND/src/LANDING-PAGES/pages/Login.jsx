@@ -165,7 +165,9 @@ const Login = () => {
 
 			setLoading(false);
 			// Redirect to home page
-			navigate(from);
+			setTimeout(() => {
+				navigate(from);
+			}, 2000)
 		} catch (err) {
 			console.error("Login error:", err);
 

@@ -231,7 +231,7 @@ const CartPopup = () => {
 				aria-hidden="true"
 			>
 				<div className="modal-dialog modal-dialog-scrollable modal-xl">
-					<div className="modal-content">
+					<div className="modal-content px-3">
 						<div className="d-flex justify-content-end ms-auto">
 							{/* <h5 className="modal-title fw-bold" id="cartModalLabel">
 								Shopping Cart ({cart.length})
@@ -245,7 +245,7 @@ const CartPopup = () => {
 								<BsX size={40} />
 							</button>
 						</div>
-						<div className="modal-body">
+						<div className="modal-body mt-3 mb-4">
 							{loading ? (
 								<div className="text-center py-5">
 									<div className="spinner-border" role="status">

@@ -5,8 +5,7 @@
 }
 
 .signup-body {
-	min-height: 130vh !important;
-   height: 100% !important;
+   height: 100dvh !important;
 }
 
 .signup-body .position-relative.w-50 {
@@ -58,4 +57,20 @@
 
 .form-container form button.submit {
    padding-block: .7rem !important;
+}
+
+@media(max-width: 1200px) {
+   .signup-form {
+      max-width: 100%;
+   }
+}
+
+@media(max-width: 950px) {
+   .signup-body .position-relative.w-50{
+      display: none;
+   }
+   .right-auth{
+      width: 80% !important;
+      margin-inline: auto !important;
+   }
 }

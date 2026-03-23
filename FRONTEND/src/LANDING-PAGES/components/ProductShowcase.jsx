@@ -24,19 +24,19 @@ const ProductShowcase = ({
 		switch (sectionType) {
 			case "popular":
 				return (
-					<h2 className="font-nichrome fw-bold mb-0 text-main-accent fs-xl">
+					<h2 className="font-nichrome fw-bold mb-3 text-main-accent fs-xl">
 						Our Popular Products
 					</h2>
 				);
 			case "newest":
 				return (
-					<h2 className="font-nichrome fw-bold mb-0 text-main-accent fs-xl">
+					<h2 className="font-nichrome fw-bold mb-3 text-main-accent fs-xl">
 						Our New Products
 					</h2>
 				);
 			case "hasOffer":
 				return (
-					<h2 className="font-nichrome fw-bold mb-0 text-main-accent fs-xl">
+					<h2 className="font-nichrome fw-bold mb-3 text-main-accent fs-xl">
 						Hurry do not miss out on <br /> these offers
 					</h2>
 				);
@@ -48,13 +48,13 @@ const ProductShowcase = ({
 				);
 			case "similar":
 				return (
-					<h2 className="font-nichrome fw-bold mb-0 text-main-accent fs-xl">
+					<h2 className="font-nichrome fw-bold mb-3 text-main-accent fs-xl">
 						Similar Products
 					</h2>
 				);
 			default:
 				return (
-					<h2 className="font-nichrome fw-bold mb-0 text-main-accent fs-xl">
+					<h2 className="font-nichrome fw-bold mb-3 text-main-accent fs-xl">
 						People Also Buy
 					</h2>
 				);
@@ -65,14 +65,14 @@ const ProductShowcase = ({
 		switch (sectionType) {
 			case "popular":
 				return (
-					<p className="font-inter fs-md fs-normal">
+					<p className="font-inter fs-md fs-normal pb-3">
 						Browse our most popular snacks and make your day <br /> more
 						beautiful and glorious.
 					</p>
 				);
 			case "newest":
 				return (
-					<p className="font-inter fs-md fs-normal">
+					<p className="font-inter fs-md fs-normal pb-3">
 						Check out our latest arrivals and be the first to try <br />{" "}
 						something new and exciting.
 					</p>
@@ -81,16 +81,16 @@ const ProductShowcase = ({
 				return "Don't miss out on these amazing deals! Limited time offers on your favorite products.";
 			case "bulk":
 				return (
-					<p className="font-inter fs-md fs-normal">
+					<p className="font-inter fs-md fs-normal pb-3">
 						Our snacks are free from artificial additives, providing a pure and
-						wholesome snacking experience. Discover <br /> our range of
-						delightful organic treats designed to satisfy your cravings while
-						supporting a healthy lifestyle.
+						wholesome snacking experience. Discover <br className="d-none d-lg-block" /> our
+						range of delightful organic treats designed to satisfy your cravings
+						while supporting a healthy lifestyle.
 					</p>
 				);
 			default:
 				return (
-					<p className="font-inter fs-md fs-normal">
+					<p className="font-inter fs-md fs-normal pb-3">
 						Browse our most popular snacks and make your day <br /> more
 						beautiful and glorious.
 					</p>
@@ -101,11 +101,13 @@ const ProductShowcase = ({
 	if (layoutStyle === "grid" && imageSlot) {
 		return (
 			<div className="py-5">
-				<div className="container offer-container">
-					<div className="d-flex flex-column flex-lg-row align-items-center justify-content-between mb-5">
-						<div className="offer-header-text">{getTitle()}</div>
+				<div className="container mx-auto offer-container">
+					<div className="d-flex flex-column align-items-center justify-content-center flex-xl-row align-items-xl-center justify-content-xl-between mb-5">
+						<div className="offer-header-text text-center text-xl-start">
+							{getTitle()}
+						</div>
 						{showBrowseButton && (
-							<div className="align-self-end">
+							<div className="align-self-xl-end">
 								<Link to={buttonLink}>
 									<button className="fs-5 fw-semibold bg-transparent browse-btn text-primary-normal font-inter rounded-1">
 										{buttonText}
@@ -114,15 +116,17 @@ const ProductShowcase = ({
 							</div>
 						)}
 					</div>
-					<div className="offers-grid">
-						<div className="grid-col">{imageSlot}</div>
-						<ProductSection
-							title=""
-							type={sectionType}
-							limit={limit}
-							layoutMode="grid"
-							variant={variant}
-						/>
+					<div className="offers-grid px-3">
+						<div className="grid-col img-fluid">{imageSlot}</div>
+						{/* <div className="offers-cards-grid"> */}
+							<ProductSection
+								title=""
+								type={sectionType}
+								limit={limit}
+								layoutMode="grid"
+								variant={variant}
+							/>
+						{/* </div> */}
 					</div>
 				</div>
 			</div>
@@ -132,7 +136,7 @@ const ProductShowcase = ({
 	if (layoutStyle === "scroll") {
 		return (
 			<div className="py-5">
-				<div className="container px-0 px-lg-3">
+				<div className="product-show container mx-auto px-0 gx-0 px-lg-3">
 					<div className="product-heading mb-5 text-center text-lg-start">
 						{getTitle()}
 						<div className="d-flex flex-column flex-lg-row align-items-center justify-content-between">
@@ -166,10 +170,7 @@ const ProductShowcase = ({
 	return (
 		<div id="bulkOrders">
 			<div className="container">
-				<div
-					className="product-heading mb-5 text-center"
-					style={{ maxWidth: "80%", margin: "auto" }}
-				>
+				<div className="product-heading mb-5 text-center w-100 mx-auto">
 					{getTitle()}
 					{getSubtitle()}
 				</div>
@@ -210,9 +211,9 @@ const ProductShowcase = ({
 								</p>
 								<button
 									className="text-white border-2 border-white bg-transparent py-2 px-4 d-inline-flex align-items-center fw-semibold rounded-2"
-									onClick={() => navigate('/bulk-products')}
+									onClick={() => navigate("/bulk-products")}
 								>
-									See Others <FaChevronRight className="ms-1"/>
+									See Others <FaChevronRight className="ms-1" />
 								</button>
 							</div>
 						</div>

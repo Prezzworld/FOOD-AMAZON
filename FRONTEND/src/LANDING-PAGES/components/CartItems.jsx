@@ -45,8 +45,8 @@ const CartItems = ({
 	if (variant === "compact") {
 		return (
 			<>
-				<div className="cart-content">
-					<div className="d-flex justify-content-between align-items-center border-bottom pb-3">
+				<div className="cart-content row">
+					<div className="d-flex justify-content-between align-items-center border-bottom pb-3 col-12">
 						<div className="">
 							<p className="item-count font-inter fw-medium text-main-accent mb-0">
 								Item {index + 1}
@@ -94,7 +94,7 @@ const CartItems = ({
 							)}
 						</div>
 					</div>
-					<div className="d-flex mt-3 gap-3 mb-4">
+					<div className="d-flex mt-3 gap-3 mb-4 col-12">
 						<div className="item-img">
 							<img
 								src={item.productImg}
@@ -178,7 +178,7 @@ const CartItems = ({
 						</div>
 					</div>
 				</div>
-				<div className="d-flex gap-3 my-3">
+				<div className="d-flex gap-3 my-3 justify-content-center justify-content-lg-start">
 					<div className="item-img">
 						<img
 							src={item.productImg}
@@ -186,7 +186,7 @@ const CartItems = ({
 							className="w-100 h-100 object-fit-cover rounded-3"
 						/>
 					</div>
-					<div className="d-flex flex-column justify-content-between">
+					<div className="d-flex flex-column gap-2 gap-lg-0 justify-content-center justify-content-lg-between">
 						<h4 className="font-nichrome fs-5 fw-medium text-main-accent">
 							{item.name}
 						</h4>

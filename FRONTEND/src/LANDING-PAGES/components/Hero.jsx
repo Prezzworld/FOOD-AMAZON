@@ -8,15 +8,15 @@ const Hero = () => {
 				<div className="container">
 					<div className="row align-items-center mt-5 mt-lg-0">
 						<div className="col-12 text-center col-lg-6 text-lg-start">
-							<p className="p-hero font-inter fs-md lh-base">
+							<p className="p-hero font-inter fs-md lh-base pb-3">
 								Discover the Pure Taste of Nature
 							</p>
-							<h1 className="font-nichrome fs-xxl text-primary-normal lh-1">
+							<h1 className="font-nichrome fs-xxl text-primary-normal lh-2 px-3 px-sm-0">
 								Organic <span className="text-secondary-normal">Snacks </span>
 								<br className='d-none d-lg-block' />
 								Made <br className='d-none d-sm-block d-lg-none'/> <span className="text-secondary-normal">
 									with
-								</span> Love, <br className='d-none d-lg-block' />
+								</span> Love, <br className='d-none d-xl-block' />
 								Just
 								<span className="text-secondary-normal"> for</span> You!
 							</h1>
@@ -34,15 +34,15 @@ const Hero = () => {
 								</button>
 							</div>
 						</div>
-						<div className="col-12 col-lg-6">
-							<div className="image">
+						<div className="col-12 col-lg-6 overflow-hidden">
+							<div className="image pb-4">
 								<img src={HeroImg} alt=""/>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div className="vector-1 position-absolute"></div>
-        		<div className="vector-2 position-absolute"></div>
+        <div className="vector-2 position-absolute"></div>
 
 		  {/* For next section */}
         <div className="rectangle position-absolute w-100 bg-white opacity-75"></div>

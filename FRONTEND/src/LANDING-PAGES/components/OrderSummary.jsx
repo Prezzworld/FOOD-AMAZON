@@ -87,13 +87,13 @@ const OrderSummary = ({
 							</div>
 						</div>
 						<div
-							className="mt-3 d-flex justify-content-between align-items-center font-inter text-main-accent fw-bold"
+							className="my-3 d-flex justify-content-between align-items-center font-inter text-main-accent fw-bold"
 							style={{ fontSize: "20px" }}
 						>
 							<h4>Total</h4>
 							<p>${totalPrice.toFixed(2)}</p>
 						</div>
-						<div className="checkout mt-4  ">
+						<div className="checkout">
 							<button
 								onClick={handleButtonClick}
 								disabled={disabled}

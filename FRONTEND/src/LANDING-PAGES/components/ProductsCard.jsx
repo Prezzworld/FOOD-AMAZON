@@ -89,14 +89,14 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 
 		if (variant === "bulk") {
 			if (layoutMode === "flex") {
-				return `${baseClasses} col-6 col-md-3`;
+				return `${baseClasses} col-12 col-md-6 col-lg-3`;
 			}
 			return baseClasses;
 		}
 
 		if (layoutMode === "flex") {
-			return `${baseClasses} col-6 col-md-4`;
-		}
+			return `${baseClasses} col-12 col-sm-8 col-md-5`;
+		} 
 		return baseClasses;
 	};
 
@@ -143,11 +143,11 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 					style={{ cursor: "pointer" }}
 					onClick={handleProductClick}
 				>
-					<div className="product-image-container mb-4">
+					<div className="product-image-container product-bulk-image mb-4">
 						<img
 							src={product.productImg}
 							alt={product.name}
-							className="product-image"
+							className="product-image product-image-bulk"
 						/>
 					</div>
 					<div className="product-card-details text-center">
@@ -157,10 +157,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 						{/* The description field will come from your backend
 					    We'll add this to the product model */}
 						{product.bulkDescription && (
-							<p
-								className="text-content-accent fs-6 font-inter mb-4"
-								style={{ width: "80%", margin: "auto" }}
-							>
+							<p className="text-content-accent fs-6 font-inter mb-4 bulk-description">
 								{product.bulkDescription}
 							</p>
 						)}

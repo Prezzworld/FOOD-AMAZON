@@ -47,10 +47,10 @@ const Footer = ({ iconsDisplay }) => {
 							<img src={TrustpilotLogo} alt="" className="img-fluid" />
 						</div>
 					</div>
-					<div className="footer-grid d-flex justify-content-between py-5">
+					<div className="footer-grid row g-4 g-lg-0 justify-content-lg-between py-5">
 						{footerElem.map((item, index) => (
-							<ul key={index} className="ps-0">
-								<h4 className="font-nicrome fw-medium text-white">
+							<ul key={index} className="ps-0 col-12 col-md-4 col-lg-2">
+								<h4 className="font-nicrome fw-medium text-white mb-3 mb-md-4">
 									{item.title}
 								</h4>
 								{item.links.map((link, key) =>
@@ -70,22 +70,22 @@ const Footer = ({ iconsDisplay }) => {
 										>
 											<Link className="text-decoration-none">{link}</Link>
 										</li>
-									)
+									),
 								)}
 							</ul>
 						))}
 					</div>
 				</div>
-				<div className="footer-bottom py-2">
+				<div className="footer-bottom py-4">
 					<div className="container px-0">
-						<div className="row align-items-center">
-							<div className="footer-logo col-4">
-								<img src={Logo} alt="" />
+						<div className="row g-3 align-items-center text-center text-md-start">
+							<div className="footer-logo col-12 col-md-4">
+								<img src={Logo} alt="" className="img-fluid" />
 							</div>
-							<div className="payment-companies mx-auto col-4">
+							<div className="payment-companies mx-auto col-12 col-md-4">
 								<img src={CompaniesLogo} alt="" className="img-fluid " />
 							</div>
-							<div className="copyright col-4">
+							<div className="copyright col-12 col-md-4">
 								<p className="fw-normal font-inter text-main-accent">
 									Copyright © 2024 FoodieAmazon. All Rights Reserved
 								</p>

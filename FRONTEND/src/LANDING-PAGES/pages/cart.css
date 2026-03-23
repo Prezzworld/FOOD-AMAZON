@@ -67,3 +67,10 @@ span.border-content {
 /* .item-details {
 	height: 100px;
 } */
+
+@media(max-width: 992px) {
+	.item-img {
+		width: 150px;
+		height: 150px;
+	}
+}

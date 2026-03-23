@@ -55,7 +55,7 @@ const Header = ({ shadow }) => {
 	return (
 		<>
 			<nav className={`navbar navbar-expand-lg font-inter ${shadow}`}>
-				<div className="container px-0">
+				<div className="container px-3">
 					<div className="navbar-brand">
 						<img src={Logo} alt="Food Amazon Logo" className="img-fluid" />
 					</div>
@@ -111,7 +111,7 @@ const Header = ({ shadow }) => {
 								<MdOutlineShoppingBag size={20} />
 								{cartCount > 0 && (
 									<span
-										className="position-absolute start-100 translate-middle badge rounded-circle text-white bg-secondary-normal"
+										className="position-absolute start-100 translate-middle badge rounded-circle text-white bg-secondary-normal p-1"
 										style={{ fontSize: "0.65rem", top: "5px" }}
 									>
 										{cartCount}

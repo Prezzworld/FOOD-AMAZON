@@ -6,7 +6,7 @@ const About = () => {
 		<>
 			<div className="container py-5">
 				<div className="row align-items-center">
-					<div className="col-12 col-lg-5 text-center">
+					<div className="col-12 col-lg-5 text-center mb-4">
 						<div className="image mb-4">
 							<img src={AboutImg} alt="" className="img-fluid" />
 						</div>
@@ -15,11 +15,11 @@ const About = () => {
 						</button>
 					</div>
 					<div className="col-12 col-lg-7">
-						<h2 className="fs-super-large text-primary-normal font-nichrome lh-1 mb-4">
+						<h2 className="fs-super-large text-primary-normal font-nichrome lh-1 mb-4 text-center text-lg-start">
 							HIGH QUALITY{" "}
 							<span className="text-secondary-normal">ORGANIC SNACKS</span>
 						</h2>
-						<p className="about-text fs-6 fw-normal font-inter mb-2">
+						<p className="about-text fs-6 fw-normal font-inter mb-2 px-3 px-lg-0">
 							At Foodie Amazon, we believe in the power of nature to provide
 							wholesome, delicious snacks. Our journey began with a simple
 							mission: to bring the pure taste of nature to your doorstep. We
@@ -28,7 +28,7 @@ const About = () => {
 							is on providing organic snacks that are made with the finest
 							ingredients sourced from sustainable farms.
 						</p>
-						<p className="about-text fs-6 fw-normal font-inter mb-4">
+						<p className="about-text fs-6 fw-normal font-inter mb-4 px-3 px-lg-0">
 							Our commitment to quality means that you won't find any gums,
 							preservatives, or artificial sugars in our products. Instead, we
 							use natural sweeteners and preservatives to ensure that every bite
@@ -40,7 +40,7 @@ const About = () => {
 							for our commitment to quality and sustainability.
 						</p>
 
-						<div className="font-calligraffitti">
+						<div className="font-calligraffitti px-3 px-lg-0">
 							<p className="fw-normal fs-6 quote-name mb-0">John Doe</p>
 							<p className="quote-status fw-normal font-inter">Chief Executive Officer</p>
 						</div>

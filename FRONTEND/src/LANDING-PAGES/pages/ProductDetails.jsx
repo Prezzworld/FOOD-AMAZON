@@ -172,14 +172,14 @@ const ProductDetails = () => {
 	return (
 		<>
 			<Header shadow="shadow" />
-			<div className="container product-details">
-				<div className="row justify-content-between align-items-stretch">
+			<div className="container product-details row flex-column">
+				<div className="row justify-content-between align-items-stretch px-3 px-md-0 row-gap-4">
 					<div className="col-lg-6 d-flex flex-column">
 						<div className="image flex-grow-1 d-flex flex-column">
 							<img
 								src={imgVariants[selectedImage]}
 								alt={product.name}
-								className="rounded-4 w-100 h-100"
+								className="rounded-4 img-fluid"
 								style={{
 									objectFit: "cover",
 									// objectPosition: "30% 50%",
@@ -227,7 +227,7 @@ const ProductDetails = () => {
 							</div>
 						)}
 					</div>
-					<div className="col-5 d-flex flex-column">
+					<div className="col-12 col-lg-5 d-flex flex-column">
 						<div className="flex-grow-1 d-flex flex-column">
 							<p className="font-inter m-0 fw-normal subname mb-1 text-content-accent">
 								{product.category?.name}
@@ -300,14 +300,14 @@ const ProductDetails = () => {
 								</div>
 							</div>
 							<div className="description">
-								<p className="fs-5 fw-normal font-inter text-content-accent">
+								<p className="fs-5 fw-normal font-inter text-content-accent my-3">
 									{product.bulkDescription}
 								</p>
 							</div>
 							<div className="d-flex flex-column gap-3">
 								<button
 									onClick={handleAddToCart}
-									className="bg-primary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5"
+									className="bg-primary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5 py-3"
 								>
 									{added ? (
 										<>
@@ -319,7 +319,7 @@ const ProductDetails = () => {
 								</button>
 								<button
 									onClick={handleCheckOut}
-									className="bg-secondary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5"
+									className="bg-secondary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5 py-3"
 								>
 									Check Out
 								</button>
@@ -328,7 +328,7 @@ const ProductDetails = () => {
 					</div>
 				</div>
 
-				<div className="w-50 py-5">
+				<div className="col-12 col-lg-6 py-5 px-3 px-md-0">
 					<h4 className="font-nichrome fw-bold text-main-accent mb-4">
 						About This Product
 					</h4>
@@ -338,8 +338,8 @@ const ProductDetails = () => {
 				</div>
 
 				{/* Reviews Section */}
-				<div className="reviews row justify-content-between mt-5">
-					<div className="col-6">
+				<div className="reviews row justify-content-between px-3 px-md-0">
+					<div className="col-12 col-lg-12 mb-5 mb-lg-0">
 						<h4 className="font-inter fw-bold text-main-accent mb-0">
 							Customer Reviews
 						</h4>
@@ -383,7 +383,7 @@ const ProductDetails = () => {
 							</div>
 						</div>
 					</div>
-					<div className="col-5">
+					<div className="col-12 col-lg-5">
 						<h4 className="font-inter text-main-accent fw-bold">
 							How Would you rate this?
 						</h4>
@@ -425,7 +425,7 @@ const ProductDetails = () => {
 
 			{/* Testimonials & Reviews */}
 			<div className="container testimonial-container">
-				<div className="testimonials">
+				<div className="testimonials px-3 px-sm-0">
 					{reviews.map((review, index) => (
 						<div key={index} className="testimonial border rounded-3">
 							<div className="testimonial-content">

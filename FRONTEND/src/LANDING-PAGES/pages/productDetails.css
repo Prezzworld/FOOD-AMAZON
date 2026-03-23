@@ -1,7 +1,7 @@
 @import url("../../custom.css");
 
 .product-details {
-	margin-top: 100px;
+	margin-top: 70px !important;
 }
 
 .product-details .row {
@@ -154,4 +154,30 @@
 
 .review-product {
 	font-size: 20px;
+}
+
+@media(max-width: 992px) {
+	.product-details {
+		margin-top: 50px !important;
+	}
+	.product-details .image {
+		width: 100%;
+		height: 400px !important;
+	}
+	.testimonials {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media(max-width: 576px) {
+	.testimonials {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media(max-width: 350px) {
+	.product-details .image {
+		width: 100%;
+		height: 350px !important;
+	}
 }

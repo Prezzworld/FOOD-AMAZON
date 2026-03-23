@@ -134,10 +134,10 @@ const Cart = () => {
 				</>
 			) : (
 				<>
-					<div className="container">
+					<div className="container mt-5 mb-4">
 						<div className="cart-page">
-							<div className="row d-flex">
-								<div className="col-12 col-md-6">
+							<div className="row d-flex g-4">
+								<div className="col-12 col-lg-6">
 									{cart.map((item, index) => (
 										<CartItems
 											key={item.itemId}
@@ -150,7 +150,7 @@ const Cart = () => {
 										/>
 									))}
 								</div>
-								<div className="col-12 col-md-5 offset-md-1">
+								<div className="col-12 col-lg-6 offset-md-1 offset-lg-0">
 									<OrderSummary title="Order Summary" buttonText="Proceed to Check out"/>
 								</div>
 							</div>
