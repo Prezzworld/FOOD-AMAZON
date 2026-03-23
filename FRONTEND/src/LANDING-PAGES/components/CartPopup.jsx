@@ -230,7 +230,7 @@ const CartPopup = () => {
 				aria-labelledby="cartModalLabel"
 				aria-hidden="true"
 			>
-				<div className="modal-dialog modal-dialog-scrollable modal-xl">
+				<div className="modal-dialog modal-dialog-scrollable modal-xl mx-auto">
 					<div className="modal-content px-3">
 						<div className="d-flex justify-content-end ms-auto">
 							{/* <h5 className="modal-title fw-bold" id="cartModalLabel">

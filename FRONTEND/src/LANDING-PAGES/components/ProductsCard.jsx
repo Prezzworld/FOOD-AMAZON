@@ -95,7 +95,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		}
 
 		if (layoutMode === "flex") {
-			return `${baseClasses} col-12 col-sm-8 col-md-5`;
+			return `${baseClasses} col-12 col-sm-8 col-md-5 col-lg-4`;
 		} 
 		return baseClasses;
 	};

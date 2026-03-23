@@ -30,6 +30,7 @@
 
 .modal-xl {
 	max-width: 1150px !important;
+	margin-inline: auto;
 }
 
 .modal-body {
