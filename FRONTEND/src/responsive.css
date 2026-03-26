@@ -42,18 +42,9 @@
 }
 
 @media (max-width: 576px) {
-  /* Single card per row on small phones */
-  /* .offers-grid .grid-col:first-child {
-      height: 220px;
-  } */
-
-  /* .offers-cards-grid {
-    grid-template-columns: 1fr;
+  .navbar-brand {
+    max-width: 60px !important;
   }
-
-  .offers-grid {
-    padding: 1.5rem !important;
-  } */
 }
 
 @media (max-width: 320px ) {

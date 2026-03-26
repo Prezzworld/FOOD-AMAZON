@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import OrderSummary from "../components/OrderSummary";
-import './checkout.css';
+import "./checkout.css";
 import { cartService } from "../utils/cartService";
+import { useAlert } from "../../alert/AlertContext";
+import { useToast } from "../../toast/ToastContext";
 import axiosInstance from "../utils/axiosInstance";
 
 const Checkout = () => {
+	const { showToast } = useToast();
+	const { showAlert } = useAlert();
 	const endpoint_url = "/food-amazon-database/order/";
 	const [formData, setFormData] = useState({
 		email: "",
@@ -47,23 +51,35 @@ const Checkout = () => {
 			const cartItems = await cartService.getCart();
 			if (!cartItems || cartItems.length === 0) {
 				setError(
-					"Your cart is empty. Please add items to cart before checkout"
+					"Your cart is empty. Please add items to cart before checkout",
+				);
+				showAlert(
+					"Your cart is empty. Please add items to cart before checkout",
+					"error",
+					{ mode: "inline" },
 				);
 				setLoading(false);
 				return;
 			}
 			const response = await axiosInstance.get(
-				"/food-amazon-database/cart/get-cart"
+				"/food-amazon-database/cart/get-cart",
 			);
 			console.log(response.data);
 			setCart(response.data);
 			setCartId(response.data._id);
 			console.log("Response data body: ", response.data._id);
-			setLoading(false)
+			setLoading(false);
 		} catch (error) {
 			console.error("Error fetching cart: ", error);
 			setError("Failed to load cart. Please try again.");
-			setLoading(false);
+			showAlert("Failed to load cart. Please try again.", "error", {
+				mode: "confirm",
+				confirmText: "Try again",
+				onConfirm: () => {
+					setLoading(false);
+					fetchCartData();
+				},
+			});
 		}
 	};
 	const validateForm = async () => {
@@ -81,18 +97,30 @@ const Checkout = () => {
 		];
 		for (let field of required) {
 			if (!formData[field] || formData[field].trim() === "") {
+				setLoading(false);
 				setError(
 					`Please fill in your ${field
 						.replace(/([A-Z])/g, ` $1`)
-						.toLowerCase()}`
+						.toLowerCase()}`,
 				);
-				return false;
+				showAlert(
+					`Please fill in your ${field
+						.replace(/([A-Z])/g, ` $1`)
+						.toLowerCase()}`,
+					"error",
+					{ mode: "inline" },
+				);
+				// return false;
 			}
 		}
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(formData.email)) {
+			setLoading(false);
 			setError("Please enter a valid email address");
-			return false;
+			showAlert("Please enter a valid email address", "error", {
+				mode: "inline",
+			});
+			// return false;
 		}
 		return true;
 	};
@@ -104,6 +132,11 @@ const Checkout = () => {
 		}
 		if (!cartId) {
 			setError("Cart ID not found. Please refresh and try again.");
+			showAlert("Cart ID not found. Please refresh and try again.", "error", {
+				mode: "confirm",
+				confirmText: "Try again",
+				onConfirm: () => handlePlaceOrder(),
+			});
 			return;
 		}
 		setSubmitting(true);
@@ -129,9 +162,10 @@ const Checkout = () => {
 			console.log("Submitting order: ", orderData);
 			const response = await axiosInstance.post(
 				`${endpoint_url}create`,
-				orderData
+				orderData,
 			);
 			console.log("Order created successfully:", response.data);
+			await showToast("Order created successfully!", "success", 2000);
 			if (response.data.authorizationUrl) {
 				window.location.href = response.data.authorizationUrl;
 			} else {
@@ -142,9 +176,22 @@ const Checkout = () => {
 			setError(
 				error.response?.data ||
 					error.message ||
-					"Failed to create order. Please try again."
+					"Failed to create order. Please try again.",
 			);
-			setSubmitting(false);
+			setLoading(false);
+			showAlert(
+					"Failed to create order. Please try again.",
+				"error",
+				{
+					// mode: "inline",
+					mode: "confirm",
+					confirmText: "Try again",
+					onConfirm: () => {
+						setSubmitting(false);
+						setLoading(false);
+					},
+				},
+			);
 		}
 	};
 
@@ -167,20 +214,6 @@ const Checkout = () => {
 		<>
 			<Header shadow="shadow" />
 			<div className="container my-5 py-3">
-				{error && (
-					<div
-						className="alert alert-danger alert-dismissible fade show"
-						role="alert"
-					>
-						{error}
-						<button
-							type="button"
-							className="btn-close"
-							onClick={() => setError("")}
-							aria-label="Close"
-						></button>
-					</div>
-				)}
 				<div className="row g-4">
 					<div className="col-12 col-md-6">
 						<h4
@@ -211,16 +244,21 @@ const Checkout = () => {
 									value={formData.residence}
 									onChange={handleInputChange}
 								>
-									<option value="Residence">Residence</option>									
-									<option value="Work Office">Work Office</option>									
-									<option value="Other">Other</option>									
+									<option value="Residence">Residence</option>
+									<option value="Work Office">Work Office</option>
+									<option value="Other">Other</option>
 								</select>
 							</div>
 							<div className="col-12">
 								<label htmlFor="country" className="form-label">
 									Country
 								</label>
-								<select id="country" className="form-control" value={formData.country} onChange={handleInputChange}>
+								<select
+									id="country"
+									className="form-control"
+									value={formData.country}
+									onChange={handleInputChange}
+								>
 									<option selected>Nigeria</option>
 									<option>United States of America</option>
 								</select>
@@ -278,7 +316,12 @@ const Checkout = () => {
 							<div className="col-4 mt-0">
 								{/* <label htmlFor="LGA" className="form-label">
 								</label> */}
-								<select id="LGA" className="form-control" value={formData.state} onChange={handleInputChange}>
+								<select
+									id="LGA"
+									className="form-control"
+									value={formData.state}
+									onChange={handleInputChange}
+								>
 									<option>Lagos</option>
 									<option>Ogun</option>
 								</select>
@@ -321,7 +364,12 @@ const Checkout = () => {
 						</form>
 					</div>
 					<div className="col-12 col-md-6 col-lg-5 offset-md-1">
-						<OrderSummary title="Your Order" buttonText={submitting ? 'Processing...' : 'Place Order'} onPlaceOrder={handlePlaceOrder} disabled={submitting} />
+						<OrderSummary
+							title="Your Order"
+							buttonText={submitting ? "Processing..." : "Place Order"}
+							onPlaceOrder={handlePlaceOrder}
+							disabled={submitting}
+						/>
 					</div>
 				</div>
 			</div>

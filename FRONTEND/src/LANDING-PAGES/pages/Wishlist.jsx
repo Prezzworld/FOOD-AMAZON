@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 // import { useNavigate } from 'react-router-dom';
 // import { stringToArray } from '../helper/Helper';
 import { BsX } from "react-icons/bs";
@@ -6,12 +6,13 @@ import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
 import { cartService } from "../utils/cartService";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import Swal from 'sweetalert2';
-import withReactContent from "sweetalert2-react-content";
-import '../pages/wishlist.css';
+import "../pages/wishlist.css";
+import { useAlert } from "../../alert/AlertContext";
+import { useToast } from "../../toast/ToastContext";
 
 const Wishlist = () => {
-	const MySwal = withReactContent(Swal);
+	const { showAlert } = useAlert();
+	const { showToast } = useToast();
 	// const navigate = useNavigate();
 	const [wishlist, setWishlist] = useState({});
 	const [addedItem, setAddedItem] = useState([]);
@@ -39,11 +40,10 @@ const Wishlist = () => {
 			window.addEventListener("storage", handleStorageChange);
 			return () => window.removeEventListener("storage", handleStorageChange);
 		} catch (error) {
-			console.error('Error loading wishlist', error);
-			MySwal.fire({
-				icon: "error",
-				text: "Failed to load wishlist",
-				showConfirmButton: true,
+			console.error("Error loading wishlist", error);
+			showAlert("Failed to load wishlist", "error", {
+				mode: "confirm",
+				confirmText: "Ok",
 			});
 		} finally {
 			setLoading(false);
@@ -54,31 +54,22 @@ const Wishlist = () => {
 		if (addingToCart[product._id]) return; // Prevent multiple clicks
 		try {
 			await cartService.addToCart(product, 1);
-			setAddedItem(prev => ({...prev, [product._id]: true}));
-		// Here you would dispatch to Redux or Context
-		console.log("Added to cart:", product);
+			setAddedItem((prev) => ({ ...prev, [product._id]: true }));
+			// Here you would dispatch to Redux or Context
+			console.log("Added to cart:", product);
 
-		MySwal.fire({
-			icon: "success",
-			text: "Product added to cart",
-			showConfirmButton: false,
-			timer: 2000,
-			toast: true,
-			position: "top-end",
-		});
+			showToast("Product added to cart", "success");
 
-		// Reset after 2 seconds
-		setTimeout(() => {
-			setAddedItem(prev => ({...prev, [product._id]: false}))
-		}, 2000);
+			// Reset after 3 seconds
+			setTimeout(() => {
+				setAddedItem((prev) => ({ ...prev, [product._id]: false }));
+			}, 3000);
 		} catch (error) {
 			console.error("Error adding to cart:", error);
 
-			MySwal.fire({
-				icon: "error",
-				text: error.message || "Failed to add item to cart",
-				showConfirmButton: true,
-				confirmButtonColor: "#00a859",
+			showAlert(error.message || "Failed to add product to cart", "error", {
+				mode: "confirm",
+				confirmText: "Ok",
 			});
 		} finally {
 			setAddedItem((prev) => ({ ...prev, [product._id]: false }));
@@ -89,52 +80,38 @@ const Wishlist = () => {
 		const inStockItems = wishlist.filter((item) => item.inStock > 0);
 
 		if (inStockItems.length === 0) {
-			MySwal.fire({
-				icon: "warning",
-				text: "No item in stock to add",
-				showConfirmButton: false,
-				timer: 2000,
-				toast: true,
-				position: "top-end"
-			});
+			showToast("No item in stock to add", "info");
 			return;
 		}
 
 		try {
 			const loadingState = {};
-			inStockItems.forEach(item => {
+			inStockItems.forEach((item) => {
 				loadingState[item._id] = true;
 			});
 			setAddingToCart(loadingState);
 
 			const results = await Promise.allSettled(
-				inStockItems.map(item => cartService.addToCart(item, 1))
-			)
+				inStockItems.map((item) => cartService.addToCart(item, 1)),
+			);
 
-			const successCount = results.filter(r => r.status === 'fulfilled').length;
-			const failCount = results.filter(r => r.status === 'rejected').length;
+			const successCount = results.filter(
+				(r) => r.status === "fulfilled",
+			).length;
+			const failCount = results.filter((r) => r.status === "rejected").length;
 
 			const newAddedItems = {};
-			inStockItems.forEach(item => {
+			inStockItems.forEach((item) => {
 				newAddedItems[item._id] = true;
-			})
+			});
 			setAddedItem(newAddedItems);
 
 			if (failCount === 0) {
-				MySwal.fire({
-					icon: "success",
-					text: `${successCount} items added to cart`,
-					showConfirmButton: false,
-					timer: 2000,
-					toast: true,
-					position: "top-end",
-				});
+				showToast(`${successCount} items added to cart`, "success");
 			} else {
-				MySwal.fire({
-					icon: "warning",
-					title: "Partial Success",
-					text: `${successCount} items added, ${failCount} failed`,
-					showConfirmButton: true,
+				showAlert(`${successCount} added, ${failCount} failed`, "warning", {
+					mode: "confirm",
+					confirmText: "Ok",
 				});
 			}
 			console.log("Added all to cart:", inStockItems);
@@ -144,45 +121,36 @@ const Wishlist = () => {
 			}, 2000);
 		} catch (error) {
 			console.error("Error adding all to cart", error);
-			MySwal.fire({
-				icon: "error",
-				text: "Failed to add all items to cart",
-				showConfirmButton: true,
+			showAlert("Failed to add all items to cart", "error", {
+				mode: "confirm",
+				confirmText: "Ok",
 			});
 		} finally {
 			setAddingToCart({});
 		}
-	}
+	};
 
 	const handleRemove = (productId) => {
 		wishlistLocalStorage.removeFromWishlist(productId);
-		setWishlist(prev => prev.filter(item => item._id !== productId));
-	}
+		setWishlist((prev) => prev.filter((item) => item._id !== productId));
+	};
 
 	const handleClearAll = () => {
-		MySwal.fire({
-			title: "Are you sure?",
-			text: "This will clear your entire wishlist",
-			icon: "warning",
-			showCancelButton: true,
-			confirmButtonColor: "#d33",
-			cancelButtonColor: "#00a859",
-			confirmButtonText: "Yes, clear it!",
-		}).then(result => {
-			if (result.isConfirmed) {
-				wishlistLocalStorage.clearWishlist();
-				setWishlist([]);
-				MySwal.fire({
-					icon: "success",
-					text: "Wishlist cleared",
-					showConfirmButton: false,
-					timer: 1500,
-					toast: true,
-					position: "top-end",
-				});
-			}
-		});
-	}
+		showAlert(
+			"Are you sure?, This will clear your entire wishlist",
+			"warning",
+			{
+				mode: "confirm",
+				confirmText: "Yes, clear it",
+				cancelText: "No, leave it",
+				onConfirm: () => {
+					wishlistLocalStorage.clearWishlist();
+					setWishlist([]);
+					showToast("Wishlist cleared", "success",);
+				}
+			},
+		)
+	};
 
 	// const handleProductClick = (product) => {
 	// 	navigate(`/product-details/${product._id}`, { state: {product}})
@@ -198,7 +166,7 @@ const Wishlist = () => {
 		);
 	}
 
-	console.log("Your wishlist:", wishlist)
+	console.log("Your wishlist:", wishlist);
 
 	return (
 		<>
@@ -340,6 +308,6 @@ const Wishlist = () => {
 			<Footer iconsDisplay />
 		</>
 	);
-}
+};
 
 export default Wishlist;

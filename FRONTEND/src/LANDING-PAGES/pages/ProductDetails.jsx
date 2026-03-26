@@ -5,15 +5,16 @@ import axios from "axios";
 import Footer from "../components/Footer";
 import { stringToArray } from "../helper/Helper";
 import { FaCheck } from "react-icons/fa";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 import reviews from "../components/Testimonials";
 import ProductShowcase from "../components/ProductShowcase";
 import { cartService } from "../utils/cartService";
+import { useAlert } from "../../alert/AlertContext";
 import "../pages/productDetails.css";
+import { useToast } from "../../toast/ToastContext";
 
 const ProductDetails = () => {
-	const MySwal = withReactContent(Swal);
+	const { showAlert} = useAlert();
+	const { showToast } = useToast();
 	const [selectedImage, setSelectedImage] = useState(0);
 	const [quantity, setQuantity] = useState(1);
 	const [loading, setLoading] = useState(false);
@@ -40,13 +41,15 @@ const ProductDetails = () => {
 
 	const fetchProductById = async (productId) => {
 		try {
+			const backend_url = import.meta.env.VITE_API_URL;
 			setLoading(true);
 			const response = await axios.get(
-				`http://localhost:3004/api/food-amazon-database/products/get-single-product/${productId}`
+				`${backend_url}/api/food-amazon-database/products/get-single-product/${productId}`
 			);
 			setProduct(response.data);
 		} catch (error) {
 			console.error("Error fetching product:", error);
+			showAlert(error.message || "Error fetching product", "error")
 		} finally {
 			setLoading(false);
 		}
@@ -60,14 +63,7 @@ const ProductDetails = () => {
 		if (quantity > 1) {
 			setQuantity(quantity - 1);
 		} else {
-			MySwal.fire({
-				icon: "warning",
-				text: "Quantity cannot be less than 1",
-				showConfirmButton: false,
-				timer: 1500,
-				toast: true,
-				position: "top-end",
-			});
+			showToast("Quantity cannot be less than 1", "warning")
 		}
 	};
 
@@ -77,14 +73,7 @@ const ProductDetails = () => {
 
 			await cartService.addToCart(product, quantity);
 			setIsAdded(true);
-			MySwal.fire({
-				icon: "success",
-				text: `${quantity} ${quantity > 1 ? "items" : "item"} added to cart`,
-				showConfirmButton: false,
-				timer: 2000,
-				toast: true,
-				position: "top-end",
-			});
+			showToast(`${quantity} ${quantity > 1 ? "items" : "item"} added to cart`, "success");
 			setTimeout(() => setIsAdded(false), 2000);
 			console.log("Added to cart", { product, quantity });
 		} catch (error) {
@@ -92,13 +81,10 @@ const ProductDetails = () => {
 
 			// Don't show error dialog for authentication errors, let the TokenExpirationHandler handle it
 			if (error.response?.status !== 401) {
-				MySwal.fire({
-					icon: "error",
-					title: "Failed to Add to Cart",
-					text: error.message || "Something went wrong. Please try again.",
-					showConfirmButton: true,
-					confirmButtonColor: "#00a859",
-				});
+				showAlert(error.message || "Something went wrong, please try again", "error", {
+					mode: "confirm",
+					confirmText: "Try again",
+				})
 			}
 		} finally {
 			setIsAddingToCart(false);
@@ -109,19 +95,11 @@ const ProductDetails = () => {
 		const isAuthenticated = await cartService.checkAuthStatus();
 
 		if (!isAuthenticated) {
-			const result = await MySwal.fire({
-				icon: "info",
-				title: "Login Required",
-				text: "You need to be logged in to checkout",
-				showCancelButton: true,
-				confirmButtonText: "Login",
-				cancelButtonText: "Cancel",
-				confirmButtonColor: "#00a859",
+			showAlert("You need to be logged in to checkout", "info", {
+				confirmText: "Login",
+				cancelText: "Cancel",
+				onConfirm: () => navigate("/login", { state: { from: `/product-details/${id}` } })
 			});
-
-			if (result.isConfirmed) {
-				navigate("/login", { state: { from: `/product-details/${id}` } });
-			}
 			return;
 		}
 
@@ -130,11 +108,7 @@ const ProductDetails = () => {
 			navigate("/checkout");
 		} catch (error) {
 			console.error("Error during checkout:", error);
-			MySwal.fire({
-				icon: "error",
-				text: error.message || "Failed to proceed to checkout",
-				showConfirmButton: true,
-			});
+			showAlert(error.message || "Failed to proceed to checkout", "error", {mode: "confirm", confirmText: "Try again"})
 		}
 	};
 
@@ -153,7 +127,7 @@ const ProductDetails = () => {
 			<div className="text-center mt-5">
 				<h2>Product not found</h2>
 				<p>Maybe you refreshed the page and no product data was passed</p>
-				<button className="btn btn-success mt-3" onClick={() => navigate("/")}>
+				<button className="btn btn-success mt-3 px-4 py-3" onClick={() => navigate("/")}>
 					Go Back Home
 				</button>
 			</div>
@@ -254,11 +228,10 @@ const ProductDetails = () => {
 										{varieties.map((variety, id) => (
 											<span
 												key={id}
-												className="badge bg-primary-normal text-white"
+												className="badge px-3 py-2 bg-primary-normal text-white"
 												style={{
 													fontSize: "0.9rem",
 													fontWeight: "normal",
-													padding: "0.5rem 1rem",
 												}}
 											>
 												{variety}
@@ -339,7 +312,7 @@ const ProductDetails = () => {
 
 				{/* Reviews Section */}
 				<div className="reviews row justify-content-between px-3 px-md-0">
-					<div className="col-12 col-lg-12 mb-5 mb-lg-0">
+					<div className="col-12 col-lg-6 mb-5 mb-lg-0">
 						<h4 className="font-inter fw-bold text-main-accent mb-0">
 							Customer Reviews
 						</h4>
@@ -427,7 +400,7 @@ const ProductDetails = () => {
 			<div className="container testimonial-container">
 				<div className="testimonials px-3 px-sm-0">
 					{reviews.map((review, index) => (
-						<div key={index} className="testimonial border rounded-3">
+						<div key={index} className="testimonial border rounded-3 p-3">
 							<div className="testimonial-content">
 								<div className="user-image mb-3">
 									<img src={review.userImage} alt="" className="img-fluid" />

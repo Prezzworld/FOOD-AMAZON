@@ -42,12 +42,12 @@ router.post("/create", auth, async (req, res) => {
 			} else if (deviceInfo.device.type === "desktop") {
 				deviceType = "desktop";
 			}
-			if (distributorId) {
-				console.log(`Order assigned to distributor: ${distributorId}`);
-			} else {
-				console.log(`No distributor found for city: ${customerSnapshot.city}`);
-				return res.status(400).send("No distributor available for your area");
-			}
+			// if (distributorId) {
+			// 	console.log(`Order assigned to distributor: ${distributorId}`);
+			// } else {
+			// 	console.log(`No distributor found for city: ${customerSnapshot.city}`);
+			// 	return res.status(400).send("No distributor available for your area");
+			// }
 		} else if (orderChannel === "walk-in") {
 			distributorId = req.user._id;
 			console.log(`Walk-in order for distributor: ${distributorId}`);

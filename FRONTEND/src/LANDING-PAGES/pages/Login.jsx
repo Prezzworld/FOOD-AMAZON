@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cartService } from "../utils/cartService";
 import "../pages/signin.css";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import { useToast } from "../../toast/ToastContext";
+import { useAlert } from "../../alert/AlertContext";
 import AuthLayout from "../components/AuthLayout";
 
 const Login = () => {
-	const MySwal = withReactContent(Swal);
+	const { showToast } = useToast();
+	const { showAlert } = useAlert();
 	const [loginData, setLoginData] = useState({
 		email: "",
 		password: "",
@@ -35,24 +36,19 @@ const Login = () => {
 		setLoading(true);
 
 		if (!loginData.email || !loginData.password) {
-			MySwal.fire({
-				icon: "error",
-				text: "All fields are required",
-				showConfirmButton: true,
-			}).then(() => {
-				setLoading(false);
+			showAlert("All fields are required", "error", {
+				mode: "inline",
 			});
+			setLoading(false);
 			return;
 		}
 
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailPattern.test(loginData.email)) {
-			MySwal.fire({
-				icon: "error",
-				text: "Please enter a valid email address",
-			}).then(() => {
-				setLoading(false);
+			showAlert("Please enter a valid email address", "error", {
+				mode: "inline",
 			});
+			setLoading(false);
 			return;
 		}
 
@@ -147,21 +143,7 @@ const Login = () => {
 				localStorage.removeItem("rememberedEmail");
 			}
 
-			// Show success message
-			await MySwal.fire({
-				icon: "success",
-				text: "Login Successful!",
-				// text: `Welcome back! ${
-				// 	loginData.rememberMe
-				// 		? "You'll stay logged in for 30 days."
-				// 		: "Session expires in 24 hours."
-				// 	}`,
-				toast: true,
-				timer: 2000,
-				position: "top-end",
-				timerProgressBar: true,
-				showConfirmButton: false,
-			});
+			showToast("Login successful!", "success", 2000)
 
 			setLoading(false);
 			// Redirect to home page
@@ -171,13 +153,12 @@ const Login = () => {
 		} catch (err) {
 			console.error("Login error:", err);
 
-			MySwal.fire({
-				icon: "error",
-				title: "Login Failed",
-				text: err.message,
-				showConfirmButton: true,
-			}).then(() => {
-				setLoading(false);
+			showAlert(err.message || "Login failed. Please try again.", "error", {
+				mode: "confirm",
+				confirmText: "Try Again",
+				cancelText: "Cancel",
+				onConfirm: () => setLoading(false),
+				onCancel: () => setLoading(false),
 			});
 		}
 	};

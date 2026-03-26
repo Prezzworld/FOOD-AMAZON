@@ -74,3 +74,9 @@
       margin-inline: auto !important;
    }
 }
+
+@media(max-width: 768px) {
+   .right-auth{
+      width: 100% !important;
+   }
+}

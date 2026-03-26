@@ -2,16 +2,17 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineVisibility, MdVisibilityOff } from "react-icons/md";
 import axios from "axios";
-import Swal from 'sweetalert2';
-import withReactContent from "sweetalert2-react-content";
+import { useToast } from "../../toast/ToastContext";
+import { useAlert } from "../../alert/AlertContext";
 import "./distributorAuth.css";
 
 const Login = () => {
 	const API_URL = "http://localhost:3004/api/food-amazon-database"
-	const MySwal = withReactContent(Swal);
+	const { showToast } = useToast();
+	const { showAlert } = useAlert();
 	const [visiblePassword, setVisiblePassword] = useState(false);
 	const navigate = useNavigate();
-	const [error, setError] = useState("");
+	// const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [loginData, setLoginData] = useState({
 		email: "",
@@ -30,24 +31,19 @@ const Login = () => {
 		setLoading(true);
 
 		if (!loginData.email || !loginData.password) {
-			MySwal.fire({
-				icon: "error",
-				text: "All fields are required",
-				showConfirmButton: true,
-			}).then(() => {
-				setLoading(false);
+			showAlert("All fields are required", "error", {
+				mode: "inline",
 			});
+			setLoading(false);
 			return;
 		}
 
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailPattern.test(loginData.email)) {
-			MySwal.fire({
-				icon: "error",
-				text: "Please enter a valid email address",
-			}).then(() => {
-				setLoading(false);
+			showAlert("Please enter a valid email address", "error", {
+				mode: "inline",
 			});
+			setLoading(false);
 			return;
 		}
 
@@ -83,27 +79,24 @@ const Login = () => {
 					localStorage.setItem("distributor", JSON.stringify(user));
 					console.log("✅ Distributor info saved:", user);
 				}
-				MySwal.fire({
-					icon: "success",
-					text: "Login Successful!",
-					toast: true,
-					timer: 2500,
-					position: "top-end",
-					animation: true,
-					timerProgressBar: true,
-					showConfirmButton: false,
-				}).then(() => {
+				showToast("Login successful!", "success", 2000)
+				setTimeout(() => {
 					navigate("/distributor/dashboard");
-				})
+				}, 2000)
 			}
 		} catch (error) {
 			console.error("Error logging in: ", error);
 			if (error.response?.data) {
-				setError(error.response.data.message || "Invalid email or password");
+				showAlert(error.response.data.message || "Invalid email or password", "error", {
+				mode: "inline"});
 			} else if (error.request) {
-				setError("No response from server. Please check your connection.");
+				showAlert("No response from server. Please check your connection.", "error", {
+				mode: "confirm",
+					confirmText: "Try again",})
 			} else {
-				setError("An error occurred during login. Please try again.");
+				showAlert("An error occurred during login. Please try again.", "error", {
+				mode: "confirm",
+				confirmText: "Try again",});
 			}
 		} finally {
 			setLoading(false);
@@ -179,7 +172,7 @@ const Login = () => {
                            <p className="text-primary-normal font-inter fw-medium fs-sm mb-0">Forgot Password</p>
                         </div>
                      </div>
-							{error && 
+							{/* {error && 
 								(
 									<>
 										<div className="alert alert-danger mb-3" role="alert">
@@ -187,7 +180,7 @@ const Login = () => {
 									</div>
 									 </> 
 								)
-							}
+							} */}
 							<div className="mb-3">
 								<button type="submit" disabled={loading} className="bg-primary-normal text-white border-0 font-archivo fw-semibold fs-6 rounded-2 d-inline-block w-100 py-3">
 									{loading ? (

@@ -7,13 +7,14 @@ import {
 	FaChevronRight,
 	FaCheck,
 } from "react-icons/fa";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
 import { cartService } from "../utils/cartService";
+import { useAlert } from "../../alert/AlertContext";
+import { useToast } from "../../toast/ToastContext";
 
 const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
-	const MySwal = withReactContent(Swal);
+	const { showAlert } = useAlert()
+	const { showToast } = useToast();
 	const [added, setIsAdded] = useState(false);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [isFavorite, setIsFavorite] = useState(false);
@@ -40,24 +41,15 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		// Here you would dispatch to Redux or Context
 			console.log("Added to cart:", product);
 			
-			MySwal.fire({
-				icon: "success",
-				text: "Product added to cart",
-				showConfirmButton: false,
-				timer: 2000,
-				toast: true,
-				position: "top-end",
-			});
+			showToast("Product added to cart", "success")
 	
-			// Reset after 2 seconds
-			setTimeout(() => setIsAdded(false), 2000);
+			// Reset after 3 seconds
+			setTimeout(() => setIsAdded(false), 3000);
 		} catch (error) {
 			console.error("Error adding to cart:", error);
-			MySwal.fire({
-				icon: "error",
-				text: "Failed to add product to cart",
-				showConfirmButton: true,
-				confirmButtonColor: "#00a859",
+			showAlert("Failed to add product to cart", "error", {
+				mode: "confirm",
+				confirmText: "Ok",
 			});
 		} finally {
 			setIsAddingToCart(false);
@@ -71,14 +63,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		const wasAdded = wishlistLocalStorage.toggleWishlist(product);
 		setIsFavorite(wasAdded);
 
-		MySwal.fire({
-			icon: wasAdded ? "success" : "info",
-			text: wasAdded ? "Added to your wishlist!" : "Removed from your wishlist",
-			showConfirmButton: false,
-			timer: 1500,
-			toast: true,
-			position: "top-end",
-		});
+		showToast(wasAdded ? "Added to your wishlist!" : "Removed from your wishlist", wasAdded ? "success" : "info")
 
 		console.log("Wishlist toggled:", wasAdded);
 		console.log("Favorite toggled:", !isFavorite);
@@ -118,12 +103,14 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		MySwal.fire({
-			icon: "info",
-			title: "Bulk Order Inquiry",
-			text: `You're interested in bulk ordering ${product.name}. We'll contact you with a custom quote!`,
-			showConfirmButton: true,
-		});
+		showAlert(
+			`You're interested in bulk ordering ${product.name}. We'll contact you with a custom quote!`,
+			"info",
+			{
+				mode: "confirm",
+				confirmText: "Ok",
+			},
+		);
 		// Here you would typically send the inquiry to your backend
 		console.log("Bulk order inquiry for:", product);
 

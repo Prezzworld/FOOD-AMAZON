@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { MdOutlineVisibility, MdVisibilityOff } from "react-icons/md";
 import axios from "axios";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 import "./distributorAuth.css";
+import { useToast } from "../../toast/ToastContext";
+import { useAlert } from "../../alert/AlertContext";
 
 const Signup = () => {
-	const MySwal = withReactContent(Swal);
+	const { showToast } = useToast();
+	const { showAlert } = useAlert();
 	const [visiblePassword, setVisiblePassword] = useState(false);
 	const [searchParams] = useSearchParams();
 	const token = searchParams.get("token");
@@ -15,8 +16,8 @@ const Signup = () => {
 	const [invitationData, setInvitationData] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
-	const [success, setSuccess] = useState(false);
-	const [error, setError] = useState("");
+	// const [success, setSuccess] = useState(false);
+	// const [error, setError] = useState("");
 	const [formData, setFormData] = useState({
 		fullName: "",
 		email: "",
@@ -33,7 +34,11 @@ const Signup = () => {
 
 	useEffect(() => {
 		if (!token) {
-			setError("No invitation token provided"), setLoading(false);
+			showAlert("No invitation token provided", "error", {
+				mode: "confirm",
+				confirmText: "Ok",
+			});
+			setLoading(false);
 			return;
 		}
 		console.log("Hello signup page!!!");
@@ -41,27 +46,40 @@ const Signup = () => {
 		const verifyToken = async () => {
 			try {
 				const response = await axios.get(
-					`${API_URL}/invitation/verify-invitation/${token}`
+					`${API_URL}/invitation/verify-invitation/${token}`,
 				);
 				console.log(response.data);
 				if (response.data.success) {
 					setInvitationData(response.data);
 					console.log(response.data);
-					setError("");
+					// setError("");
 				} else {
-					setError(response.data.error || "Invalid or expired invitation");
+					showAlert(
+						response.data.error || "Invalid or expired invitation",
+						"error",
+						{
+							mode: "confirm",
+							confirmText: "Ok",
+						},
+					);
 				}
 			} catch (error) {
 				console.error("Verification error:", error);
 				if (error.response && error.response.data) {
-					setError(
+					showAlert(
 						error.response.data.error ||
 							error.response.data.message ||
-							"Invalid or expired invitation"
+							"Invalid or expired invitation",
+						"error",
+						{
+							mode: "confirm",
+							confirmText: "Ok",
+						},
 					);
 				} else {
-					setError(
-						"Failed to verify invitation. Please check your connection."
+					showAlert(
+						"Failed to verify invitation. Please check your connection.",
+						"error", {mode: "confirm", confirmText: "Ok"}
 					);
 				}
 			} finally {
@@ -73,14 +91,18 @@ const Signup = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		setError("");
+		// setError("");
 
 		if (!formData.email || !formData.fullName || !formData.password) {
-			setError("All fields are required");
+			showAlert("All fields are required", "error", {
+				mode: "inline",
+			});
 			return;
 		}
 		if (formData.password.length < 6) {
-			setError("Password must be at least 6 characters long");
+			showAlert("Password must be at least 6 characters long", "error", {
+				mode: "inline",
+			});
 			return;
 		}
 		setSubmitting(true);
@@ -93,31 +115,41 @@ const Signup = () => {
 			if (response.data.success) {
 				localStorage.setItem("disToken", response.data.token);
 				localStorage.setItem("user", JSON.stringify(response.data.user));
-				MySwal.fire({
-					icon: "success",
-					text: "Account created successfully! Welcome aboard",
-					showConfirmButton: false,
-					toast: true,
-					position: "top-end",
-					animation: true,
-					timer: 2500,
-					timerProgressBar: true,
-				});
-				navigate("/distributor/dashboard");
+				showToast("Account created successfully, welcome aboard!", "success", 2000);
+				setTimeout(() => navigate("/distributor/dashboard"), 2000)
 			}
 		} catch (error) {
 			console.error("Signup error:", error);
-			console.log(error)
+			console.log(error);
 			if (error.response && error.response.data) {
-				setError(
+				showAlert(
 					error.response.data.error ||
 						error.response.data.message ||
-						"Failed to create account"
+						"Failed to create account",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
 				);
 			} else if (error.request) {
-				setError("No response from server. Please check your connection.");
+				showAlert(
+					"No response from server. Please check your connection.",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
+				);
 			} else {
-				setError("An error occurred during signup. Please try again.");
+				showAlert(
+					"An error occurred during signup. Please try again.",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
+				);
 			}
 		} finally {
 			setSubmitting(false);
@@ -134,25 +166,18 @@ const Signup = () => {
 		);
 	}
 
-	if (error && !invitationData) {
-		return MySwal.fire({
-			icon: "error",
-			title: "Invalid Invitation",
-			titleText: error,
-			text: "Please contact your administrator if you believe this is an error",
-			showConfirmbutton: false,
-			// toast: true,
-			timer: 2500,
-			position: "center",
-			animation: true,
-		});
-	}
+	// if (error && !invitationData) {
+	// 	return showAlert("Invali")
+	// }
 
 	return (
 		<>
 			<div className="body">
 				<div className="container mx-auto">
-					<form className="bg-white form mx-auto rounded-5" onSubmit={handleSubmit}>
+					<form
+						className="bg-white form mx-auto rounded-5"
+						onSubmit={handleSubmit}
+					>
 						<div className="form-heading mb-4">
 							<h1 className="text-dark-blue font-archivo fw-bold mb-2">
 								Sign Up
@@ -250,15 +275,13 @@ const Signup = () => {
 									)}
 								</button>
 							</div>
-							{error && 
-								(
-									<>
-										<div className="alert alert-danger mb-3" role="alert">
+							{/* {error && (
+								<>
+									<div className="alert alert-danger mb-3" role="alert">
 										{error}
 									</div>
-									</> 
-								)
-							}
+								</>
+							)} */}
 							<div className="mb-4">
 								<button className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-block w-100 py-3">
 									Sign Up with Google

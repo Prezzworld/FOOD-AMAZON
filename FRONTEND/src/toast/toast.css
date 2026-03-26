@@ -1,0 +1,13 @@
+.toast-icon {
+	width: 32px;
+	height: 32px;
+  flex-shrink: 0;
+}
+
+@media(max-width: 576px) {
+  .toast-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+}

@@ -2,12 +2,13 @@ import { React, useState } from "react";
 import "../pages/signin.css";
 import { Logo } from "../pages/Images";
 import { useNavigate, useLocation } from "react-router-dom";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+// import { useToast } from "../../toast/ToastContext";
+import { useAlert } from "../../alert/AlertContext";
 import AuthLayout from "../components/AuthLayout";
 
 const Signup = () => {
-	const MySwal = withReactContent(Swal);
+	const { showAlert } = useAlert();
+	// const { showToast } = useToast();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const from = location.state?.from || '/login';
@@ -28,14 +29,14 @@ const Signup = () => {
 		});
 	};
 
-	const [error, setError] = useState(undefined);
+	// const [error, setError] = useState(undefined);
 	const [success, setSuccess] = useState("");
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setLoading(true);
-		setError("");
+		// setError("");
 		setSuccess("");
 
 		if (
@@ -44,33 +45,23 @@ const Signup = () => {
 			!formData.phoneNumber ||
 			!formData.password
 		) {
-			MySwal.fire({
-				icon: "error",
-				title: "All fields are required",
-				showConfirmButton: true,
+			showAlert("All fields are required", "error", {
+				mode: "inline",
+				// confirmText: "Ok",
 			});
-			setError("All fields are required");
 			setLoading(false);
 			return;
 		}
 
 		if (formData.password.length < 6) {
-			MySwal.fire({
-				icon: "error",
-				title: "Password must be at least 6 characters long",
-			});
-			setError("Password must be at least 6 characters long");
+			showAlert("Password must be at least 6 characters long", "error", {mode: "inline"});
 			setLoading(false);
 			return;
 		}
 
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailPattern.test(formData.email)) {
-			MySwal.fire({
-				icon: "error",
-				title: "Please enter a valid email address",
-			});
-			setError("Please enter a valid email address");
+			showAlert("Please enter a valid email address", "error", {mode: "inline"});
 			setLoading(false);
 			return;
 		}
@@ -125,10 +116,8 @@ const Signup = () => {
 					}
 					throw new Error(errorMessage);
 				}
-				MySwal.fire({
-					icon: 'error',
-					titleText: errorMessage || 'Signup failed. Please try again.',
-					showConfirmButton: true,
+				showAlert(errorMessage, "error", {
+					mode: "inline"
 				})
 			}
 
@@ -142,32 +131,35 @@ const Signup = () => {
 			console.log("Signup successful:", responseData);
 			setSuccess("Signup successful!");
 
-			MySwal.fire({
-				icon: "success",
-				title: "Signup successful!",
-				text: "Redirecting to login page...",
-				showConfirmButton: true,
-			}).then(() => {
-				setFormData({
-					name: "",
-					email: "",
-					password: "",
-					phoneNumber: "",
-				});
-
-				setTimeout(() => {
-					navigate('/login', {state: {from: from}});
-				}, 2000);
-			});
+			showAlert(
+				"Signup successful! Click OK to go to the login page.",
+				"success",
+				{
+					mode: "confirm",
+					confirmText: "OK",
+					// cancelText: "Stay here",
+					onConfirm: () => {
+						setFormData({ name: "", email: "", password: "", phoneNumber: "" });
+						navigate("/login", { state: { from } });
+					},
+				},
+			);
 		} catch (err) {
 			console.error("Signup error:", err);
-			setError(err.message);
-			MySwal.fire({
-				icon: "error",
-				title:
-					err.message || "An error occurred during signup. Please try again.",
-				showConfirmButton: true,
-			});
+			showAlert(
+				err.message || "An error occurred during signup. Please try again.",
+				"error",
+				{
+					mode: "confirm",
+					confirmText: "Login",
+					cancelText: "Cancel",
+					onConfirm: () => {
+						setLoading(false)
+						navigate("/login")
+				},
+					onCancel: () => setLoading(false),
+				},
+			);
 		} finally {
 			setLoading(false);
 		}

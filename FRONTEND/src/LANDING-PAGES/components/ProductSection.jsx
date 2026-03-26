@@ -1,11 +1,10 @@
 import react, { useState, useEffect } from "react";
 import ProductsCard from "./ProductsCard";
+import { useAlert } from "../../alert/AlertContext";
 import axios from "axios";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
-const ProductSection = ({ title, type, layoutMode="flex", variant="full", limit }) => {
-	const MySwal = withReactContent(Swal);
+const ProductSection = ({ title, type, layoutMode = "flex", variant = "full", limit }) => {
+	const {showAlert} = useAlert()
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -16,12 +15,7 @@ const ProductSection = ({ title, type, layoutMode="flex", variant="full", limit 
 
 	useEffect(() => {
 		if (error) {
-			MySwal.fire({
-				icon: "error",
-				title: "Oops!",
-				text: `An error has occurred: ${error}`,
-				showConfirmButton: true,
-			});
+			showAlert(`An error has occured ${error}`, "error", {mode: "confirm", confirmText: "Ok"})
 		}
 	}, [error]);
 

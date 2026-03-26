@@ -1,21 +1,23 @@
+import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { cartService } from "../utils/cartService";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+// import { useAlert } from "../../alert/AlertContext";
+import { useToast } from "../../toast/ToastContext";
 
 const AuthStatus = ({ children }) => {
-   const MySwal = withReactContent(Swal)
-   const location = useLocation;
+   // const { showAlert } = useAlert();
+   const { showToast } = useToast();
+   const location = useLocation();
    // const navigate = useNavigate()
    const isAuthenticated = cartService.checkAuthStatus();
 
-   if (!isAuthenticated) {
-      MySwal.fire({
-         icon: 'info',
-         text: 'Log in to check out your order',
-         showConfirmButton: false,
-         timer: 1500
-      });
+   useEffect(() => {
+      if (!isAuthenticated) {
+         showToast("You need to be logged in to checkout", "warning")
+      }
+   }, [isAuthenticated])
+
+   if (!isAuthenticated) { 
       return <Navigate to="/login" state={{ from: location.pathname }} replace />;
    }
    return children;

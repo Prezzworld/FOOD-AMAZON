@@ -56,7 +56,7 @@ const Header = ({ shadow }) => {
 		<>
 			<nav className={`navbar navbar-expand-lg font-inter ${shadow}`}>
 				<div className="container px-3">
-					<div className="navbar-brand">
+					<div className="navbar-brand py-3">
 						<img src={Logo} alt="Food Amazon Logo" className="img-fluid" />
 					</div>
 					<button
@@ -75,7 +75,7 @@ const Header = ({ shadow }) => {
 							} border-0 fs-3`}
 						></span>
 					</button>
-					<div className="collapse navbar-collapse" id="navbarSupportedContent">
+					<div className="collapse navbar-collapse pb-4" id="navbarSupportedContent">
 						<ul className="navbar-nav align-items-center mx-auto mb-2 mb-lg-0">
 							{navItems.map((navItem, index) => (
 								<li className="nav-item" key={index}>
