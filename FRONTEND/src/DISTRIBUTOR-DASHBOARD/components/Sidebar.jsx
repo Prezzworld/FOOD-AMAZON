@@ -1,9 +1,10 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { NavLink } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import { MdInventory } from "react-icons/md";
 import { RiHome4Fill, RiMessage2Line, RiSettings3Fill } from "react-icons/ri";
-import { HiUser, HiBellAlert } from "react-icons/hi2";
+import { HiUser, HiBellAlert, HiPower } from "react-icons/hi2";
+import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
 const Sidebar = () => {
 	const navItems = [
@@ -43,9 +44,29 @@ const Sidebar = () => {
 			icon: <RiSettings3Fill />,
 		},
 	];
+
+	const handleLogout = async (userId) => {
+		try {
+			const distributor = JSON.parse(localStorage.getItem("distributor"));
+			userId = distributor._id;
+			const response = await distributorAxiosInstance.post("/food-amazon-database/distributors/logout", { userId });
+			if (response.statusText === "OK") {
+				localStorage.removeItem("distributor");
+				localStorage.removeItem("token");
+				localStorage.removeItem("disToken");
+				localStorage.removeItem("disRefreshToken");
+				localStorage.removeItem("user");
+				console.log(localStorage.getItem("distributor"))
+			}
+			console.log(response)
+		} catch (error) {
+			console.error("An error occured while logging out" + error)
+		}
+	}
+
 	return (
 		<>
-			<div className="bg-white h-100 m-0 px-3">
+			<div className="bg-white h-100 m-0 px-3 position-relative">
 				<nav className="mt-4">
 					{navItems.map((item, index) =>
 						item.label === "Notifications" ? (
@@ -82,6 +103,11 @@ const Sidebar = () => {
 							</>
 						),
 					)}
+					<div className="position-absolute logout-btn-wrapper">
+						<button onClick={handleLogout} className="logout-button fs-sm px-4 py-2 rounded-pill font-archivo fw-medium text-content-dark">
+							<HiPower className="item-icon me-2"/> Logout
+						</button>
+					</div>
 				</nav>
 			</div>
 		</>

@@ -121,7 +121,7 @@ const SalesByChannelChart = () => {
 
 	return (
 		<>
-			<div className="position-relative">
+			<div className="position-relative p-4">
 				<div className="mb-4 d-flex justify-content-between align-items-center">
 					<div>
 						<h3 className="font-archivo text-dark-blue fs-4 fw-semibold">

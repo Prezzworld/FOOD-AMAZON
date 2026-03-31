@@ -4,10 +4,11 @@ import { MdOutlineVisibility, MdVisibilityOff } from "react-icons/md";
 import axios from "axios";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
+import {GoogleImg} from '../../LANDING-PAGES/pages/Images'
 import "./distributorAuth.css";
 
 const Login = () => {
-	const API_URL = "http://localhost:3004/api/food-amazon-database"
+	const API_URL = "http://localhost:3004/api/food-amazon-database";
 	const { showToast } = useToast();
 	const { showAlert } = useAlert();
 	const [visiblePassword, setVisiblePassword] = useState(false);
@@ -17,14 +18,15 @@ const Login = () => {
 	const [loginData, setLoginData] = useState({
 		email: "",
 		password: "",
-	})
+		rememberMe: false,
+	});
 	const handlePasswordVisibility = () => setVisiblePassword(!visiblePassword);
 	const handleChange = (e) => {
 		setLoginData({
 			...loginData,
 			[e.target.name]: e.target.value,
-		})
-	}
+		});
+	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -50,21 +52,21 @@ const Login = () => {
 		try {
 			console.log(
 				`Submitting request to ${API_URL}/distributors/login with data:`,
-				loginData
+				loginData,
 			);
 			console.log("Login data being sent:", {
 				email: loginData.email,
 				password: loginData.password,
-				// rememberMe: loginData.rememberMe, // Optional field
+				rememberMe: loginData.rememberMe, // Optional field
 			});
 
 			const response = await axios.post(`${API_URL}/distributors/login`, {
-				...loginData
+				...loginData,
 			});
 			const data = response.data;
 			console.log(data);
-			if(response.data.success) {
-				const {accessToken, refreshToken, user} = data;
+			if (response.data.success) {
+				const { accessToken, refreshToken, user } = data;
 				if (!accessToken || !refreshToken) {
 					console.error("Missing tokens in response:", data);
 					throw new Error("No authentication tokens received");
@@ -72,42 +74,66 @@ const Login = () => {
 				localStorage.setItem("disToken", accessToken);
 				localStorage.setItem("disRefreshToken", refreshToken);
 				console.log("Tokens saved successfully");
-				console.log("Access token preview:", accessToken.substring(0, 30) + "...");
-				console.log("Refresh token preview:", refreshToken.substring(0, 30) + "...");
+				console.log(
+					"Access token preview:",
+					accessToken.substring(0, 30) + "...",
+				);
+				console.log(
+					"Refresh token preview:",
+					refreshToken.substring(0, 30) + "...",
+				);
 
 				if (user) {
 					localStorage.setItem("distributor", JSON.stringify(user));
 					console.log("✅ Distributor info saved:", user);
 				}
-				showToast("Login successful!", "success", 2000)
+				showToast("Login successful!", "success", 2000);
 				setTimeout(() => {
 					navigate("/distributor/dashboard");
-				}, 2000)
+				}, 2000);
 			}
 		} catch (error) {
 			console.error("Error logging in: ", error);
 			if (error.response?.data) {
-				showAlert(error.response.data.message || "Invalid email or password", "error", {
-				mode: "inline"});
+				showAlert(
+					error.response.data.message || "Invalid email or password",
+					"error",
+					{
+						mode: "inline",
+					},
+				);
 			} else if (error.request) {
-				showAlert("No response from server. Please check your connection.", "error", {
-				mode: "confirm",
-					confirmText: "Try again",})
+				showAlert(
+					"No response from server. Please check your connection.",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
+				);
 			} else {
-				showAlert("An error occurred during login. Please try again.", "error", {
-				mode: "confirm",
-				confirmText: "Try again",});
+				showAlert(
+					"An error occurred during login. Please try again.",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
+				);
 			}
 		} finally {
 			setLoading(false);
 		}
-	}
+	};
 
 	return (
 		<>
 			<div className="body">
 				<div className="container">
-					<form className="form bg-white mx-auto rounded-3" onSubmit={handleSubmit}>
+					<form
+						className="form bg-white mx-auto rounded-3"
+						onSubmit={handleSubmit}
+					>
 						<div className="form-heading mb-4">
 							<h1 className="text-dark-blue font-archivo fw-bold mb-2">
 								Welcome Back
@@ -163,15 +189,29 @@ const Login = () => {
 									)}
 								</div>
 							</div>
-                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div className="d-flex align-items-center gap-2">
-                           <input type="checkbox" id="rememberMe" />
-                           <p className="font-inter fw-medium fs-sm text-dark-blue mb-0">Remember for 30 days</p>
-                        </div>
-                        <div>
-                           <p className="text-primary-normal font-inter fw-medium fs-sm mb-0">Forgot Password</p>
-                        </div>
-                     </div>
+							<div className="d-flex remember-password justify-content-between align-items-center mb-3">
+								<div className="d-flex align-items-center gap-2">
+									<input
+										type="checkbox"
+										id="rememberMe"
+										checked={loginData.rememberMe}
+										onChange={(e) =>
+											setLoginData({
+												...loginData,
+												rememberMe: e.target.checked,
+											})
+										}
+									/>
+									<p className="font-inter fw-medium fs-sm text-dark-blue mb-0">
+										Remember for 30 days
+									</p>
+								</div>
+								<div>
+									<p className="text-primary-normal font-inter fw-medium fs-sm mb-0">
+										Forgot Password
+									</p>
+								</div>
+							</div>
 							{/* {error && 
 								(
 									<>
@@ -182,7 +222,11 @@ const Login = () => {
 								)
 							} */}
 							<div className="mb-3">
-								<button type="submit" disabled={loading} className="bg-primary-normal text-white border-0 font-archivo fw-semibold fs-6 rounded-2 d-inline-block w-100 py-3">
+								<button
+									type="submit"
+									disabled={loading}
+									className="bg-primary-normal text-white border-0 font-archivo fw-semibold fs-6 rounded-2 d-inline-block w-100 py-3"
+								>
 									{loading ? (
 										<>
 											<span
@@ -198,8 +242,11 @@ const Login = () => {
 								</button>
 							</div>
 							<div className="mb-4">
-								<button className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-block w-100 py-3">
-									Sign In with Google
+								<button type="button"
+									onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`}
+									className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-flex w-100 py-3 gap-3 justify-content-center">
+									<img src={GoogleImg} alt="" className="google-img" />
+									<p>Sign In with Google</p>
 								</button>
 							</div>
 							<p className="font-inter fw-normal fs-sm signin-text text-center">

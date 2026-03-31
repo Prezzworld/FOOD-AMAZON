@@ -10,11 +10,11 @@
    background-color: var(--white-toned) !important;
    /* position: relative !important; */
    /* width: 100% !important; */
-   /* min-height: 100vh !important; */
+   height: 100vh !important;
 }
 
 .body .container {
-   /* height: 100vh !important; */
+   height: 100vh !important;
    display: flex !important;
    align-items: center !important;
    justify-content: center !important;
@@ -23,7 +23,7 @@
 
 .form{
    max-width: 650px !important;
-   width: 100% !important;
+   width: 90% !important;
 }
 
 form.form {
@@ -56,6 +56,38 @@ input.placeholder-style::placeholder {
    right: 5% !important;
 }
 
+/* .google-img {
+   max-width: 30px;
+   width: 100%;
+   height: 30px;
+} */
+
 .signin-text {
    color: #11142d !important;
+}
+
+@media (max-width: 768px) {
+   form.form {
+      padding: 50px 80px !important;
+   }
+}
+
+@media (max-width: 576px) {
+   .form {
+      width: 100% !important;
+   }
+   form.form {
+      padding: 30px 30px !important;
+   }
+}
+
+@media (max-width: 360px) {
+   form.form {
+      padding: 40px 15px !important;
+   }
+   .remember-password {
+      flex-direction: column !important;
+      align-items: start !important;
+      row-gap: 1rem;
+   }
 }

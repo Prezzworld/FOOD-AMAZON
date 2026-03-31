@@ -36,6 +36,21 @@
 	cursor: pointer;
 }
 
+.logout-btn-wrapper {
+	bottom: 10%;
+	left: 15%;
+}
+
+.logout-button {
+	border: 1px solid var(--content-dark);
+	background-color: transparent !important;
+	transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+	background-color: #f1f1f5 !important;
+}
+
 .dashboard-container {
 	max-width: 250px !important;
 	width: 100% !important;
@@ -58,7 +73,7 @@
 }
 
 .metric-card {
-   padding-inline: 1.7rem;
+   padding-inline: 1.5rem !important;
 }
 
 .metric-card:not(:last-child) {
@@ -108,8 +123,8 @@
 /* Legend Styling For Chart */
 .custom-legend {
    position: absolute;
-   top: -490px;
-   right: 110px;
+   top: -445px;
+   right: 130px;
 	display: flex;
 	justify-content: center;
 	align-items: center;

@@ -18,6 +18,7 @@ import CoconutCrunchies1a from "../assets/CoconutCrunchies1a.png";
 import Megan from "../assets/Megan.png";
 import Ellyse from "../assets/Ellyse.png";
 import SigninImg from "../assets/signinImg.jpg";
+import GoogleImg from "../assets/google.png";
 
 export {
 	Logo,
@@ -40,5 +41,6 @@ export {
 	CoconutCrunchies1a,
 	Ellyse,
 	Megan,
-	SigninImg
+	SigninImg,
+	GoogleImg
 };

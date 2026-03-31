@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
 		enum: ["customer", "distributor", "super-admin"],
 		default: "customer",
 	},
+	googleId: {
+		type: String,
+		default: null,
+	},
 	distributorInfo: {
 		businessName: String,
 		contactPhone: String,

@@ -18,6 +18,7 @@ import { TokenExpirationHandler } from "./TokenExpirationHandler";
 import { DistributorTokenExpirationHandler } from "./DistributorTokenExpirationHandler";
 import DistributorSignup from "./DISTRIBUTOR-DASHBOARD/pages/Signup";
 import DistributorLogin from "./DISTRIBUTOR-DASHBOARD/pages/Login";
+import AuthCallback from "./DISTRIBUTOR-DASHBOARD/pages/AuthCallback";
 import ConfirmEmail from "./DISTRIBUTOR-DASHBOARD/pages/ConfirmEmail"
 import PasswordReset from "./DISTRIBUTOR-DASHBOARD/pages/PasswordReset";
 import DashboardLayout from "./DISTRIBUTOR-DASHBOARD/components/DashboardLayout"
@@ -67,6 +68,7 @@ function App() {
 								element={<DistributorSignup />}
 							/>
 							<Route path="/distributor/login" element={<DistributorLogin />} />
+							<Route path="/auth/callback" element={<AuthCallback />} />
 							<Route
 								path="/distributor/confirm-email"
 								element={<ConfirmEmail />}

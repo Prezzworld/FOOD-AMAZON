@@ -60,12 +60,14 @@ router.get("/single-distributor/:id", [auth, admin], async (req, res) => {
 
 router.get("/me", [auth, distributor], async (req, res) => {
 	try {
-		const currentDistributor = await User.findById(req.user._id).select("-password -refreshToken");
+		const currentDistributor = await User.findById(req.user._id).select(
+			"-password -refreshToken",
+		);
 		if (!currentDistributor) {
 			return res.status(404).json({
 				success: false,
-				message: "Distributor not found"
-			})
+				message: "Distributor not found",
+			});
 		}
 		res.json({
 			success: true,
@@ -88,12 +90,12 @@ router.get("/me", [auth, distributor], async (req, res) => {
 			error: "Failed to get distributor information",
 		});
 	}
-})
+});
 
 router.post("/signup", async (req, res) => {
 	try {
 		const { token, fullName, email, password } = req.body;
-		if ((!token || !fullName || !email || !password)) {
+		if (!token || !fullName || !email || !password) {
 			return res.status(400).json({
 				success: false,
 				error: "token, full name, email and password are required",
@@ -118,7 +120,9 @@ router.post("/signup", async (req, res) => {
 			});
 		}
 		if (email !== invitation.email) {
-			return res.status(401).send("Email must match with the email used to receive the invite")
+			return res
+				.status(401)
+				.send("Email must match with the email used to receive the invite");
 		}
 
 		const existingUser = await User.findOne({ email: invitation.email });
@@ -150,7 +154,7 @@ router.post("/signup", async (req, res) => {
 		invitation.status = "accepted";
 		await invitation.save();
 
-		const jwtToken = distributor.generateAuthToken('1d');
+		const jwtToken = distributor.generateAuthToken("1d");
 		res.status(201).json({
 			success: true,
 			message: "Account created successfully",
@@ -179,14 +183,15 @@ router.post("/login", async (req, res) => {
 		const user = await User.findOne({ email });
 		if (!user) return res.status(401).send("Invalid email");
 		const validPassword = await bcrypt.compare(password, user.password);
-		if (!validPassword) return res.status(401).send("The password you entered is incorrect");
+		if (!validPassword)
+			return res.status(401).send("The password you entered is incorrect");
 
-		const accessToken = user.generateAuthToken("1d")
+		const accessToken = user.generateAuthToken("1d");
+
 		if (req.body.rememberMe) {
 			const refreshToken = user.generateRefreshToken("30d");
 			user.refreshToken = refreshToken;
 			await user.save();
-
 			res.status(200).json({
 				success: true,
 				accessToken,
@@ -199,19 +204,19 @@ router.post("/login", async (req, res) => {
 					distributorInfo: user.distributorInfo,
 				},
 			});
+		} else {
+			res.status(200).json({
+				success: true,
+				accessToken,
+				user: {
+					_id: user._id,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+					distributorInfo: user.distributorInfo,
+				},
+			});
 		}
-		
-		res.status(200).json({
-			success: true,
-			accessToken,
-			user: {
-				_id: user._id,
-				name: user.name,
-				email: user.email,
-				role: user.role,
-				distributorInfo: user.distributorInfo,
-			},
-		});
 	} catch (error) {
 		console.error("Error logging in to distributor account", error);
 		res.status(500).json({
@@ -279,6 +284,5 @@ router.post("/logout", async (req, res) => {
 		res.status(500).send("Error logging out: " + error.message);
 	}
 });
-
 
 module.exports = router;

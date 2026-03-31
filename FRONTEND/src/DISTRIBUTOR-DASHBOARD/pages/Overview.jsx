@@ -142,7 +142,7 @@ const Overview = () => {
 				{/* Trends */}
 				<div
 					className="card rounded-4 h-100 border-0 chart-card-wide"
-					style={{ padding: "1.3rem" }}
+					// style={{ padding: "1.5rem" }}
 				>
 					<SalesByChannelChart />
 				</div>

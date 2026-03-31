@@ -5,5 +5,8 @@
    "emailPassword": "EMAIL_PASSWORD",
    "frontendUrl": "FRONTEND_URL",
    "mongoURI": "MONGODB_URI",
-   "port": "PORT"
+   "port": "PORT",
+   "googleClientId": "GOOGLE_CLIENT_ID",
+   "googleClientSecret": "GOOGLE_CLIENT_SECRET",
+   "googleCallbackUrl": "GOOGLE_CALLBACK_URL"
 }

@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const passport = require('./config/passport')
 // exports.app = app;
 const mongoose = require("mongoose");
 const config = require("config");
@@ -10,6 +11,7 @@ const product = require("./routes/product");
 const customer = require("./routes/customer");
 const register = require("./routes/user");
 const login = require("./routes/auth");
+const googleAuth = require("./routes/googleAuth");
 const cart = require("./routes/cart");
 const order = require("./routes/order");
 const distributor = require("./routes/distributor")
@@ -39,6 +41,8 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+
 
 // Logging middleware
 // app.use((req, res, next) => {
@@ -53,6 +57,7 @@ app.use("/api/food-amazon-database/products", product);
 app.use("/api/food-amazon-database/customers", customer);
 app.use("/api/food-amazon-database/users/register", register);
 app.use("/api/food-amazon-database/users/login", login);
+app.use("/auth", googleAuth);
 app.use("/api/food-amazon-database/cart", cart);
 app.use("/api/food-amazon-database/order", order);
 app.use('/api/food-amazon-database/distributors', distributor);
