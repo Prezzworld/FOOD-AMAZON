@@ -19,8 +19,10 @@ const AuthCallback = () => {
       return;
     }
     if (accessToken && refreshToken) {
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("disToken", accessToken);
+      localStorage.setItem("disRefreshToken", refreshToken);
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
       showToast("Signed in with google successfully", "success");
       setTimeout(() => navigate("/distributor/dashboard"), 1500);
     }

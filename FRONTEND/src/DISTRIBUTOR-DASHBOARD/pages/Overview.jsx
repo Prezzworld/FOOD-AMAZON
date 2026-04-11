@@ -100,59 +100,72 @@ const Overview = () => {
 	return (
 		<>
 			<div className="d-grid gap-4 grid-template-columns">
-				<div className="card bg-white py-4 rounded-4 overview-span-full border-0">
-					{metricConfig.map((metric) => {
-						const data = saleOverview?.[metric.key];
-						return (
-							<div
-								key={metric.key}
-								className="metric-card text-center text-md-start"
-							>
-								<h6 className="font-archivo text-dark-blue fs-6 fw-semibold mb-3">
-									{metric.title}
-								</h6>
-								<div className="d-flex gap-5 align-items-center mb-3">
-									<p className="mb-0 font-archivo fw-semibold fs-5">
-										{formatCurrency(data.sales)}
-									</p>
+				{/* <div className="card grid-card w-100 border-0 bg-white rounded-4"> */}
+					<div className="py-md-4 overview-span-full d-grid bg-white gap-3 gap-md-0 rounded-4">
+						{metricConfig.map((metric) => {
+							const data = saleOverview?.[metric.key];
+							return (
+								<div
+									key={metric.key}
+									className="metric-card text-start py-4 py-md-0"
+								>
+									<h6 className="font-archivo text-dark-blue fs-6 fw-semibold mb-3">
+										{metric.title}
+									</h6>
+									<div className="d-flex flex-wrap justify-content-between price-percentage align-items-center mb-3">
+										<p className="mb-0 font-archivo fw-semibold fs-5">
+											{formatCurrency(data.sales)}
+										</p>
+										<p
+											className={`mb-0 font-archivo fs-sm ${data.percentageChange > 0 ? "text-primary-normal" : "text-danger"}`}
+										>
+											{data.percentageChange > 0 ? (
+												<>
+													+{data.percentageChange}%
+													<BsArrowUp className="ms-2" fontWeight={10} />
+												</>
+											) : (
+												<>
+													{data.percentageChange}%
+													<BsArrowDown className="ms-2" fontWeight={10} />
+												</>
+											)}
+										</p>
+									</div>
 									<p
-										className={`mb-0 font-archivo fs-sm ${data.percentageChange > 0 ? "text-primary-normal" : "text-danger"}`}
+										className="mb-0 font-archivo text-content-dark"
+										style={{ fontSize: "12.5px" }}
 									>
-										{data.percentageChange > 0 ? (
-											<>
-												+{data.percentageChange}%
-												<BsArrowUp className="ms-2" fontWeight={10} />
-											</>
-										) : (
-											<>
-												{data.percentageChange}%
-												<BsArrowDown className="ms-2" fontWeight={10} />
-											</>
-										)}
+										{metric.comparisonText}
 									</p>
 								</div>
-								<p className="mb-0 font-archivo text-content-dark" style={{fontSize: '12.5px'}}>
-									{metric.comparisonText}
-								</p>
-							</div>
-						);
-					})}
-				</div>
+							);
+						})}
+					</div>
+				{/* </div> */}
 
 				{/* Trends */}
 				<div
-					className="card rounded-4 h-100 border-0 chart-card-wide"
+					className="card bg-white rounded-4 sales-chart border-0 chart-card-wide"
 					// style={{ padding: "1.5rem" }}
 				>
 					<SalesByChannelChart />
 				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-short py-4 px-3">
-					<VisitInsightsChart/>
+				<div className="card bg-white rounded-4 sales-chart border-0 chart-card-short py-4 px-3">
+					<VisitInsightsChart />
 				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-wider py-4">regular chart</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4">regular chart</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-shortest py-4">regular chart</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-widest py-4">regular chart</div>
+				<div className="card rounded-4 h-100 border-0 chart-card-wider py-4">
+					regular chart
+				</div>
+				<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4">
+					regular chart
+				</div>
+				<div className="card rounded-4 h-100 border-0 chart-card-shortest py-4">
+					regular chart
+				</div>
+				<div className="card rounded-4 h-100 border-0 chart-card-widest py-4">
+					regular chart
+				</div>
 			</div>
 		</>
 	);

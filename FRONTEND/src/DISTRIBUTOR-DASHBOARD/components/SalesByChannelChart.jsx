@@ -10,9 +10,16 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
-import CustomLegend from "./CustomLegend";
+// import { CustomLegends } from "./CustomLegends";
 import CustomTooltip from "./CustomTooltip";
 import CustomCursor from "./CustomCursor";
+
+const LEGEND_ITEMS = [
+	{ color: "#00a859", label: "Walk-in Sales" },
+	{ color: "#f58634", label: "Delivery Sales" },
+];
+
+const Y_AXIS_WIDTH = 45; // For the chart and header to align properly
 
 const SalesByChannelChart = () => {
 	const [chartData, setChartData] = useState([]);
@@ -121,67 +128,91 @@ const SalesByChannelChart = () => {
 
 	return (
 		<>
-			<div className="position-relative p-4">
-				<div className="mb-4 d-flex justify-content-between align-items-center">
-					<div>
-						<h3 className="font-archivo text-dark-blue fs-4 fw-semibold">
-							Distribution Trends
-						</h3>
-					</div>
-					<div>
-						<select
-							name="timePeriod"
-							id="timePeriod"
-							value={timePeriod}
-							onChange={(e) => setTimePeriod(e.target.value)}
-							className="form-select fs-v-small text-content-dark font-archivo"
-							style={{ width: "100px" }}
-						>
-							<option value="daily">Daily</option>
-							<option value="weekly">Weekly</option>
-							<option value="monthly">Monthly</option>
-							<option value="yearly">Yearly</option>
-						</select>
+			<div className="p-4 d-flex flex-column h-100">
+				<div className="flex-shrink-0">
+					<div className="mb-4 d-flex flex-wrap justify-content-between row-gap-2 align-items-center" style={{paddingLeft: `${Y_AXIS_WIDTH}px`}}>
+						<div className="">
+							<h3 className="font-archivo text-dark-blue fs-4 fw-semibold">
+								Distribution Trends
+							</h3>
+						</div>
+						<div className="d-flex flex-wrap align-items-center gap-3">
+							<div className="chart-legend d-flex flex-wrap gap-3 row-gap-1">
+								{LEGEND_ITEMS.map((item) => (
+									<div key={item.label} className="legend-item">
+										<span
+											className="legend-icon"
+											style={{ backgroundColor: item.color }}
+										/>
+										<span className="legend-text">{item.label}</span>
+									</div>
+								))}
+							</div>
+							<div className="">
+								<select
+									name="timePeriod"
+									id="timePeriod"
+									value={timePeriod}
+									onChange={(e) => setTimePeriod(e.target.value)}
+									className="form-select fs-v-small text-content-dark font-archivo"
+									style={{ width: "100px" }}
+								>
+									<option value="daily">Daily</option>
+									<option value="weekly">Weekly</option>
+									<option value="monthly">Monthly</option>
+									<option value="yearly">Yearly</option>
+								</select>
+							</div>
+						</div>
 					</div>
 				</div>
-				<ResponsiveContainer width="100%" height={400}>
-					<LineChart data={chartData} responsive>
-						<CartesianGrid strokeDasharray="" vertical={false} />
-						<XAxis
-							dataKey="date"
-							axisLine={false} // Removes the x-axis line
-							tickLine={false} // Removes the small tick marks
-							tick={{ fill: "#666", fontSize: 14 }} // Style the labels
-							dy={10}
-						/>
-						<YAxis
-							axisLine={false} // Removes the y-axis line
-							tickLine={false} // Removes the small tick marks
-							tick={{ fill: "#666", fontSize: 14 }} // Style the labels
-							dx={-10}
-						/>
-						<Tooltip
-							content={<CustomTooltip />}
-							cursor={false}
-							position={{ y: 0 }}
-						/>
-						<Legend content={<CustomLegend />} />
-						<Line
-							type="monotone"
-							dataKey="walkIn"
-							stroke="#00a859"
-							strokeWidth={2}
-							name="Walk-in Sales"
-						/>
-						<Line
-							type="monotone"
-							dataKey="delivery"
-							stroke="#f58634"
-							strokeWidth={2}
-							name="Delivery Sales"
-						/>
-					</LineChart>
-				</ResponsiveContainer>
+				{/* <div className="position-relative"> */}
+				<div style={{ flex: 1, minHeight: 0 }}>
+					<ResponsiveContainer width="100%" height="100%">
+						<LineChart data={chartData} margin={{top: 5, right: 10, left: 0, bottom: 5}} responsive>
+							<CartesianGrid strokeDasharray="" vertical={false} />
+							<XAxis
+								dataKey="date"
+								axisLine={false} // Removes the x-axis line
+								tickLine={false} // Removes the small tick marks
+								// tick={{ fill: "#666", fontSize: 14 }}
+								dy={10}
+							/>
+							<YAxis
+								width={Y_AXIS_WIDTH}
+								axisLine={false} // Removes the y-axis line
+								tickLine={false} // Removes the small tick marks
+								tick={{ fill: "#666", fontSize: 14 }} // Style the labels
+								dx={-10}
+							/>
+							<Tooltip
+								content={<CustomTooltip />}
+								cursor={false}
+								position={{ y: 0 }}
+							/>
+							{/* <Legend content={<CustomLegends.salesChannel />} /> */}
+							<Line
+								type="monotone"
+								dataKey="walkIn"
+								stroke="#00a859"
+								strokeWidth={2}
+								name="Walk-in Sales"
+								dot={false}
+								activeDot={false}
+							/>
+							<Line
+								type="monotone"
+								dataKey="delivery"
+								stroke="#f58634"
+								strokeWidth={2}
+								name="Delivery Sales"
+								dot={false}
+								activeDot={false}
+							/>
+						</LineChart>
+					</ResponsiveContainer>
+				</div>
+				{/* </div> */}
 			</div>
 		</>
 	);

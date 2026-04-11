@@ -1,12 +1,13 @@
 import React, {useEffect} from "react";
 import { NavLink } from "react-router-dom";
+import { Logo } from "../../LANDING-PAGES/pages/Images";
 import { FaCartPlus } from "react-icons/fa";
 import { MdInventory } from "react-icons/md";
 import { RiHome4Fill, RiMessage2Line, RiSettings3Fill } from "react-icons/ri";
-import { HiUser, HiBellAlert, HiPower } from "react-icons/hi2";
+import { HiUser, HiBellAlert, HiPower, HiXMark } from "react-icons/hi2";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
-const Sidebar = () => {
+const Sidebar = ({onClose}) => {
 	const navItems = [
 		{
 			path: "/distributor/dashboard",
@@ -67,6 +68,23 @@ const Sidebar = () => {
 	return (
 		<>
 			<div className="bg-white h-100 m-0 px-3 position-relative">
+				<div className="sidebar-header">
+					<div className="d-flex align-items-center gap-2">
+						<div style={{ width: "32px", height: "32px" }}>
+							<img src={Logo} alt="Company Logo" className="w-100 h-100" />
+						</div>
+						<span className="fs-sm font-archivo text-dark-blue fw-semibold">
+							360 Organic Foodie
+						</span>
+					</div>
+					<button
+						className="sidebar-close-btn"
+						onClick={onClose}
+						aria-label="Close sidebar"
+					>
+						<HiXMark size={22} />
+					</button>
+				</div>
 				<nav className="mt-4">
 					{navItems.map((item, index) =>
 						item.label === "Notifications" ? (
@@ -75,6 +93,7 @@ const Sidebar = () => {
 									key={index}
 									to={item.path}
 									end={item.path === "/distributor/dashboard"}
+									onClick={onClose}
 									className={({ isActive }) =>
 										`d-block px-3 py-2 text-decoration-none mb-4 fs-sm rounded-3 font-archivo fw-medium ${isActive ? "bg-white-toned text-primary-normal" : "hover-bg-white-toned text-content-dark"}`
 									}
@@ -93,6 +112,7 @@ const Sidebar = () => {
 									key={item.index}
 									to={item.path}
 									end={item.path === "/distributor/dashboard"}
+									onClick={onClose}
 									className={({ isActive }) =>
 										`d-block px-3 py-2 text-decoration-none mb-3 fs-sm rounded-3 font-archivo fw-medium ${isActive ? "bg-white-toned text-primary-normal" : "hover-bg-white-toned text-content-dark"}`
 									}
@@ -104,8 +124,11 @@ const Sidebar = () => {
 						),
 					)}
 					<div className="position-absolute logout-btn-wrapper">
-						<button onClick={handleLogout} className="logout-button fs-sm px-4 py-2 rounded-pill font-archivo fw-medium text-content-dark">
-							<HiPower className="item-icon me-2"/> Logout
+						<button
+							onClick={handleLogout}
+							className="logout-button fs-sm px-4 py-2 rounded-pill font-archivo fw-medium text-content-dark"
+						>
+							<HiPower className="item-icon me-2" /> Logout
 						</button>
 					</div>
 				</nav>

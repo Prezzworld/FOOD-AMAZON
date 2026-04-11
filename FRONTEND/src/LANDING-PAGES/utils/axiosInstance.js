@@ -78,7 +78,7 @@ axiosInstance.interceptors.response.use(
 		try {
 			// Request new access token (don't use axiosInstance here to avoid infinite loop)
 			const response = await axios.post(
-				`${API_BASE_URL}/food-amazon-database/users/login/refresh-token`,
+				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/users/login/refresh-token`,
 				{
 					refreshToken,
 				}
@@ -109,6 +109,9 @@ axiosInstance.interceptors.response.use(
 );
 
 function handleAuthFailure() {
+	const isOnCallbackPage = window.location.pathname === "/auth/callback";
+	if (isOnCallbackPage) return;
+
 	localStorage.removeItem("token");
 	localStorage.removeItem("refreshToken");
 	localStorage.removeItem("user");

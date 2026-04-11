@@ -115,7 +115,7 @@ const Signup = () => {
 			console.log(response.data);
 			if (response.data.success) {
 				localStorage.setItem("disToken", response.data.token);
-				localStorage.setItem("user", JSON.stringify(response.data.user));
+				localStorage.setItem("distributor", JSON.stringify(response.data.user));
 				showToast("Account created successfully, welcome aboard!", "success", 2000);
 				setTimeout(() => navigate("/distributor/dashboard"), 2000)
 			}

@@ -74,7 +74,7 @@ distributorAxiosInstance.interceptors.response.use(
 		try {
 			// Request new access token (don't use axiosInstance here to avoid infinite loop)
 			const response = await axios.post(
-				`${API_BASE_URL}/food-amazon-database/distributors/refresh-token`,
+				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/distributors/refresh-token`,
 				{
 					refreshToken,
 				},
@@ -104,6 +104,9 @@ distributorAxiosInstance.interceptors.response.use(
 );
 
 const handleDistributorAuthFailure = () => {
+	const isOnCallbackPage = window.location.pathname === "/auth/callback";
+	if (isOnCallbackPage) return;
+
 	localStorage.removeItem("disToken");
 	localStorage.removeItem("disRefreshToken");
 	localStorage.removeItem("user");

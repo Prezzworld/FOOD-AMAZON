@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Logo } from "../../LANDING-PAGES/pages/Images";
-import { IoSearch, IoNotificationsOutline, IoPerson, IoChevronDown } from "react-icons/io5";
+import { IoSearch, IoNotificationsOutline, IoPerson, IoChevronDown, IoMenu } from "react-icons/io5";
 import { BsCart } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
-const Header = () => {
+const Header = ({onMenuToggle}) => {
 	const [distributor, setDistributor] = useState(null);
 	const [loading, setLoading] = useState(false);
 	useEffect(() => {
@@ -37,45 +37,58 @@ const Header = () => {
 		<>
 			<div className="">
 				<div className="bg-white d-flex justify-content-between align-item-center py-3 px-4">
-					<div className="col-8">
-						<div className="d-flex align-items-center gap-5">
-							<div className="d-flex align-items-center gap-2">
-								<div className="imgLogo">
-									<img src={Logo} alt="Company Logo" className="w-100 h-100" />
-								</div>
-								<h3 className="fs-md1 font-archivo text-dark-blue fw-semibold mb-0">
-									360 Organic Foodie
-								</h3>
+					<div className="col-2 col-md-6 col-lg-8">
+					<div className="d-flex align-items-center gap-3 w-100">
+						<button
+							className="hamburger-btn"
+							onClick={onMenuToggle}
+							aria-label="Toggle navigation"
+							aria-expanded="false"
+						>
+							<IoMenu size={24} />
+						</button>
+						<div className="d-none d-lg-flex align-items-center gap-2">
+							<div className="imgLogo">
+								<img src={Logo} alt="Company Logo" className="w-100 h-100" />
 							</div>
-							<div className="text-content-dark position-relative search-input">
-								<label htmlFor="search" className="position-absolute search">
-									<IoSearch className="" size={24} />
-								</label>
-								<input
-									type="search"
-									name=""
-									id="search"
-									placeholder="Search here..."
-									className="bg-white-toned border-0 rounded-2 pe-3 h-100 w-100 fs-sm text-content-dark"
-								/>
-							</div>
+							<h3 className="fs-md1 font-archivo text-dark-blue fw-semibold mb-0">
+								360 Organic Foodie
+							</h3>
+						</div>
+						<div className="text-content-dark position-relative search-input">
+							<label htmlFor="search" className="position-absolute search">
+								<IoSearch className="fs-3" />
+							</label>
+							<input
+								type="search"
+								name=""
+								id="search"
+								placeholder="Search here..."
+								className="bg-white-toned border-0 rounded-2 h-100 w-100 fs-sm text-content-dark"
+							/>
+						</div>
 						</div>
 					</div>
 
 					{/* <div className="col-4"> */}
-					<div className="d-flex align-items-center gap-3">
+					<div className="d-flex align-items-center gap-1 gap-sm-3 w-100 justify-content-end">
 						<div className="bg-white-toned text-content-dark d-flex align-items-center justify-content-center rounded-circle icon">
-							<BsCart size={17}/>
+							<BsCart size={17} />
 						</div>
 						<div className="bg-white-toned text-content-dark d-flex align-items-center justify-content-center rounded-circle icon">
-							<IoNotificationsOutline size={17}/>
+							<IoNotificationsOutline size={17} />
 						</div>
 						<div className="d-flex align-items-center gap-2">
 							<div className="bg-white-toned text-content-dark d-flex align-items-center justify-content-center rounded-circle icon">
-								<IoPerson size={17}/>
+								<IoPerson size={17} />
 							</div>
-							<p className="mb-0 font-inter fw-medium fs-sm text-dark-blue">{distributor}</p>
-							<IoChevronDown className="ms-3 mb-0 chevron text-dark-blue" size={15}/>
+							<p className="d-none d-sm-block mb-0 font-inter fw-medium fs-sm text-dark-blue">
+								{distributor}
+							</p>
+							<IoChevronDown
+								className="d-none d-sm-block ms-sm-2 mb-0 chevron text-dark-blue"
+								size={15}
+							/>
 						</div>
 					</div>
 					{/* </div> */}

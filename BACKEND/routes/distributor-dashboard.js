@@ -173,72 +173,70 @@ router.get("/overview", [auth, distributor], async (req, res) => {
 		});
 	}
 });
-
-router.get("/sales-trend", [auth, distributor], async (req, res) => {
-	try {
-		const distributorId = new mongoose.Types.ObjectId(req.user._id);
-		const thirtyDaysAgo = new Date();
-		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-		thirtyDaysAgo.setHours(0, 0, 0, 0);
-		const salesTrend = await Order.aggregate([
-			{
-				$match: {
-					distributorId: distributorId,
-					"paymentInfo.paymentStatus": "paid",
-					createdAt: { $gte: thirtyDaysAgo },
-				},
-			},
-			{
-				$group: {
-					_id: {
-						year: { $year: "$createdAt" },
-						month: { $month: "$createdAt" },
-						day: { $dayOfMonth: "$createdAt" },
-					},
-					totalSales: { $sum: "$totalAmount" },
-					orderCount: { $sum: 1 },
-				},
-			},
-			{
-				$sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 },
-			},
-			{
-				$project: {
-					_id: 0,
-					date: {
-						$dateToString: {
-							format: "%Y-%m-%d",
-							date: {
-								$dateFromParts: {
-									year: "$_id.year",
-									month: "$_id.month",
-									day: "$_id.day",
-								},
-							},
-						},
-					},
-					sales: "$totalSales",
-					orders: "$orderCount",
-				},
-			},
-		]);
-		res.status(200).json({
-			success: true,
-			data: salesTrend,
-		});
-	} catch (error) {
-		console.error("Sales trend error: ", error);
-		res.status(500).json({
-			success: false,
-			message: "Failed to load sales trend " + error,
-		});
-	}
-});
+// 	try {
+// 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+// 		const thirtyDaysAgo = new Date();
+// 		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+// 		thirtyDaysAgo.setHours(0, 0, 0, 0);
+// 		const salesTrend = await Order.aggregate([
+// 			{
+// 				$match: {
+// 					distributorId: distributorId,
+// 					"paymentInfo.paymentStatus": "paid",
+// 					createdAt: { $gte: thirtyDaysAgo },
+// 				},
+// 			},
+// 			{
+// 				$group: {
+// 					_id: {
+// 						year: { $year: "$createdAt" },
+// 						month: { $month: "$createdAt" },
+// 						day: { $dayOfMonth: "$createdAt" },
+// 					},
+// 					totalSales: { $sum: "$totalAmount" },
+// 					orderCount: { $sum: 1 },
+// 				},
+// 			},
+// 			{
+// 				$sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 },
+// 			},
+// 			{
+// 				$project: {
+// 					_id: 0,
+// 					date: {
+// 						$dateToString: {
+// 							format: "%Y-%m-%d",
+// 							date: {
+// 								$dateFromParts: {
+// 									year: "$_id.year",
+// 									month: "$_id.month",
+// 									day: "$_id.day",
+// 								},
+// 							},
+// 						},
+// 					},
+// 					sales: "$totalSales",
+// 					orders: "$orderCount",
+// 				},
+// 			},
+// 		]);
+// 		res.status(200).json({
+// 			success: true,
+// 			data: salesTrend,
+// 		});
+// 	} catch (error) {
+// 		console.error("Sales trend error: ", error);
+// 		res.status(500).json({
+// 			success: false,
+// 			message: "Failed to load sales trend " + error,
+// 		});
+// 	}
+// });
 
 router.get("/sales-by-channel", [auth, distributor], async (req, res) => {
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
-		const { timePeriod = "weekly" } = req.query;
+		const { timePeriod = "monthly" } = req.query;
 		let startDate, groupByFormat;
 		const now = new Date();
 		switch (timePeriod) {
@@ -330,10 +328,44 @@ router.get("/sales-by-channel", [auth, distributor], async (req, res) => {
 router.get("/visit-insights", [auth, distributor], async (req, res) => {
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
-		let startDate;
+		const { timePeriod = "daily" } = req.query;
+		let startDate, groupByFormat;
 		const now = new Date();
-		startDate = new Date(now);
-		startDate.setMonth(startDate.getMonth() - 12);
+		switch(timePeriod) {
+			case "daily":
+				// last 30 days
+				startDate = new Date(now);
+				startDate.setDate(startDate.getDate() - 60);
+				groupByFormat = {
+					year: {$year: "$createdAt"},
+					month: {$month: "$createdAt"},
+					day: {$dayOfMonth: "$createdAt"},
+				};
+				break;
+			case "weekly":
+				// last 12 weeks
+				startDate = new Date(now);
+				startDate.setDate(startDate.getDate() - 12 * 7);
+				groupByFormat = {
+					year: { $year: "$createdAt" },
+					week: { $week: "$createdAt" },
+				};
+				break;
+			case "monthly":
+				// last 12 months
+				startDate = new Date(now);
+				startDate.setMonth(startDate.getMonth() - 12);
+				groupByFormat = {
+					year: { $year: "$createdAt" },
+					month: { $month: "$createdAt" },
+				};
+				break;
+			default:
+				return res.status(400).json({
+					success: false,
+					message: "Invalid time period. Valid options are: daily, weekly and monthly"
+				});
+		}
 		const deviceData = await Order.aggregate([
 			{
 				$match: {
@@ -344,8 +376,7 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 			{
 				$group: {
 					_id: {
-						year: { $year: "$createdAt" },
-						month: { $month: "$createdAt" },
+						...groupByFormat,
 						device: {
 							$ifNull: ["$deviceType", "desktop"],
 						},
@@ -358,11 +389,14 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 				$sort: {
 					"_id.year": 1,
 					"_id.month": 1,
+					"_id.week": 1,
+					"_id.day": 1,
 				},
 			},
 		]);
 		res.status(200).json({
 			success: true,
+			timePeriod,
 			data: deviceData,
 		});
 	} catch (error) {
@@ -373,5 +407,77 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 		});
 	}
 });
+
+router.get("/best-selling", [auth, distributor], async (req, res) => {
+	try {
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+
+		const year = parseInt(req.query.year) || new Date().getFullYear();
+		const startOfYear = new Date(year, 0, 1);
+		const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
+
+		const limit = parseInt(req.query.limit) || 5;
+
+		const bestSellers = await Order.aggregate([
+			{
+				$match: {
+					distributorId: distributorId,
+					"paymentInfo.paymentStatus": "paid",
+					cratedAt: {
+						$gte: startOfYear,
+						$lte: endOfYear,
+					}
+				},
+			},
+			{ $unwind: "$items" },
+			{
+				$group: {
+					_id: "$items.productId",
+					productName: { $first: "$items.name" },
+					totalQuantitySold: { $sum: "$items.quantity" },
+					totalRevenue: {$sum: {$multiply: ["$items.price", "$items.quantity"]}}
+				}
+			},
+			{ $sort: { totalQuantitySold: -1 } },
+			{ $limit: limit },
+			{
+				$lookup: {
+					from: "products",
+					localField: "_id",
+					foreignField: "_id",
+					as: "productDetails"
+				}
+			},
+			{
+				$project: {
+					_id: 0,
+					productId: "$_id",
+          productName: 1,
+          totalQuantitySold: 1,
+          totalRevenue: 1,
+          currentStock: { $arrayElemAt: ["$productDetails.inStock", 0] },
+          // status: derive from currentStock — hint: $cond
+          status: {
+            $cond: {
+              if: { $gt: [{ $arrayElemAt: ["$productDetails.inStock", 0] }, 0] },
+              then: "In Stock",
+              else: "Out of Stock"
+            }
+          }
+			}}
+		])
+		res.status(200).json({
+			success: true,
+			year,
+			data: bestSellers
+		});
+	} catch (error) {
+		console.error("Error getting best selling products:", error);
+		res.status(500).json({
+			success: false,
+			message: error,
+		})
+	}
+})
 
 module.exports = router;

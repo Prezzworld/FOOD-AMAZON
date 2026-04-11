@@ -32,9 +32,28 @@
 	cursor: pointer;
 }
 
+.hamburger-btn {
+	display: none; /* Hidden on desktop */
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 6px 8px;
+	color: #11142d;
+	border-radius: 8px;
+	transition: background-color 0.2s ease;
+}
+ 
+.hamburger-btn:hover {
+	background-color: #f1f1f5;
+}
+
 .chevron {
 	cursor: pointer;
 }
+
+
 
 .logout-btn-wrapper {
 	bottom: 10%;
@@ -51,10 +70,30 @@
 	background-color: #f1f1f5 !important;
 }
 
-.dashboard-container {
+.sidebar-container {
 	max-width: 250px !important;
 	width: 100% !important;
-	height: 100dvh !important;
+	/* height: 100dvh !important; */
+	flex-shrink: 0;
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-overlay, .sidebar-header {
+	display: none; /* Hidden by default */
+}
+
+.sidebar-close-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	color: var(--content-dark);
+	border-radius: 6px;
+	transition: background-color 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+	background-color: #f1f1f5;
 }
 
 .item-icon {
@@ -62,47 +101,55 @@
 }
 
 .grid-template-columns {
-   grid-template-columns: repeat(12, 1fr);
+	grid-template-columns: repeat(12, 1fr);
 }
 
 .overview-span-full {
-   grid-column: 1 / -1;
-   display: grid;
-   grid-template-columns: repeat(4, 1fr);
-   gap: 0;
+	grid-column: 1/-1;
+	grid-template-columns: repeat(4, 1fr);
 }
 
 .metric-card {
-   padding-inline: 1.5rem !important;
+	padding-inline: 1.5rem !important;
 }
 
 .metric-card:not(:last-child) {
-   border-right: 1px solid #e5e7eb;
+	border-right: 1px solid #e5e7eb;
 }
 
 .chart-card-wide {
-   grid-column: 1 / 9;
+	grid-column: 1 / 9;
 }
 
 .chart-card-short {
-   grid-column: 9 / 13;
+	grid-column: 9 / 13;
 }
 
 .chart-card-wider {
-   grid-column: 1 / 10;
+	grid-column: 1 / 10;
 }
 
 .chart-card-shorter {
-   grid-column: 10 / 13;
-   /* width: 90%; */
+	grid-column: 10 / 13;
+	/* width: 90%; */
 }
 
 .chart-card-shortest {
-   grid-column: 1 / 4;
+	grid-column: 1 / 4;
 }
 
 .chart-card-widest {
-   grid-column: 4 / 13;
+	grid-column: 4 / 13;
+}
+
+.sales-chart {
+	min-height: 370px;
+	/* max-height: 370px; */
+	height: 100%;
+}
+
+.legend-text {
+	font-size: 12px;
 }
 
 .form-select {
@@ -118,19 +165,6 @@
 
 .fs-v-small {
 	font-size: 12px !important;
-}
-
-/* Legend Styling For Chart */
-.custom-legend {
-   position: absolute;
-   top: -445px;
-   right: 130px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 20px;
-	padding: 20px 0;
-	margin-top: 20px;
 }
 
 .legend-item {
@@ -159,29 +193,184 @@
 
 /* Tooltip Styling for chart */
 .custom-tooltip::after {
-   content: '';
-   position: absolute;
-   bottom: -10px;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 0;
-   height: 0;
-   border-left: 10px solid transparent;
-   border-right: 10px solid transparent;
-   border-top: 10px solid white;
+	content: "";
+	position: absolute;
+	bottom: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-top: 10px solid white;
 }
+
+.tooltip-item {
+	margin: 0;
+	margin-top: 4px;
+	font-size: 13px;
+}
+
+.tooltip-icon {
+	display: inline-block;
+	margin-right: 4px;
+}
+
+.tooltip-text {
+	/* Add any text styling you want */
+}
+
+.dots {
+	width: 32px;
+	height: 32px;
+}
+
+.dots:hover {
+	background-color: var(--content-light) !important;
+}
+
+.select-option {
+	top: 30px;
+}
+
+.select-option li:hover {
+	background-color: var(--primary);
+	color: white;
+}
+
+@media (max-width: 1200px) {
+	.chart-card-wide {
+		grid-column: 1/8;
+	}
+	.chart-card-short {
+		grid-column: 8/13;
+	}
+}
+
+@media(max-width: 998px) {
+	.hamburger-btn {
+		display: flex;
+	}
+	/* Hide the search bar on mobile to save space */
+	.search-input {
+		/* display: none !important; */
+		max-width: 0px !important;
+		padding-right: 0px !important;
+	}
+
+	.search-input input {
+		background-color: transparent !important;
+	}
+
+	.search {
+		position: relative !important;
+		top: 3px !important;
+		left: 0 !important;
+	}
+
+	.search > * {
+		font-size: 32px !important;
+	}
+
+	.sidebar-container {
+		/* 
+      'fixed' means: positioned relative to the VIEWPORT, not the page.
+      It will stay in place even when the user scrolls.
+      This is exactly what we want for a drawer/overlay.
+    */
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 100dvh; /* dvh = dynamic viewport height, handles mobile browser chrome */
+		width: 280px;
+		z-index: 1050; /* Must be above the overlay (1049) */
+		/*
+      The starting state: completely off-screen to the left.
+      translateX(-100%) = move left by 100% of the element's own width.
+      So a 280px sidebar moves -280px off screen. You see nothing.
+    */
+		transform: translateX(-100%);
+		/* Nice shadow to give depth when it slides in */
+		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+	}
  
- .tooltip-item {
-   margin: 0;
-   margin-top: 4px;
-   font-size: 13px;
- }
+	/* 
+    The OPEN state: we add this class via React state when user clicks hamburger.
+    translateX(0) = element is at its natural position. Fully visible.
+    The transition on .sidebar-container animates between these two states.
+  */
+	.sidebar-container.sidebar-open {
+		transform: translateX(0);
+	}
+
+	.sidebar-overlay {
+		display: block;
+		position: fixed;
+		inset: 0; /* Cover the entire viewport */
+		background-color: rgba(0, 0, 0, 0.5);
+		z-index: 1049; /* Below sidebar (1050) but above everything else */
+		animation: overlayFadeIn 0.2s ease forwards;
+	}
+
+	.sidebar-close-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
  
- .tooltip-icon {
-   display: inline-block;
-   margin-right: 4px;
- }
- 
- .tooltip-text {
-   /* Add any text styling you want */
- }
+	/* On mobile, show the logo + close button at the top of the sidebar */
+	.sidebar-header {
+		display: flex !important;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1rem 0;
+		border-bottom: 1px solid #f1f1f5;
+		padding-bottom: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.chart-card-wide {
+		grid-column: 1/7;
+	}
+	.chart-card-short {
+		grid-column: 7/13;
+	}
+}
+
+@media (max-width: 768px) {
+	.overview-span-full {
+		grid-template-columns: repeat(2, 1fr);
+		background-color: transparent !important;
+	}
+
+	.metric-card {
+		background-color: white;
+		border-radius: 15px;
+	}
+
+	.chart-card-wide {
+		grid-column: 1/-1;
+	}
+	.chart-card-short {
+		grid-column: 1/-1;
+	}
+}
+
+@media (max-width: 517px) {
+	.overview-span-full {
+		grid-template-columns: 1fr;
+	}
+
+	.sales-chart {
+		min-height: 330px;
+	}
+}
+
+@keyframes overlayFadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
