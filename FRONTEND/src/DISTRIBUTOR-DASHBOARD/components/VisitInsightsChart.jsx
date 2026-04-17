@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import { FaEllipsisH } from "react-icons/fa";
+import CustomTooltip from "./CustomTooltip";
 // import { CustomLegends } from "./CustomLegends";
 
 const LEGEND_ITEMS = [
@@ -189,8 +190,21 @@ const VisitInsightsChart = () => {
 						tick={{ fill: "#666", fontSize: 13 }}
 						dx={-10}
           /> */}
-						<Tooltip />
-						{/* <Legend content={<CustomLegends.VisitInsights />} />  */}
+						<Tooltip
+							content={
+								<CustomTooltip
+									showLine={false}
+									formatValue={(entry) =>
+										entry.payload[
+											entry.dataKey === "mobile"
+												? "mobileSales"
+												: "desktopSales"
+										]
+									}
+								/>
+							}
+							cursor={{ fill: "rgba(0,0,0,0.04)" }}
+						/>
 						<Bar
 							dataKey="mobile"
 							fill="#00a859"

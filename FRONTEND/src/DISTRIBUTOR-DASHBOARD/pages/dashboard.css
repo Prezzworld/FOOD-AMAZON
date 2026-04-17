@@ -125,13 +125,20 @@
 	grid-column: 9 / 13;
 }
 
+.best-selling-grid {
+	grid-column: 1 / 13;
+}
+
 .chart-card-wider {
-	grid-column: 1 / 10;
+	max-width: 70% !important;
+	width: 100% !important;
+	/* grid-column: 1 / 10; */
 }
 
 .chart-card-shorter {
-	grid-column: 10 / 13;
-	/* width: 90%; */
+	/* grid-column: 10 / 13; */
+	max-width: 30% !important;
+	width: 100% !important;
 }
 
 .chart-card-shortest {

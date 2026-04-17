@@ -3,6 +3,7 @@ import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import SalesByChannelChart from "../components/SalesByChannelChart";
 import VisitInsightsChart from "../components/VisitInsightsChart";
+import { BestSellingTable, BestSellingChart } from "../components/BestSelling";
 
 const Overview = () => {
 	const [saleOverview, setSaleOverview] = useState(null);
@@ -154,11 +155,13 @@ const Overview = () => {
 				<div className="card bg-white rounded-4 sales-chart border-0 chart-card-short py-4 px-3">
 					<VisitInsightsChart />
 				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-wider py-4">
-					regular chart
+				<div className="d-flex align-items-center best-selling-grid gap-4">
+				<div className="card rounded-4 h-100 border-0 chart-card-wider py-4 px-3">
+					<BestSellingTable />
 				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4">
-					regular chart
+				<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4 px-3">
+					<BestSellingChart/>
+				</div>
 				</div>
 				<div className="card rounded-4 h-100 border-0 chart-card-shortest py-4">
 					regular chart

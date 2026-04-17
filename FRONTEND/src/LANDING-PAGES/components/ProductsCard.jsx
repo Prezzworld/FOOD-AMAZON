@@ -122,6 +122,15 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		});
 	};
 
+	const formatCurrency = (amount) => {
+		return new Intl.NumberFormat("en-NG", {
+			style: "currency",
+			currency: "NGN",
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
+		}).format(amount);
+	};
+
 	if (variant === "bulk") {
 		return (
 			<div className={getCardClassname()}>
@@ -208,7 +217,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 							{product.rating} (18)
 						</p>
 						<p className="fw-semibold font-inter fs-6 text-main-accent">
-							${product.price}
+							{formatCurrency(product.price)}
 						</p>
 					</div>
 				</div>

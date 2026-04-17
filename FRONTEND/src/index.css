@@ -52,6 +52,10 @@ body {
 	font-family: "Archivo", sans-serif;
 }
 
+.cursor-pointer {
+	cursor: pointer !important;
+}
+
 .primary-light {
 	color: #e6f6ee;
 }

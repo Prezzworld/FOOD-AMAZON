@@ -418,12 +418,12 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
 
 		const limit = parseInt(req.query.limit) || 5;
 
-		const bestSellers = await Order.aggregate([
+		const allBestSellers = await Order.aggregate([
 			{
 				$match: {
 					distributorId: distributorId,
 					"paymentInfo.paymentStatus": "paid",
-					cratedAt: {
+					createdAt: {
 						$gte: startOfYear,
 						$lte: endOfYear,
 					}
@@ -439,7 +439,7 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
 				}
 			},
 			{ $sort: { totalQuantitySold: -1 } },
-			{ $limit: limit },
+			// { $limit: limit },
 			{
 				$lookup: {
 					from: "products",
@@ -466,10 +466,13 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
           }
 			}}
 		])
+		const bestSellers = allBestSellers.slice(0, limit);
 		res.status(200).json({
 			success: true,
 			year,
-			data: bestSellers
+			displayLimit: limit,
+			data: bestSellers,
+			totalCount: allBestSellers.length
 		});
 	} catch (error) {
 		console.error("Error getting best selling products:", error);

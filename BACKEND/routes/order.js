@@ -4,6 +4,7 @@ const axios = require("axios");
 const UAparser = require("ua-parser-js");
 const { Order, validate } = require("../models/order");
 const { Cart } = require("../models/cart");
+const {Product} = require("../models/product")
 const auth = require("../middleware/auth");
 const crypto = require("crypto");
 const config = require("config");
@@ -81,7 +82,14 @@ router.post("/create", auth, async (req, res) => {
 				paymentGateway: "cash",
 				paymentReference: `walkin_${order._id}`
 			};
+
 			await order.save();
+			for (const item of order.items) {
+				await Product.findByIdAndUpdate(item.productId,
+					{ $inc: { inStock: -item.quantity } },
+					{new: true}
+				)
+			}
 			await Cart.findOneAndDelete({user: order.userId});
 			return res.status(201).send({
 				success: true,
@@ -182,6 +190,13 @@ router.post("/confirm", auth, async (req, res) => {
 			}
 			console.log("Order updated successfully: ", order._id),
 				await Cart.findOneAndDelete({ user: order.userId });
+				for (const item of order.items) {
+					await Product.findByIdAndUpdate(
+						item.productId,
+						{ $inc: { inStock: -item.quantity } },
+						{ new: true },
+					);
+				}
 			console.log("Cart cleared for user: ", order.userId);
 			return res.json({
 				success: true,
@@ -282,6 +297,13 @@ router.post(
 					}, { new: true });
 				if (order) {
 					console.log("Order udated by webhook: ", order._id);
+					for (const item of order.items) {
+						await Product.findByIdAndUpdate(
+							item.productId,
+							{ $inc: { inStock: -item.quantity } },
+							{ new: true },
+						);
+					}
 					await Cart.findOneAndDelete({ user: order.userId });
 					console.log("Cart cleared for user: ", order.userId);
 				} else {

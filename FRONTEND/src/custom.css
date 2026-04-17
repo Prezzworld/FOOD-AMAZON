@@ -223,6 +223,10 @@
   color: var(--dark-blue) !important;
 }
 
+.fs-xsm {
+  font-size: 12px !important;
+}
+
 .fs-sm {
   font-size: 14px !important;
 }
