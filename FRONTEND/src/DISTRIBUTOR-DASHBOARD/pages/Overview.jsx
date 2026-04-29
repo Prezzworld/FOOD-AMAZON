@@ -4,6 +4,8 @@ import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import SalesByChannelChart from "../components/SalesByChannelChart";
 import VisitInsightsChart from "../components/VisitInsightsChart";
 import { BestSellingTable, BestSellingChart } from "../components/BestSelling";
+import CustomerList from "../components/CustomerList";
+import RecentOrderTable from "../components/RecentOrderTable";
 
 const Overview = () => {
 	const [saleOverview, setSaleOverview] = useState(null);
@@ -102,47 +104,47 @@ const Overview = () => {
 		<>
 			<div className="d-grid gap-4 grid-template-columns">
 				{/* <div className="card grid-card w-100 border-0 bg-white rounded-4"> */}
-					<div className="py-md-4 overview-span-full d-grid bg-white gap-3 gap-md-0 rounded-4">
-						{metricConfig.map((metric) => {
-							const data = saleOverview?.[metric.key];
-							return (
-								<div
-									key={metric.key}
-									className="metric-card text-start py-4 py-md-0"
-								>
-									<h6 className="font-archivo text-dark-blue fs-6 fw-semibold mb-3">
-										{metric.title}
-									</h6>
-									<div className="d-flex flex-wrap justify-content-between price-percentage align-items-center mb-3">
-										<p className="mb-0 font-archivo fw-semibold fs-5">
-											{formatCurrency(data.sales)}
-										</p>
-										<p
-											className={`mb-0 font-archivo fs-sm ${data.percentageChange > 0 ? "text-primary-normal" : "text-danger"}`}
-										>
-											{data.percentageChange > 0 ? (
-												<>
-													+{data.percentageChange}%
-													<BsArrowUp className="ms-2" fontWeight={10} />
-												</>
-											) : (
-												<>
-													{data.percentageChange}%
-													<BsArrowDown className="ms-2" fontWeight={10} />
-												</>
-											)}
-										</p>
-									</div>
+				<div className="py-md-4 overview-span-full d-grid bg-white gap-3 gap-md-0 rounded-4">
+					{metricConfig.map((metric) => {
+						const data = saleOverview?.[metric.key];
+						return (
+							<div
+								key={metric.key}
+								className="metric-card text-start py-4 py-md-0"
+							>
+								<h6 className="font-archivo text-dark-blue fs-6 fw-semibold mb-3">
+									{metric.title}
+								</h6>
+								<div className="d-flex flex-wrap justify-content-between price-percentage align-items-center mb-3">
+									<p className="mb-0 font-archivo fw-semibold fs-5">
+										{formatCurrency(data.sales)}
+									</p>
 									<p
-										className="mb-0 font-archivo text-content-dark"
-										style={{ fontSize: "12.5px" }}
+										className={`mb-0 font-archivo fs-sm ${data.percentageChange > 0 ? "text-primary-normal" : "text-danger"}`}
 									>
-										{metric.comparisonText}
+										{data.percentageChange > 0 ? (
+											<>
+												+{data.percentageChange}%
+												<BsArrowUp className="ms-2" fontWeight={10} />
+											</>
+										) : (
+											<>
+												{data.percentageChange}%
+												<BsArrowDown className="ms-2" fontWeight={10} />
+											</>
+										)}
 									</p>
 								</div>
-							);
-						})}
-					</div>
+								<p
+									className="mb-0 font-archivo text-content-dark"
+									style={{ fontSize: "12.5px" }}
+								>
+									{metric.comparisonText}
+								</p>
+							</div>
+						);
+					})}
+				</div>
 				{/* </div> */}
 
 				{/* Trends */}
@@ -156,18 +158,20 @@ const Overview = () => {
 					<VisitInsightsChart />
 				</div>
 				<div className="d-flex align-items-center best-selling-grid gap-4">
-				<div className="card rounded-4 h-100 border-0 chart-card-wider py-4 px-3">
-					<BestSellingTable />
+					<div className="card rounded-4 h-100 border-0 chart-card-wider py-4 px-3">
+						<BestSellingTable />
+					</div>
+					<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4 px-3">
+						<BestSellingChart />
+					</div>
 				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-shorter py-4 px-3">
-					<BestSellingChart/>
-				</div>
-				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-shortest py-4">
-					regular chart
-				</div>
-				<div className="card rounded-4 h-100 border-0 chart-card-widest py-4">
-					regular chart
+				<div className="d-flex align-items-center customer-order-grid gap-4">
+					<div className="card rounded-4 h-100 border-0 chart-card-shortest" style={{height: '400px'}}>
+						<CustomerList />
+					</div>
+					<div className="card rounded-4 h-100 border-0 chart-card-widest" style={{height: '400px'}}>
+						<RecentOrderTable/>
+					</div>
 				</div>
 			</div>
 		</>

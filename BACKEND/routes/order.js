@@ -9,6 +9,8 @@ const auth = require("../middleware/auth");
 const crypto = require("crypto");
 const config = require("config");
 const { assignDistributorByCity } = require("../utils/assign-distributor");
+const { upsertDistributorCustomer } = require('../utils/upsertDistributorCustomer');
+const {generateShortId} = require('../utils/generateShortId')
 // const admin = require("../middleware/admin");
 
 router.post("/create", auth, async (req, res) => {
@@ -53,7 +55,13 @@ router.post("/create", auth, async (req, res) => {
 			distributorId = req.user._id;
 			console.log(`Walk-in order for distributor: ${distributorId}`);
 		}
+
+		const shortId = distributorId
+			? await generateShortId(Order, "distributorId", distributorId)
+			: await generateShortId(Order, 'userId', req.user._id);
+
 		order = new Order({
+			shortId,
 			userId: req.user._id,
 			cartId: cartId,
 			customerSnapshot: customerSnapshot,
@@ -180,6 +188,7 @@ router.post("/confirm", auth, async (req, res) => {
 					$set: {
 						"paymentInfo.paymentStatus": "paid",
 						"paymentInfo.transactionId": data.id,
+						"paymentInfo.deliveryStatus": "processing"
 					},
 				},
 				{ new: true }
@@ -189,6 +198,15 @@ router.post("/confirm", auth, async (req, res) => {
 				return res.status(404).send("Order not found");
 			}
 			console.log("Order updated successfully: ", order._id),
+				await upsertDistributorCustomer({
+					distributorId: order.distributorId,
+					customerEmail: order.customerSnapshot.email,
+					firstName: order.customerSnapshot.firstName,
+					lastName: order.customerSnapshot.lastName,
+					phone: order.customerSnapshot.phone,
+					source: "order",
+					orderDate: order.createdAt
+				})
 				await Cart.findOneAndDelete({ user: order.userId });
 				for (const item of order.items) {
 					await Product.findByIdAndUpdate(

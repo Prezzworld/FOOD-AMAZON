@@ -97,7 +97,8 @@ const orderSchema = new mongoose.Schema(
 			type: String,
 			enum: ["desktop", "mobile"],
 			default: "desktop",
-		}
+		},
+		shortId: {type: String}
 	},
 	{ timestamps: true }
 );

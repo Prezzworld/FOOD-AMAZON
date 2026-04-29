@@ -4,6 +4,7 @@ const router = express.Router();
 const { Order } = require("../models/order");
 const auth = require("../middleware/auth");
 const distributor = require("../middleware/distributor");
+const { DistributorCustomer } = require("../models/distributorCustomer");
 
 router.get("/overview", [auth, distributor], async (req, res) => {
 	try {
@@ -331,15 +332,15 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 		const { timePeriod = "daily" } = req.query;
 		let startDate, groupByFormat;
 		const now = new Date();
-		switch(timePeriod) {
+		switch (timePeriod) {
 			case "daily":
 				// last 30 days
 				startDate = new Date(now);
 				startDate.setDate(startDate.getDate() - 60);
 				groupByFormat = {
-					year: {$year: "$createdAt"},
-					month: {$month: "$createdAt"},
-					day: {$dayOfMonth: "$createdAt"},
+					year: { $year: "$createdAt" },
+					month: { $month: "$createdAt" },
+					day: { $dayOfMonth: "$createdAt" },
 				};
 				break;
 			case "weekly":
@@ -363,7 +364,8 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 			default:
 				return res.status(400).json({
 					success: false,
-					message: "Invalid time period. Valid options are: daily, weekly and monthly"
+					message:
+						"Invalid time period. Valid options are: daily, weekly and monthly",
 				});
 		}
 		const deviceData = await Order.aggregate([
@@ -426,7 +428,7 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
 					createdAt: {
 						$gte: startOfYear,
 						$lte: endOfYear,
-					}
+					},
 				},
 			},
 			{ $unwind: "$items" },
@@ -435,8 +437,10 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
 					_id: "$items.productId",
 					productName: { $first: "$items.name" },
 					totalQuantitySold: { $sum: "$items.quantity" },
-					totalRevenue: {$sum: {$multiply: ["$items.price", "$items.quantity"]}}
-				}
+					totalRevenue: {
+						$sum: { $multiply: ["$items.price", "$items.quantity"] },
+					},
+				},
 			},
 			{ $sort: { totalQuantitySold: -1 } },
 			// { $limit: limit },
@@ -445,40 +449,122 @@ router.get("/best-selling", [auth, distributor], async (req, res) => {
 					from: "products",
 					localField: "_id",
 					foreignField: "_id",
-					as: "productDetails"
-				}
+					as: "productDetails",
+				},
 			},
 			{
 				$project: {
 					_id: 0,
 					productId: "$_id",
-          productName: 1,
-          totalQuantitySold: 1,
-          totalRevenue: 1,
-          currentStock: { $arrayElemAt: ["$productDetails.inStock", 0] },
-          // status: derive from currentStock — hint: $cond
-          status: {
-            $cond: {
-              if: { $gt: [{ $arrayElemAt: ["$productDetails.inStock", 0] }, 0] },
-              then: "In Stock",
-              else: "Out of Stock"
-            }
-          }
-			}}
-		])
+					productName: 1,
+					totalQuantitySold: 1,
+					totalRevenue: 1,
+					currentStock: { $arrayElemAt: ["$productDetails.inStock", 0] },
+					// status: derive from currentStock — hint: $cond
+					status: {
+						$cond: {
+							if: {
+								$gt: [{ $arrayElemAt: ["$productDetails.inStock", 0] }, 0],
+							},
+							then: "In Stock",
+							else: "Out of Stock",
+						},
+					},
+				},
+			},
+		]);
 		const bestSellers = allBestSellers.slice(0, limit);
 		res.status(200).json({
 			success: true,
 			year,
 			displayLimit: limit,
 			data: bestSellers,
-			totalCount: allBestSellers.length
+			totalCount: allBestSellers.length,
 		});
 	} catch (error) {
 		console.error("Error getting best selling products:", error);
 		res.status(500).json({
 			success: false,
 			message: error,
+		});
+	}
+});
+
+router.get("/new-customers", [auth, distributor], async (req, res) => {
+	try {
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+		const newCustomers = await DistributorCustomer.find({ distributorId })
+			.sort({ createdAt: -1 })
+			.limit(4);
+		res.status(200).json({ success: true, data: newCustomers });
+	} catch (error) {
+		console.error("Error getting new customers:", error);
+		res.status(500).json({
+			success: false,
+			message: "Failed to load new customers: " + error.message,
+		});
+	}
+});
+
+router.get("/recent-orders", [auth, distributor], async (req, res) => {
+	try {
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+		const recentOrers = await Order.find({
+			distributorId,
+			"paymentInfo.paymentReference": { $exists: true },
+		}).sort({ createdAt: -1 }).limit(4).select('_id shortId customerSnapshot.firstName customerSnapshot.lastName totalAmount paymentInfo createdAt')
+		res.status(200).json({success: true, data: recentOrers})
+	} catch (error) {
+		console.error("Error getting recent orders:", error);
+		res.status(500).json({
+			success: false,
+			message: "Failed to load recent orders: " + error.message,
+		});
+	}
+});
+
+router.patch("/orders/:orderId/update-status", [auth, distributor], async (req, res) => {
+	try {
+		const orderId = new mongoose.Types.ObjectId(req.params.orderId);
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+		const order = await Order.findOne({ _id: orderId, distributorId });
+		if (!order) {
+			return res.status(404).json({
+				success: false,
+				message: "Order not found",
+			})
+		}
+		const { deliveryStatus } = req.body;
+		if (!deliveryStatus) {
+			return res.status(400).json({
+				success: false,
+				message: "Delivery status is required",
+			})
+		}
+		const updateData = { "paymentInfo.deliveryStatus": deliveryStatus };
+		if (deliveryStatus === "shipped") {
+			updateData["paymentInfo.shippedAt"] = new Date();
+		} else if (deliveryStatus === "delivered") { 
+			updateData["paymentInfo.deliveredAt"] = new Date();
+		} else if (deliveryStatus === "cancelled") {
+			updateData["paymentInfo.cancelledAt"] = new Date();
+		}
+
+		const updatedOrder = await Order.findByIdAndUpdate(
+			orderId,
+			{ $set: updateData },
+			{new: true}
+		)
+		res.status(200).json({
+			success: true,
+			message: "Order delivery status updated successfully",
+			data: updatedOrder,
+		})
+	} catch (error) {
+		console.error("Failed to update order delivery status: ", error);
+		res.status(500).json({
+			success:false,
+			message: "Failed to update order delivery status: " + error.message,
 		})
 	}
 })
