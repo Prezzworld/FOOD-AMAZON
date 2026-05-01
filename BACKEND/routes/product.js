@@ -248,7 +248,7 @@ router.post(
 				imagePublicId: productImagePublicId,
 				bulkOrderEligible: req.body.bulkOrderEligible || false,
 				bulkDescription: req.body.bulkDescription || '',
-				minimumBulkQuantity: req.body.minimumBulkQuantity || 50
+				minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
 			});
 
 			product = await product.save();
@@ -338,10 +338,10 @@ router.put(
 					productImg: newImageUrl,
 					imagePublicId: newImagePublicId,
 					bulkOrderEligible: req.body.bulkOrderEligible || false,
-					bulkDescription: req.body.bulkDescription || '',
-					minimumBulkQuantity: req.body.minimumBulkQuantity || 50
+					bulkDescription: req.body.bulkDescription || "",
+					minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
 				},
-				{ new: true }
+				{ new: true },
 			);
 
 			res.json({
@@ -357,7 +357,7 @@ router.put(
 				error: error.message,
 			});
 		}
-	}
+	},
 );
 
 router.delete("/delete-product/:id", [auth, admin], async (req, res) => {

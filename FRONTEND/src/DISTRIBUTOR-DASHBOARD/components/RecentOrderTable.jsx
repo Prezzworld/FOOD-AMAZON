@@ -43,21 +43,21 @@ const RecentOrderTable = () => {
 		});
 	};
 
-	const paymentNumText = (deliveryStatus, paymentStatus) => {
-		if (deliveryStatus === "delivered" && paymentStatus === "paid") {
+	const paymentNumText = (deliveryStatus, paymentStatus, shortId) => {
+		if (deliveryStatus === "cancelled" || paymentStatus === "failed") {
 			return {
-				message: "Process delivery to",
-				status: <p className="text-primary-normal bg-primary-normal bg-opacity-10 d-inline-block py-1 px-2 rounded-1">completed</p>
-			};
-		} else if (deliveryStatus === "cancelled" || paymentStatus === "failed") {
-			return {
-				message: "Process refund to",
+				message: "Process refund to " + shortId,
 				status: <p className="text-danger bg-danger-subtle bg-opacity-10 d-inline-block py-1 px-2 rounded-1">cancelled</p>
 			};
-		} else if (deliveryStatus === "pending" && paymentStatus === "paid") {
+		} else if (deliveryStatus === "delivered" && paymentStatus === "paid") {
 			return {
-				message: "Payment from",
-				status: <p className="text-info bg-info-subtle bg-opacity-10 d-inline-block py-1 px-2 rounded-1">pending</p>
+				message: "Process delivery to " + shortId,
+				status: <p className="text-primary-normal bg-success bg-opacity-10 d-inline-block py-1 px-2 rounded-1">completed</p>
+			};
+		} else if (deliveryStatus === "pending" || paymentStatus === "paid") {
+			return {
+				message: "Payment from " + shortId,
+				status: <p className="text-primary-normal bg-success bg-opacity-10 d-inline-block py-1 px-2 rounded-1">completed</p>
 			};
 		}
 	};
@@ -113,14 +113,14 @@ const RecentOrderTable = () => {
 								<th
 									scope="col"
 									className="text-start p-3"
-									style={{ borderRadius: "8px 0 0 8px" }}
+									style={{ borderRadius: "8px 0 0 8px",  width: "45%" }}
 								>
 									Payment Number
 								</th>
-								<th scope="col" className="" style={{}}>
+								<th scope="col" className="" style={{width: '30%'}}>
 									Date & time
 								</th>
-								<th scope="col" className="" style={{}}>
+								<th scope="col" className="" style={{width: "15%"}}>
 									Amount
 								</th>
 								<th
@@ -145,21 +145,23 @@ const RecentOrderTable = () => {
 												paymentNumText(
 													order.paymentInfo.deliveryStatus,
 													order.paymentInfo.paymentStatus,
+													order.shortId
 												).message
 											}
 										</p>
 									</td>
-									<td className="py-3">
-										<p>{formatDate(order.createdAt)}</p>
+									<td className="">
+										<p className="py-2">{formatDate(order.createdAt)}</p>
 									</td>
-									<td className="py-3">
-										<p>{formatCurrency(order.totalAmount)}</p>
+									<td className="">
+										<p className="py-2">{formatCurrency(order.totalAmount)}</p>
 									</td>
-									<td className="py-3">
+									<td className="py-2">
 										{
 											paymentNumText(
 												order.paymentInfo.deliveryStatus,
 												order.paymentInfo.paymentStatus,
+												order.shortId
 											).status
 										}
 									</td>
