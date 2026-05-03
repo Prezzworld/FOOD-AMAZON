@@ -166,6 +166,7 @@ const Checkout = () => {
 			);
 			console.log("Order created successfully:", response.data);
 			await showToast("Order created successfully!", "success", 2000);
+			setSubmitting(false);
 			if (response.data.authorizationUrl) {
 				window.location.href = response.data.authorizationUrl;
 			} else {
@@ -179,6 +180,7 @@ const Checkout = () => {
 					"Failed to create order. Please try again.",
 			);
 			setLoading(false);
+			setSubmitting(false)
 			showAlert(
 					"Failed to create order. Please try again.",
 				"error",

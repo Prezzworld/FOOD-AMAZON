@@ -49,18 +49,29 @@ const RecentOrderTable = () => {
 				message: "Process refund to " + shortId,
 				status: <p className="text-danger bg-danger-subtle bg-opacity-10 d-inline-block py-1 px-2 rounded-1">cancelled</p>
 			};
-		} else if (deliveryStatus === "delivered" && paymentStatus === "paid") {
+		}
+
+		if (deliveryStatus === "delivered" && paymentStatus === "paid") {
 			return {
 				message: "Process delivery to " + shortId,
 				status: <p className="text-primary-normal bg-success bg-opacity-10 d-inline-block py-1 px-2 rounded-1">completed</p>
 			};
-		} else if (deliveryStatus === "pending" || paymentStatus === "paid") {
+		}
+
+		if (paymentStatus === "paid") {
 			return {
 				message: "Payment from " + shortId,
 				status: <p className="text-primary-normal bg-success bg-opacity-10 d-inline-block py-1 px-2 rounded-1">completed</p>
 			};
 		}
-	};
+
+		return {
+			message: "Pending order " + shortId,
+			status: (
+				<p className="text-info bg-info-subtle bg-opacity-10 d-inline-block py-1 px-2 rounded-1">pending</p>
+			),
+		};
+	}
 
 	const formatCurrency = (amount) => {
 		return new Intl.NumberFormat("en-NG", {
@@ -133,40 +144,39 @@ const RecentOrderTable = () => {
 							</tr>
 						</thead>
 						<tbody className="">
-							{orders.map((order) => (
-								
-								<tr
-									key={order._id}
-									className="font-archivo fs-sm text-dark-blue fw-normal p-4"
-								>
-									<td>
-										<p className="fs-sm ms-3 py-3">
+							{orders.map((order) => {
+								if (!order.paymentInfo) return null;
+								const paymentDisplay = paymentNumText(
+									order.paymentInfo.deliveryStatus,
+									order.paymentInfo.paymentStatus,
+									order.shortId,
+								);
+								return (
+									<tr
+										key={order._id}
+										className="font-archivo fs-sm text-dark-blue fw-normal p-4"
+									>
+										<td>
+											<p className="fs-sm ms-3 py-3">
+												{
+													paymentDisplay.message
+												}
+											</p>
+										</td>
+										<td className="">
+											<p className="py-2">{formatDate(order.createdAt)}</p>
+										</td>
+										<td className="">
+											<p className="py-2">{formatCurrency(order.totalAmount)}</p>
+										</td>
+										<td className="py-2">
 											{
-												paymentNumText(
-													order.paymentInfo.deliveryStatus,
-													order.paymentInfo.paymentStatus,
-													order.shortId
-												).message
+												paymentDisplay.status
 											}
-										</p>
-									</td>
-									<td className="">
-										<p className="py-2">{formatDate(order.createdAt)}</p>
-									</td>
-									<td className="">
-										<p className="py-2">{formatCurrency(order.totalAmount)}</p>
-									</td>
-									<td className="py-2">
-										{
-											paymentNumText(
-												order.paymentInfo.deliveryStatus,
-												order.paymentInfo.paymentStatus,
-												order.shortId
-											).status
-										}
-									</td>
-								</tr>
-							))}
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 					{/* </div> */}

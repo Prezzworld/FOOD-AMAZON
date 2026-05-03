@@ -138,7 +138,7 @@ router.post("/create", auth, async (req, res) => {
 				paymentGateway: "paystack",
 				paymentStatus: "pending",
 			};
-			await order.save();
+			await order.save({w: 'majority'});
 			res.status(201).send({
 				message: "Order created successfully",
 				deviceInfo,
@@ -272,38 +272,109 @@ router.post("/confirm", auth, async (req, res) => {
 // 	}
 // });
 
+const findOrderWithRetry = async (reference, maxRetry = 3, delay = 1000) => {
+	// Log what we're about to search for
+	console.log(`Searching for order with reference: ${reference}`);
+
+	// On the very first attempt, wait a moment to give MongoDB
+	// time to propagate the write from the create route
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+
+	for (let retry = 1; retry <= maxRetry; retry++) {
+		try {
+			const order = await Order.findOne({
+				"paymentInfo.paymentReference": reference,
+			}).lean(); // .lean() returns a plain JS object, faster for read-only use
+
+			if (order) {
+				console.log(`✅ Order found on attempt ${retry}:`, order._id);
+				console.log(
+					`Order payment status: ${order.paymentInfo?.paymentStatus}`,
+				);
+				return order;
+			}
+
+			// This log tells you the query ran but found nothing
+			console.log(
+				`❌ Attempt ${retry}/${maxRetry}: No order found for reference ${reference}`,
+			);
+
+			// On last attempt, do a broader search to help diagnose
+			// Check if ANY recent orders exist, to confirm DB connection is working
+			if (retry === maxRetry) {
+				const recentOrder = await Order.findOne({})
+					.sort({ createdAt: -1 })
+					.lean();
+				console.log(
+					`Most recent order in DB:`,
+					recentOrder?._id,
+					recentOrder?.paymentInfo?.paymentReference,
+				);
+			}
+
+			if (retry < maxRetry) {
+				const waitTime = retry * delay; // 2s, 4s, 6s, 8s
+				console.log(`Waiting ${waitTime}ms before retry...`);
+				await new Promise((resolve) => setTimeout(resolve, waitTime));
+			}
+		} catch (queryError) {
+			// This catches MongoDB connection errors during cold start
+			console.error(`Query error on attempt ${retry}:`, queryError.message);
+			if (retry < maxRetry) {
+				await new Promise((resolve) => setTimeout(resolve, retry * delay));
+			}
+		}
+	}
+	return null;
+}; 
+
 router.post(
 	"/webhook",
-	express.json({ type: "application/json" }),
 	async (req, res) => {
 		console.log("🔥 PAYSTACK WEBHOOK HIT");
 		try {
-			if (process.env.NODE_ENV !== "production") {
-				console.log(
-					"DEVELOPMENT MODE: Skipping webhook signature verification"
-				);
-			} else {
+			if (process.env.NODE_ENV === "production") {
 				// Production signature verification
 				const hash = req.headers["x-paystack-signature"];
 				if (!hash) {
 					console.error("No signature provided in webhook");
 					return res.status(400).send("No signature provided");
 				}
-				const bodyString = JSON.stringify(req.body);
+				// const bodyString = JSON.stringify(req.body);
 				const expectedHash = crypto
 					.createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
-					.update(bodyString)
+					.update(req.body)
 					.digest("hex");
 				if (hash !== expectedHash) {
 					console.error("Invalid webhook signature");
 					return res.status(400).send("Invalid signature");
 				}
+
+				req.body = JSON.parse(req.body); // Parse the raw body to JSON for further processing
+				console.log("Webhook signature verified successfully");
 			}
 			const event = req.body;
 			console.log("Webhook received: ", event.event);
 			if (event.event === "charge.success") {
 				const reference = event.data.reference;
 				console.log("Processing successful charge for reference: ", reference);
+				const directCheck = await Order.findOne({
+					"paymentInfo.paymentReference": reference,
+				});
+				console.log(
+					"Direct DB check result:",
+					directCheck ? `Found order ${directCheck._id}` : "NOT FOUND",
+				);
+			
+				const existingOrder = await findOrderWithRetry(reference);
+				if(!existingOrder) {
+					console.log("Order not found after retries for reference: ", reference);
+					return res.sendStatus(200); // Acknowledge the webhook to prevent retries, even if we can't find the order
+				}
+				if (existingOrder.paymentInfo?.paymentStatus === "paid") {
+					console.log(`Order ${existingOrder._id} already processed, skipping webhook duplicate`);
+					return res.sendStatus(200);
+				}
 				const order = await Order.findOneAndUpdate(
 					{ "paymentInfo.paymentReference": reference },
 					{
@@ -313,7 +384,6 @@ router.post(
 							"paymentInfo.deliveryStatus": "processing"
 						}
 					}, { new: true });
-				if (order) {
 					console.log("Order udated by webhook: ", order._id);
 					for (const item of order.items) {
 						await Product.findByIdAndUpdate(
@@ -324,15 +394,33 @@ router.post(
 					}
 					await Cart.findOneAndDelete({ user: order.userId });
 					console.log("Cart cleared for user: ", order.userId);
-				} else {
-					console.log("Order not found for reference: ", reference);
-					return res.status(404).send("Order not found");
-				}
-				res.sendStatus(200);
 			}
+
+			if (event.event === "charge.failed") {
+				const reference = event.data.reference;
+				console.log("❌ Charge failed for reference:", reference);
+
+				const order = await Order.findOneAndUpdate(
+					{ "paymentInfo.paymentReference": reference },
+					{
+						$set: {
+							"paymentInfo.paymentStatus": "failed",
+							"paymentInfo.deliveryStatus": "cancelled",
+						},
+					},
+					{ new: true },
+				);
+
+				if (order) {
+					console.log("Order marked as failed:", order._id);
+				} else {
+					console.log("No order found for failed charge reference:", reference);
+				}
+			}
+			res.sendStatus(200);
 		} catch (error) {
 			console.error("Webhook error: ", error);
-			res.status(500).send("Webhook error -- " + error);
+			res.sendStatus(200);
 		}
 	}
 );
