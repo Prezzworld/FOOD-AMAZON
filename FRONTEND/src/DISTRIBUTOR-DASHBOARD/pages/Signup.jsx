@@ -24,7 +24,8 @@ const Signup = () => {
 		email: "",
 		password: "",
 	});
-	const API_URL = "http://localhost:3004/api/food-amazon-database";
+	const BASE_URL = import.meta.env.VITE_API_URL;
+	const api_endpoint = `${BASE_URL}/api/food-amazon-database`;
 	const handlePasswordVisibility = () => setVisiblePassword(!visiblePassword);
 	const handleChange = (e) => {
 		setFormData({
@@ -47,7 +48,7 @@ const Signup = () => {
 		const verifyToken = async () => {
 			try {
 				const response = await axios.get(
-					`${API_URL}/invitation/verify-invitation/${token}`,
+					`${api_endpoint}/invitation/verify-invitation/${token}`,
 				);
 				console.log(response.data);
 				if (response.data.success) {
@@ -108,7 +109,7 @@ const Signup = () => {
 		}
 		setSubmitting(true);
 		try {
-			const response = await axios.post(`${API_URL}/distributors/signup`, {
+			const response = await axios.post(`${api_endpoint}/distributors/signup`, {
 				token: token,
 				...formData,
 			});

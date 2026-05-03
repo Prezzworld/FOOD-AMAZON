@@ -8,7 +8,8 @@ import {GoogleImg} from '../../LANDING-PAGES/pages/Images'
 import "./distributorAuth.css";
 
 const Login = () => {
-	const API_URL = "http://localhost:3004/api/food-amazon-database";
+	const BASE_URL = import.meta.env.VITE_API_URL;
+	const api_endpoint = `${BASE_URL}/api/food-amazon-database/distributors/login`;
 	const { showToast } = useToast();
 	const { showAlert } = useAlert();
 	const [visiblePassword, setVisiblePassword] = useState(false);
@@ -51,7 +52,7 @@ const Login = () => {
 
 		try {
 			console.log(
-				`Submitting request to ${API_URL}/distributors/login with data:`,
+				`Submitting request to ${api_endpoint} with data:`,
 				loginData,
 			);
 			console.log("Login data being sent:", {
@@ -60,7 +61,7 @@ const Login = () => {
 				rememberMe: loginData.rememberMe, // Optional field
 			});
 
-			const response = await axios.post(`${API_URL}/distributors/login`, {
+			const response = await axios.post(`${api_endpoint}`, {
 				...loginData,
 			});
 			const data = response.data;

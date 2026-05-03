@@ -48,13 +48,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 
-// Logging middleware
-// app.use((req, res, next) => {
-// 	console.log(`${req.method} ${req.path}`);
-// 	console.log("Headers:", req.headers);
-// 	console.log("Body:", req.body);
-// 	next();
-// });
+
+app.use('/api', (req, res, next) => {
+	console.log(`${req.method} ${req.path}`);
+	console.log("Headers:", req.headers);
+	console.log("Body:", req.body);
+
+	res.set('Cache-Control', 'no-store');
+	next();
+});
 
 app.use("/api/food-amazon-database/categories", category);
 app.use("/api/food-amazon-database/products", product);

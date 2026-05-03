@@ -14,7 +14,7 @@ async function assignDistributorByCity(city) {
 
       console.log(`Assigned order to distributor: ${distributor.name} (${distributor.distributorInfo.businessName})`);
       return distributor._id;
-   } catch {
+   } catch(error) {
       console.error("Error assigning distributor", error);
       return null;
    }
