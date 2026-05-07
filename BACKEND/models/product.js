@@ -43,8 +43,12 @@ const productSchema = new mongoose.Schema(
 		},
 		rating: {
 			type: Number,
-			minLength: 0,
-			maxLength: 5,
+			min: 0,
+			max: 5,
+			default: 0,
+		},
+		reviewCount: {
+			type: Number,
 			default: 0,
 		},
 		productImg: {
