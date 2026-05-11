@@ -118,14 +118,14 @@ const Header = ({ shadow }) => {
 									</span>
 								)}
 							</button>
-							<Link to="/signup">
+							{/* <Link to="/signup"> */}
 								<button
 									className="bg-primary-normal border-0 text-white px-4 py-2 rounded-2 contact-btn"
 									style={{ cursor: "pointer" }}
 								>
 									Contact Us
 								</button>
-							</Link>
+							{/* </Link> */}
 						</div>
 					</div>
 				</div>

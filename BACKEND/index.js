@@ -14,6 +14,7 @@ const login = require("./routes/auth");
 const googleAuth = require("./routes/googleAuth");
 const cart = require("./routes/cart");
 const order = require("./routes/order");
+const review = require("./routes/review")
 const distributor = require("./routes/distributor")
 const invitation = require('./routes/invitations');
 const dashboard = require("./routes/distributor-dashboard");
@@ -66,16 +67,17 @@ app.use("/api/food-amazon-database/users/login", login);
 app.use("/auth", googleAuth);
 app.use("/api/food-amazon-database/cart", cart);
 app.use("/api/food-amazon-database/order", order);
+app.use("/api/food-amazon-database/review", review);
 app.use('/api/food-amazon-database/distributors', distributor);
 app.use("/api/food-amazon-database/distributors/dashboard", dashboard);
 app.use('/api/food-amazon-database/invitation', invitation);
 app.use('/api/food-amazon-database/test', test);
 // Global error handling middleware - MUST be last
 app.use((err, req, res, next) => {
-	console.error("🔴 FULL ERROR OBJECT:", err);
-	console.error("🔴 ERROR MESSAGE:", err?.message || "No message");
-	console.error("🔴 ERROR STACK:", err?.stack || "No stack");
-	console.error("🔴 ERROR NAME:", err?.name || "No name");
+	console.error("FULL ERROR OBJECT:", err);
+	console.error("ERROR MESSAGE:", err?.message || "No message");
+	console.error("ERROR STACK:", err?.stack || "No stack");
+	console.error("ERROR NAME:", err?.name || "No name");
 
 	res.status(err.status || 500).json({
 		success: false,

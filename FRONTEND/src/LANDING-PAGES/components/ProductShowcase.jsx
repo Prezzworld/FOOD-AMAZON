@@ -16,6 +16,7 @@ const ProductShowcase = ({
 	imageSlot = null, // Optional: an image or component to show alongside products
 	layoutStyle = "default", // "default", "grid", or "scroll"
 	variant = "full",
+	refProp
 }) => {
 	const navigate = useNavigate();
 
@@ -108,11 +109,11 @@ const ProductShowcase = ({
 						</div>
 						{showBrowseButton && (
 							<div className="align-self-xl-end">
-								<Link to={buttonLink}>
+								{/* <Link to={buttonLink}> */}
 									<button className="fs-5 fw-semibold bg-transparent browse-btn text-primary-normal font-inter rounded-1">
 										{buttonText}
 									</button>
-								</Link>
+								{/* </Link> */}
 							</div>
 						)}
 					</div>
@@ -135,7 +136,7 @@ const ProductShowcase = ({
 
 	if (layoutStyle === "scroll") {
 		return (
-			<div className="py-5">
+			<div className="py-5" ref={refProp}>
 				<div className="product-show container mx-auto px-0 gx-0 px-lg-3">
 					<div className="product-heading mb-5 text-center text-lg-start">
 						{getTitle()}
@@ -143,11 +144,11 @@ const ProductShowcase = ({
 							<div>{getSubtitle()}</div>
 							{showBrowseButton && (
 								<div>
-									<Link to={buttonLink}>
+									{/* // <Link to={buttonLink}> */}
 										<button className="browse-btn bg-transparent rounded-1 fs-md text-primary-normal fw-semibold font-inter">
 											{buttonText}
 										</button>
-									</Link>
+									{/* // </Link> */}
 								</div>
 							)}
 						</div>

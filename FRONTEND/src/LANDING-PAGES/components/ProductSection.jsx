@@ -1,4 +1,4 @@
-import react, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ProductsCard from "./ProductsCard";
 import { useAlert } from "../../alert/AlertContext";
 import axios from "axios";

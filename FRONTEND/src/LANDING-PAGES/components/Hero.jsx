@@ -1,7 +1,7 @@
 import React from 'react';
 import { HeroImg} from '../pages/Images';
 
-const Hero = () => {
+const Hero = ({scrollToProduct}) => {
   return (
 		<>
 			<div id="hero" className="position-relative">
@@ -21,7 +21,7 @@ const Hero = () => {
 								<span className="text-secondary-normal"> for</span> You!
 							</h1>
 							<div className="hero-button">
-								<button className="bg-secondary-normal text-white fs-6 fw-semibold border-0 py-2 px-3 rounded-2">
+								<button onClick={scrollToProduct} className="bg-secondary-normal text-white fs-6 fw-semibold border-0 py-2 px-3 rounded-2">
 									Shop Now
 									<ion-icon
 										name="storefront-outline"
