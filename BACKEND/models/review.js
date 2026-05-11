@@ -35,12 +35,22 @@ const reviewSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  headline: {
+    type: String,
+    minLength: 5,
+    required: true
+  },
   comment: {
     type: String,
     minLength: 10,
     maxLength: 1000,
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["pending", "published", "rejected"],
+    default: "pending",
+  }
 }, { timestamps: true });
 
 reviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
@@ -51,6 +61,7 @@ function validateReview(review) {
   const schema = Joi.object({
 		productId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
     rating: Joi.number().min(1).max(5).required(),
+    headline: Joi.string().min(5).required(),
     comment: Joi.string().min(10).max(1000).required(),
 	});
   return schema.validate(review);
