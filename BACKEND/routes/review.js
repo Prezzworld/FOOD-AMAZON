@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const { Review, validateReview } = require("../models/review");
 const auth = require("../middleware/auth");
 const distributor = require("../middleware/distributor")
@@ -33,10 +34,18 @@ router.post("/add-review", auth, async (req, res) => {
 		});
 
 		const user = await User.findById(userId).select("name");
+		const product = await Product.findById(productId);
+		if (!product) {
+			return res.status(404).json({
+				success: false,
+				message: "Product not found",
+			});
+		}
 
 		const review = new Review({
 			userId,
 			productId,
+			distributorId: product.distributorId,
 			reviewerName: user.name,
       rating,
       headline,
@@ -45,7 +54,6 @@ router.post("/add-review", auth, async (req, res) => {
 		});
 		await review.save();
 
-		const product = await Product.findById(productId);
 		const newReviewCount = product.reviewCount + 1;
 		const ratingAverage =
 			(product.rating * product.reviewCount + rating) / newReviewCount;
@@ -75,15 +83,45 @@ router.post("/add-review", auth, async (req, res) => {
 router.get("/product-reviews/:productId", async (req, res) => {
 	try {
 		const { productId } = req.params;
-		const { limit = 6 } = req.query;
+		const { limit = 6, page = 1 } = req.query;
 
-		const reviews = await Review.find({ productId })
+		const reviews = await Review.find({ productId, status: "published" })
+			.populate("userId", "name")
 			.sort({ createdAt: -1 })
-			.limit(parseInt(limit));
+			.limit(parseInt(limit))
+			.skip((parseInt(page) - 1) * parseInt(limit));
+
+		const stats = await Review.aggregate([
+			{
+				$match: {
+					productId: new mongoose.Types.ObjectId(productId),
+					status: "published"
+				}
+			},
+			{
+				$group: {
+					_id: null,
+					totalCount: { $sum: 1 },
+					averageRating: { $avg: "$rating" },
+					fiveStars: {$sum: {$cond: [{$eq: ["$rating", 5]}, 1, 0]}},
+					fourStars: {$sum: {$cond: [{$eq: ["$rating", 4]}, 1, 0]}},
+					threeStars: {$sum: {$cond: [{$eq: ["$rating", 3]}, 1, 0]}},
+					twoStars: {$sum: {$cond: [{$eq: ["$rating", 2]}, 1, 0]}},
+					oneStar: {$sum: {$cond: [{$eq: ["$rating", 1]}, 1, 0]}},
+				}
+			}
+		])
+
+		const reviewStats = stats[0] || {
+			totalCount: 0, averageRating: 0,
+			fiveStars: 0, fourStars: 0, threeStars: 0, twoStars: 0, oneStar: 0
+	};
 
 		res.status(200).json({
 			success: true,
 			data: reviews,
+			stats: reviewStats,
+			totalCount: reviewStats.totalCount,
 		});
 	} catch (error) {
 		console.error("Error fetching reviews:", error);
@@ -128,7 +166,7 @@ router.delete("/delete-review/:reviewId", auth, async (req, res) => {
 		await Review.findByIdAndDelete(reviewId);
 
 		if (product.reviewCount === 1) {
-			await product.findByIdAndUpdate(review.productId, {
+			await Product.findByIdAndUpdate(review.productId, {
 				rating: 0,
 				reviewCount: 0,
 			});
@@ -137,7 +175,7 @@ router.delete("/delete-review/:reviewId", auth, async (req, res) => {
 			const newAvgRating =
 				(product.rating * product.reviewCount - review.rating) / newReviewCount;
 
-			await product.findByIdAndUpdate(review.productId, {
+			await Product.findByIdAndUpdate(review.productId, {
 				rating: Math.round(newAvgRating * 10) / 10,
 				reviewCount: newReviewCount,
 			});
@@ -168,7 +206,7 @@ router.patch("/update-review/:reviewId", auth, async (req, res) => {
 				message: "Review not found",
 			});
 		}
-		if (review.userId.toString !== userId.toString()) {
+		if (review.userId.toString() !== userId.toString()) {
 			return res.status(403).json({
 				success: false,
 				message: "You can only update your own reviews",
@@ -183,7 +221,7 @@ router.patch("/update-review/:reviewId", auth, async (req, res) => {
 		}
 		const updatedReview = await Review.findByIdAndUpdate(
 			reviewId,
-      {$set: { rating, comment }},
+      {$set: { rating, headline, comment }},
 			{ new: true, runValidators: true },
     );
     

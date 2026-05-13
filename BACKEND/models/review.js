@@ -31,7 +31,7 @@ const reviewSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  isverifiedPurchase: {
+  isVerifiedPurchase: {
     type: Boolean,
     default: false
   },

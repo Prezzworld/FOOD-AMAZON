@@ -21,6 +21,12 @@ const ProductDetails = () => {
 	const [added, setIsAdded] = useState(false);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [product, setProduct] = useState(null);
+	const [reviewData, setReviewData] = useState({
+		rating: 0,
+		headline: "",
+		comment: "",
+	})
+	const [submittingReview, setSubmittingReview] = useState(false);
 
 	const { id } = useParams();
 	const { state } = useLocation();
@@ -38,6 +44,28 @@ const ProductDetails = () => {
 			setLoading(false);
 		}
 	}, [id, state]);
+
+	const handleChange = (e) => {
+		setReviewData({
+			...reviewData,
+			[e.target.name]: e.target.value
+		})
+	}
+
+	const handleReviewSubmit = (e) => {
+		e.preventDefault();
+		setSubmittingReview(true);
+
+		if (!reviewData.rating) {
+			showAlert("Please provide a rating", "error", {
+				mode: "inline"
+			})
+		} else if (!reviewData.comment) {
+			showAlert("Please leave a review comment", "error", {mode: "inline"})
+		} else if (!reviewData.headline) {
+			showAlert("Please add a headline", "error", {mode: "inline"})
+		}
+	}
 
 	const fetchProductById = async (productId) => {
 		try {
@@ -326,7 +354,7 @@ const ProductDetails = () => {
 							Customer Reviews
 						</h4>
 						<p className="fw-semibold fs-5 text-main-accent mt-3">77 Reviews</p>
-						{/* <div className="stars">{renderStars("text-secondary-normal")}</div> */}
+						<div className="stars my-3">{renderStars("text-secondary-normal")}</div>
 						<div className="ratings mt-4">
 							<div className="rating mb-2 d-flex align-items-center gap-4">
 								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
@@ -366,41 +394,51 @@ const ProductDetails = () => {
 						</div>
 					</div>
 					<div className="col-12 col-lg-5">
-						<h4 className="font-inter text-main-accent fw-bold">
-							How Would you rate this?
-						</h4>
-						{/* <div className="stars mb-4">{renderStars("text-main-accent")}</div> */}
-						<div class="mb-4">
-							<label
-								for="exampleFormControlInput1"
-								className="form-label mb-3 fw-semibold fs-5 text-main-accent"
-							>
-								Add a headline
-							</label>
-							<input
-								type="text"
-								className="form-control font-inter fs-5 text-main-accent"
-								id="exampleFormControlInput1"
-								placeholder="Write a summary of your review"
-							/>
-						</div>
-						<div className="mb-3">
-							<label
-								for="exampleFormControlTextarea1"
-								className="form-label mb-3 fw-semibold fs-5 text-main-accent"
-							>
-								Write a review
-							</label>
-							<textarea
-								className="form-control fs-5 font-inter fw-normal"
-								id="exampleFormControlTextarea1"
-								rows="5"
-								placeholder="Tell us what you think"
-							></textarea>
-						</div>
-						<button className="bg-primary-normal text-white border-0 fs-5 fw-semibold rounded-1 submit">
-							Submit Review
-						</button>
+						<form onSubmit={handleReviewSubmit}>
+							<h4 className="font-inter text-main-accent fw-bold">
+								How Would you rate this?
+							</h4>
+							<div className="stars mb-4 my-2">{renderStars("text-main-accent")}</div>
+							<div class="mb-4">
+								<label
+									for="exampleFormControlInput1"
+									className="form-label mb-2 fw-semibold fs-5 text-main-accent"
+								>
+									Add a headline
+								</label>
+								<input
+									type="text"
+									className="form-control font-inter fs-5 text-main-accent"
+									id="exampleFormControlInput1"
+									placeholder="Write a summary of your review"
+									name="headline"
+									value={reviewData.headline}
+									onChange={handleChange}
+									disabled={submittingReview}
+								/>
+							</div>
+							<div className="mb-3">
+								<label
+									for="exampleFormControlTextarea1"
+									className="form-label mb-2 fw-semibold fs-5 text-main-accent"
+								>
+									Write a review
+								</label>
+								<textarea
+									className="form-control fs-5 font-inter fw-normal"
+									id="exampleFormControlTextarea1"
+									rows="5"
+									placeholder="Tell us what you think"
+									name="comment"
+									value={reviewData.comment}
+									onChange={handleChange}
+									disabled={submittingReview}
+								></textarea>
+							</div>
+							<button className="bg-primary-normal text-white border-0 fs-5 fw-semibold rounded-1 submit" onClick={handleReviewSubmit}>
+								Submit Review
+							</button>
+						</form>
 					</div>
 				</div>
 			</div>
