@@ -76,7 +76,10 @@ router.post("/add-review", auth, async (req, res) => {
 			});
 		}
 		console.error("Error adding review:", error);
-		res.status(500).send("Internal server error");
+		res.status(500).json({
+			success: false,
+			message: "Error adding review " + error.message, 
+		});
 	}
 });
 
@@ -89,7 +92,7 @@ router.get("/product-reviews/:productId", async (req, res) => {
 			.populate("userId", "name")
 			.sort({ createdAt: -1 })
 			.limit(parseInt(limit))
-			.skip((parseInt(page) - 1) * parseInt(limit));
+			.skip((parseInt(page) - 1) * parseInt(limit)); 
 
 		const stats = await Review.aggregate([
 			{
@@ -132,9 +135,11 @@ router.get("/product-reviews/:productId", async (req, res) => {
 	}
 });
 
-router.get("/all-reviews", [auth, distributor], async (req, res) => {
+router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res) => {
 	try {
-		const reviews = await Review.find().sort({ createdAt: -1 });
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+
+		const reviews = await Review.find({distributorId}).sort({ createdAt: -1 });
 		res.status(200).json({
 			success: true,
 			data: reviews,
@@ -148,7 +153,7 @@ router.get("/all-reviews", [auth, distributor], async (req, res) => {
 	}
 });
 
-router.delete("/delete-review/:reviewId", auth, async (req, res) => {
+router.delete("/delete-review/:reviewId", [auth, distributor], async (req, res) => {
 	try {
 		const userId = req.user._id;
 		const { reviewId } = req.params;

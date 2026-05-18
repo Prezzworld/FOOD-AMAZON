@@ -4,8 +4,7 @@ import Header from "../components/Header";
 import axios from "axios";
 import Footer from "../components/Footer";
 import { stringToArray } from "../helper/Helper";
-import { FaCheck } from "react-icons/fa";
-import reviews from "../components/Testimonials";
+import { FaCheck, FaStar } from "react-icons/fa";
 import ProductShowcase from "../components/ProductShowcase";
 import { cartService } from "../utils/cartService";
 import { useAlert } from "../../alert/AlertContext";
@@ -13,24 +12,72 @@ import "../pages/productDetails.css";
 import { useToast } from "../../toast/ToastContext";
 
 const ProductDetails = () => {
-	const { showAlert} = useAlert();
+	const { showAlert } = useAlert();
 	const { showToast } = useToast();
 	const [selectedImage, setSelectedImage] = useState(0);
 	const [quantity, setQuantity] = useState(1);
 	const [loading, setLoading] = useState(false);
 	const [added, setIsAdded] = useState(false);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
-	const [product, setProduct] = useState(null);
+	const [product, setProduct] = useState([]);
 	const [reviewData, setReviewData] = useState({
-		rating: 0,
 		headline: "",
 		comment: "",
-	})
+	});
+	const [hoveredRating, setHoveredRating] = useState(0);
+	const [selectedRating, setSelectedRating] = useState(0);
+	const [reviewList, setReviewList] = useState([]);
+	const [reviewStats, setReviewStats] = useState({
+		totalCount: 0,
+		averageRating: 0,
+		fiveStars: 0,
+		fourStars: 0,
+		threeStars: 0,
+		twoStars: 0,
+		oneStar: 0,
+	});
+	const [reviewsLoading, setReviewsLoading] = useState(false);
 	const [submittingReview, setSubmittingReview] = useState(false);
 
 	const { id } = useParams();
 	const { state } = useLocation();
 	const navigate = useNavigate();
+
+	const fetchProductById = async (productId) => {
+		try {
+			const backend_url = import.meta.env.VITE_API_URL;
+			setLoading(true);
+			const response = await axios.get(
+				`${backend_url}/api/food-amazon-database/products/get-single-product/${productId}`,
+			);
+			setProduct(response.data);
+		} catch (error) {
+			console.error("Error fetching product:", error);
+			showAlert("An error occured, please try again", "error", {mode: "confirm"});
+			setLoading(false);
+		} finally {
+			setLoading(false);
+		}
+	};
+	const fetchReviews = async (productId) => {
+		try {
+			setReviewsLoading(true);
+			const response = await axios.get(
+				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/review/product-reviews/${productId}`,
+			);
+			if (response.data.success) {
+				console.log("Reviews for this product: ", response.data.data);
+				console.log("Review stats for this product: ", response.data.stats);
+				setReviewList(response.data.data);
+				setReviewStats(response.data.stats);
+			}
+		} catch (error) {
+			console.error("Error fetching reviews:", error);
+			showAlert("An error occured, please try again", "error", {mode: "confirm"});
+		} finally {
+			setReviewsLoading(false);
+		}
+	};
 
 	useEffect(() => {
 		if (state?.product) {
@@ -45,41 +92,78 @@ const ProductDetails = () => {
 		}
 	}, [id, state]);
 
+	useEffect(() => {
+		if (id) {
+			fetchReviews(id);
+		}
+	}, [id]);
+
 	const handleChange = (e) => {
 		setReviewData({
 			...reviewData,
-			[e.target.name]: e.target.value
-		})
-	}
+			[e.target.name]: e.target.value,
+		});
+	};
 
-	const handleReviewSubmit = (e) => {
+	const handleReviewSubmit = async (e) => {
 		e.preventDefault();
-		setSubmittingReview(true);
 
-		if (!reviewData.rating) {
+		if (selectedRating === 0) {
 			showAlert("Please provide a rating", "error", {
-				mode: "inline"
-			})
-		} else if (!reviewData.comment) {
-			showAlert("Please leave a review comment", "error", {mode: "inline"})
-		} else if (!reviewData.headline) {
-			showAlert("Please add a headline", "error", {mode: "inline"})
+				mode: "confirm",
+			});
+			return;
 		}
-	}
+		if (!reviewData.comment) {
+			showAlert("Please leave a review comment", "error", { mode: "confirm" });
+			return;
+		}
+		if (!reviewData.headline) {
+			showAlert("Please add a headline", "error", { mode: "confirm" });
+			return;
+		}
 
-	const fetchProductById = async (productId) => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			showAlert("You need to be logged in to submit a review", "info", {
+				mode: "confirm",
+				confirmText: "Login",
+				onConfirm: () =>
+					navigate("/login", { state: { from: `/product-details/${id}` } }),
+			});
+			return;
+		}
+
 		try {
-			const backend_url = import.meta.env.VITE_API_URL;
-			setLoading(true);
-			const response = await axios.get(
-				`${backend_url}/api/food-amazon-database/products/get-single-product/${productId}`
+			setSubmittingReview(true);
+			await axios.post(
+				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/review/add-review`,
+				{
+					productId: id,
+					rating: selectedRating,
+					headline: reviewData.headline,
+					comment: reviewData.comment,
+				},
+				{ headers: { "x-auth-token": token } },
 			);
-			setProduct(response.data);
+			showToast("Review submitted successfully.", "success");
+
+			setSelectedRating(0);
+			setReviewData({
+				comment: "",
+				headline: "",
+			});
+			fetchReviews(id);
 		} catch (error) {
-			console.error("Error fetching product:", error);
-			showAlert(error.message || "Error fetching product", "error")
+			console.error("Error submitting review:", error);
+			showAlert(
+				error.response?.data?.message ||
+					"Failed to submit review, please try again",
+				"error",
+				{ mode: "confirm", confirmText: "Try again" },
+			);
 		} finally {
-			setLoading(false);
+			setSubmittingReview(false);
 		}
 	};
 
@@ -91,7 +175,7 @@ const ProductDetails = () => {
 		if (quantity > 1) {
 			setQuantity(quantity - 1);
 		} else {
-			showToast("Quantity cannot be less than 1", "warning")
+			showToast("Quantity cannot be less than 1", "warning");
 		}
 	};
 
@@ -101,7 +185,10 @@ const ProductDetails = () => {
 
 			await cartService.addToCart(product, quantity);
 			setIsAdded(true);
-			showToast(`${quantity} ${quantity > 1 ? "items" : "item"} added to cart`, "success");
+			showToast(
+				`${quantity} ${quantity > 1 ? "items" : "item"} added to cart`,
+				"success",
+			);
 			setTimeout(() => setIsAdded(false), 2000);
 			console.log("Added to cart", { product, quantity });
 		} catch (error) {
@@ -109,10 +196,14 @@ const ProductDetails = () => {
 
 			// Don't show error dialog for authentication errors, let the TokenExpirationHandler handle it
 			if (error.response?.status !== 401) {
-				showAlert(error.message || "Something went wrong, please try again", "error", {
-					mode: "confirm",
-					confirmText: "Try again",
-				})
+				showAlert(
+					error.message || "Something went wrong, please try again",
+					"error",
+					{
+						mode: "confirm",
+						confirmText: "Try again",
+					},
+				);
 			}
 		} finally {
 			setIsAddingToCart(false);
@@ -126,7 +217,8 @@ const ProductDetails = () => {
 			showAlert("You need to be logged in to checkout", "info", {
 				confirmText: "Login",
 				cancelText: "Cancel",
-				onConfirm: () => navigate("/login", { state: { from: `/product-details/${id}` } })
+				onConfirm: () =>
+					navigate("/login", { state: { from: `/product-details/${id}` } }),
 			});
 			return;
 		}
@@ -136,7 +228,10 @@ const ProductDetails = () => {
 			navigate("/checkout");
 		} catch (error) {
 			console.error("Error during checkout:", error);
-			showAlert(error.message || "Failed to proceed to checkout", "error", {mode: "confirm", confirmText: "Try again"})
+			showAlert(error.message || "Failed to proceed to checkout", "error", {
+				mode: "confirm",
+				confirmText: "Try again",
+			});
 		}
 	};
 
@@ -155,7 +250,10 @@ const ProductDetails = () => {
 			<div className="text-center mt-5">
 				<h2>Product not found</h2>
 				<p>Maybe you refreshed the page and no product data was passed</p>
-				<button className="btn btn-success mt-3 px-4 py-3" onClick={() => navigate("/")}>
+				<button
+					className="btn btn-success mt-3 px-4 py-3"
+					onClick={() => navigate("/")}
+				>
 					Go Back Home
 				</button>
 			</div>
@@ -165,10 +263,50 @@ const ProductDetails = () => {
 	const imgVariants = product.productImg ? [product.productImg] : [];
 	const varieties = stringToArray(product.varieties);
 
-	const renderStars = (color) => {
+	const renderRatingStars = (rating) => {
 		return [...Array(5)].map((_, index) => (
-			<i key={index} className={`fas fa-star ${color} d-inline-block fs-6`} />
+			<FaStar
+				key={index}
+				className={`${index < rating ? "text-secondary-normal" : "text-main-accent"}`}
+			/>
 		));
+	};
+
+	const renderAverageRatingStars = () => {
+		const rounded = Math.round(reviewStats.averageRating);
+		return [...Array(5)].map((_, index) => (
+			<FaStar
+				key={index}
+				className={`${index < rounded ? "text-secondary-normal" : "text-main-accent"}`}
+			/>
+		));
+	};
+
+	const renderInteractiveStars = () => {
+		return [...Array(5)].map((_, index) => {
+			const starValue = index + 1;
+			const isActive = starValue <= (hoveredRating || selectedRating);
+
+			return (
+				<FaStar
+					key={index}
+					className={`${isActive ? "text-secondary-normal" : "text-main-accent"}`}
+					style={{
+						cursor: "pointer",
+						fontSize: "1.5rem",
+						marginRight: "4px",
+					}}
+					onMouseEnter={() => setHoveredRating(starValue)}
+					onMouseLeave={() => setHoveredRating(0)}
+					onClick={() => setSelectedRating(starValue)}
+				/>
+			);
+		});
+	};
+
+	const getBarWidth = (count) => {
+		if (reviewStats.totalCount === 0) return "0%";
+		return `${(count / reviewStats.totalCount) * 100}%`;
 	};
 
 	const formatCurrency = (amount) => {
@@ -254,7 +392,7 @@ const ProductDetails = () => {
 							</p>
 							<p className="font-inter fs-5 fw-normal text-content-accent rating">
 								<i className="fas fa-star text-secondary-normal d-inline-block me-2"></i>
-								{product.rating}
+								{Math.round(reviewStats.averageRating * 10) / 10}
 							</p>
 							{varieties.length > 0 && (
 								<div className="mb-4">
@@ -353,44 +491,53 @@ const ProductDetails = () => {
 						<h4 className="font-inter fw-bold text-main-accent mb-0">
 							Customer Reviews
 						</h4>
-						<p className="fw-semibold fs-5 text-main-accent mt-3">77 Reviews</p>
-						<div className="stars my-3">{renderStars("text-secondary-normal")}</div>
+						<p className="fw-semibold fs-5 text-main-accent mt-3">
+							{reviewStats.totalCount}{" "}
+							{reviewStats.totalCount === 1 ? "review" : "reviews"}
+						</p>
+						<div className="stars my-3">{renderAverageRatingStars()}</div>
 						<div className="ratings mt-4">
-							<div className="rating mb-2 d-flex align-items-center gap-4">
-								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
-									5 Stars
-								</p>
-								<div className="line line-1"></div>
-								<p className="mb-0">37</p>
-							</div>
-							<div className="rating mb-2 d-flex align-items-center gap-4">
-								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
-									4 Stars
-								</p>
-								<div className="line line-2"></div>
-								<p className="mb-0">20</p>
-							</div>
-							<div className="rating mb-2 d-flex align-items-center gap-4">
-								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
-									3 Stars
-								</p>
-								<div className="line line-3"></div>
-								<p className="mb-0">12</p>
-							</div>
-							<div className="rating mb-2 d-flex align-items-center gap-4">
-								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
-									2 Stars
-								</p>
-								<div className="line line-4"></div>
-								<p className="mb-0">8</p>
-							</div>
-							<div className="rating mb-2 d-flex align-items-center gap-4">
-								<p className="font-inter mb-0 fw-normal text-main-accent fs-5">
-									1 Stars
-								</p>
-								<div className="line line-5"></div>
-								<p className="mb-0">0</p>
-							</div>
+							{[
+								{ label: "5 Stars", count: reviewStats.fiveStars },
+								{ label: "4 Stars", count: reviewStats.fourStars },
+								{ label: "3 Stars", count: reviewStats.threeStars },
+								{ label: "2 Stars", count: reviewStats.twoStars },
+								{ label: "1 Star", count: reviewStats.oneStar },
+							].map(({ label, count }) => (
+								<div
+									key={label}
+									className="rating mb-2 d-flex align-items-center gap-4"
+								>
+									<p
+										className="font-inter fw-normal text-main-accent fs-5"
+										style={{ minWidth: "65px" }}
+									>
+										{label}
+									</p>
+									<div
+										style={{
+											flex: 1,
+											height: "8px",
+											backgroundColor: "#e0e0e0",
+											borderRadius: "4px",
+											overflow: "hidden",
+										}}
+									>
+										<div
+											style={{
+												width: getBarWidth(count),
+												height: "100%",
+												backgroundColor: "var(--primary-normal)",
+												borderRadius: "4px",
+												transition: "width 0.4s ease",
+											}}
+										/>
+									</div>
+									<p className="mb-0" style={{ minWidth: "20px" }}>
+										{count}
+									</p>
+								</div>
+							))}
 						</div>
 					</div>
 					<div className="col-12 col-lg-5">
@@ -398,10 +545,19 @@ const ProductDetails = () => {
 							<h4 className="font-inter text-main-accent fw-bold">
 								How Would you rate this?
 							</h4>
-							<div className="stars mb-4 my-2">{renderStars("text-main-accent")}</div>
+							<div className="stars mb-4 my-2">{renderInteractiveStars()}</div>
+							{selectedRating > 0 && (
+								<p
+									className="text-primary-normal mb-3"
+									style={{ fontSize: "0.9rem" }}
+								>
+									You selected {selectedRating} star
+									{selectedRating > 1 ? "s" : ""}
+								</p>
+							)}
 							<div class="mb-4">
 								<label
-									for="exampleFormControlInput1"
+									htmlFor="headline"
 									className="form-label mb-2 fw-semibold fs-5 text-main-accent"
 								>
 									Add a headline
@@ -409,7 +565,7 @@ const ProductDetails = () => {
 								<input
 									type="text"
 									className="form-control font-inter fs-5 text-main-accent"
-									id="exampleFormControlInput1"
+									id="headline"
 									placeholder="Write a summary of your review"
 									name="headline"
 									value={reviewData.headline}
@@ -419,14 +575,14 @@ const ProductDetails = () => {
 							</div>
 							<div className="mb-3">
 								<label
-									for="exampleFormControlTextarea1"
+									htmlFor="comment"
 									className="form-label mb-2 fw-semibold fs-5 text-main-accent"
 								>
 									Write a review
 								</label>
 								<textarea
 									className="form-control fs-5 font-inter fw-normal"
-									id="exampleFormControlTextarea1"
+									id="comment"
 									rows="5"
 									placeholder="Tell us what you think"
 									name="comment"
@@ -435,8 +591,22 @@ const ProductDetails = () => {
 									disabled={submittingReview}
 								></textarea>
 							</div>
-							<button className="bg-primary-normal text-white border-0 fs-5 fw-semibold rounded-1 submit" onClick={handleReviewSubmit}>
-								Submit Review
+							<button
+								className="bg-primary-normal text-white border-0 fs-5 fw-semibold rounded-1 submit"
+								onClick={handleReviewSubmit}
+								disabled={submittingReview}
+							>
+								{submittingReview ? (
+									<>
+										<span
+											className="spinner-border spinner-border-sm me-2"
+											role="status"
+										/>
+										Submitting...
+									</>
+								) : (
+									"Submit Review"
+								)}
 							</button>
 						</form>
 					</div>
@@ -445,41 +615,58 @@ const ProductDetails = () => {
 
 			{/* Testimonials & Reviews */}
 			<div className="container testimonial-container">
-				<div className="testimonials px-3 px-sm-0">
-					{reviews.map((review, index) => (
-						<div key={index} className="testimonial border rounded-3 p-3">
-							<div className="testimonial-content">
+				{reviewsLoading ? (
+					<div className="text-center py-4">
+						<div className="spinner-border text-secondary" role="status">
+							<span className="visually-hidden">Loading reviews...</span>
+						</div>
+					</div>
+				) : reviewList.length === 0 ? (
+					<p className="text-center text-content-accent py-4 font-inter">
+						No reviews yet, be the first to review this product
+					</p>
+				) : (
+					<div className="testimonials px-3 px-sm-0">
+						{reviewList.map((review) => (
+							<div key={review} className="testimonial border rounded-3 p-3">
 								<div className="user-image mb-3">
-									<img src={review.userImage} alt="" className="img-fluid" />
+									<div
+										style={{ width: "50px", height: "50px" }}
+										className="d-flex align-items-center justify-content-center text-white fw-bold bg-primary-normal rounded-circle"
+									>
+										{review.reviewerName.charAt(0).toUpperCase()}
+									</div>
 								</div>
-								<h5 className="font-inter fs-5 fw-semibold text-main-accent">
-									{review.userName}
-								</h5>
-								<div className="mb-4">
-									{renderStars("text-secondary-normal")}
+								<div>
+									<h5 className="font-inter fs-5 fw-semibold text-main-accent">
+										{review.reviewerName}
+									</h5>
+									<div className="">{renderRatingStars(review.rating)}</div>
 								</div>
-								<h4 className="font-inter text-main-accent fw-bold review-product mb-3">
-									{review.product}
+								<h4 className="font-inter text-main-accent fw-bold review-product my-4">
+									{review.headline}
 								</h4>
 								<p className="font-inter fs-6 fw-normal text-content-accent mb-0">
-									{review.message}
+									{review.comment}
 								</p>
 							</div>
-						</div>
-					))}
-				</div>
-				<div className="text-center">
-					<button className="bg-primary-normal text-white border-0 submit fs-5 font-inter rounded-2 mt-4">
-						Load More
-					</button>
-				</div>
+						))}
+					</div>
+				)}
+				{reviewList.length >= 6 && (
+					<div className="text-center">
+						<button className="bg-primary-normal text-white border-0 submit fs-5 font-inter rounded-2 mt-4">
+							Load More
+						</button>
+					</div>
+				)}
 			</div>
 
 			<ProductShowcase
 				sectionType="similar"
 				layoutStyle="scroll"
 				limit={8}
-				buttonLink="http://localhost:3004/api/food-amazon-database/products?popular=true"
+				// buttonLink="http://localhost:3004/api/food-amazon-database/products?popular=true"
 			/>
 			<Footer iconsDisplay />
 		</>

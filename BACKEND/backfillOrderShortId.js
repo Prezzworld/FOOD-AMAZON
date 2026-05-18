@@ -50,7 +50,7 @@ async function backfillOrderShortId() {
     console.log("======================================\n");
     
   } catch (error) {
-    console.error("Error backfilling short Ids for orders")
+    console.error("Error backfilling short Ids for orders", error);
   }
 }
 
