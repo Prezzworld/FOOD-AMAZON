@@ -148,7 +148,7 @@ router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res)
 		console.error("Error getting all reviews: ", err);
 		res.status(500).json({
 			success: false,
-			message: "Couldn't get all reviews, server error: " + err.message,
+			message: "Couldn't get all reviews, server error: " + err.message, 
 		});
 	}
 });

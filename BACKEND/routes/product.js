@@ -249,6 +249,7 @@ router.post(
 				bulkOrderEligible: req.body.bulkOrderEligible || false,
 				bulkDescription: req.body.bulkDescription || '',
 				minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
+				distributorId: req.body.distributorId,
 			});
 
 			product = await product.save();
@@ -340,6 +341,7 @@ router.put(
 					bulkOrderEligible: req.body.bulkOrderEligible || false,
 					bulkDescription: req.body.bulkDescription || "",
 					minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
+					distributorId: req.body.distributorId,
 				},
 				{ new: true },
 			);
