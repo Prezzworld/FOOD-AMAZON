@@ -45,6 +45,7 @@ router.post("/add-review", auth, async (req, res) => {
 		const review = new Review({
 			userId,
 			productId,
+			productName: product.name,
 			distributorId: product.distributorId,
 			reviewerName: user.name,
       rating,
@@ -139,10 +140,17 @@ router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res)
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
 
-		const reviews = await Review.find({distributorId}).sort({ createdAt: -1 });
+		const reviews = await Review.find({distributorId}).sort({ createdAt: -1 }).populate("productId", "name rating reviewCount");
+
+		const topRated = await Review.findOne({distributorId}).sort({rating: -1, createdAt: -1}).populate("productId", "name rating reviewCount");
+		const worstRated = await Review.findOne({ distributorId })
+			.sort({ rating: 1, createdAt: -1 })
+			.populate("productId", "name rating reviewCount");
 		res.status(200).json({
 			success: true,
 			data: reviews,
+			topRated,
+			worstRated,
 		});
 	} catch (err) {
 		console.error("Error getting all reviews: ", err);

@@ -22,6 +22,9 @@
   --secondary-darker: #562f12;
   --secondary-accent: #f86624;
 
+  --red-dark: #bc3a20;
+  --red-light: #f04d22;
+
   --main-light: #e8e8e9;
   --main-light-hover: #dcdcde;
   --main-light-active: #b7b7bb;
@@ -45,6 +48,10 @@
   --content-dark-active: #3f444f;
   --content-darker: #31353d;
   --content-accent: #4d4d4d;
+
+  --grey: #858585;
+  --grey-light: #c4c4c4;
+  --grey-lighter: #f8f8f8;
 
   --white-hover: #e6e6e6;
   --white-active: #cccccc;
@@ -221,6 +228,42 @@
 
 .text-dark-blue {
   color: var(--dark-blue) !important;
+}
+
+.text-red-dark {
+  color: var(--red-dark) !important;
+}
+
+.bg-red-dark {
+  background-color: var(--red-dark) !important;
+}
+
+.text-red-light {
+  color: var(--red-light) !important;
+}
+
+.bg-red-light {
+  background-color: var(--red-light) !important;
+}
+
+.text-grey {
+  color: var(--grey) !important;
+}
+
+.text-grey-light {
+  color: var(--grey-light) !important;
+}
+
+.bg-grey-light {
+  background-color: var(--grey-light) !important;
+}
+
+.text-grey-lighter {
+  color: var(--grey-lighter) !important;
+}
+
+.bg-grey-lighter {
+  background-color: var(--grey-lighter) !important;
 }
 
 .fs-xsm {
