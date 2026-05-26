@@ -139,18 +139,40 @@ router.get("/product-reviews/:productId", async (req, res) => {
 router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res) => {
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+		const { latest, published, limit = 6, page = 1 } = req.query;
+		let query = {};
+		let sortOptions = {};
 
-		const reviews = await Review.find({distributorId}).sort({ createdAt: -1 }).populate("productId", "name rating reviewCount");
+		if (latest === "true") {
+			sortOptions.createdAt = -1;
+		}
+
+		if (published === "true") {
+			query.status = "published";
+			sortOptions.createdAt = -1;
+		}
+
+		const skip = (page - 1) * parseInt(limit);
+
+		const reviews = await Review.find({distributorId, ...query}).sort(sortOptions).populate("productId", "name rating reviewCount").limit(parseInt(limit)).skip(skip);
 
 		const topRated = await Review.findOne({distributorId}).sort({rating: -1, createdAt: -1}).populate("productId", "name rating reviewCount");
 		const worstRated = await Review.findOne({ distributorId })
 			.sort({ rating: 1, createdAt: -1 })
 			.populate("productId", "name rating reviewCount");
+
+			const total = await Review.countDocuments({ distributorId, ...query });
 		res.status(200).json({
 			success: true,
 			data: reviews,
 			topRated,
 			worstRated,
+			pagination: {
+				total,
+				page: parseInt(page),
+				limit: parseInt(limit),
+				pages: Math.ceil(total / parseInt(limit)),
+			}
 		});
 	} catch (err) {
 		console.error("Error getting all reviews: ", err);

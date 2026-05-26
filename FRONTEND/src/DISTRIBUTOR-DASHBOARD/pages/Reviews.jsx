@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
-import { GoTriangleDown, GoTriangleUp, GoHome } from "react-icons/go";
+import { GoTriangleDown, GoTriangleUp, GoHome, GoTriangleRight } from "react-icons/go";
 import { FaStar } from "react-icons/fa";
 import {formatMongoDate} from "../../utils/dateFormatter"
 import { RiFilterLine } from "react-icons/ri";
@@ -10,13 +10,15 @@ const Reviews = () => {
 	const [reviews, setReviews] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [bestWorstRated, setBestWorstRated] = useState([]);
-	const [reviewType, setReviewType] = useState("latest")
+	const [reviewType, setReviewType] = useState("latest");
 
 	const fetchReviews = async () => {
 		try {
 			setLoading(true);
+			// let params = new URLSearchParams();
+
 			const response = await distributorAxiosInstance.get(
-				`/food-amazon-database/review/all-reviews-for-distributor`,
+				`/food-amazon-database/review/all-reviews-for-distributor?${reviewType}=true`,
 			);
 			console.log("Distributor reviews: ", response.data);
 			if (response.data.success) {
@@ -43,7 +45,7 @@ const Reviews = () => {
 
 	useEffect(() => {
 		fetchReviews();
-	}, []);
+	}, [reviewType]);
 
 	const renderRatingStars = (rating) => {
 		return [...Array(5)].map((_, index) => (
@@ -69,7 +71,7 @@ const Reviews = () => {
 			<h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
 				Reviews
 			</h2>
-			<div className="review-compare bg-white rounded-3 py-3 px-2 mb-4">
+			<div className="review-compare bg-white rounded-3 py-3 px-2">
 				<div className="row g-5">
 					{bestWorstRated
 						.filter((item) => item.review)
@@ -123,13 +125,19 @@ const Reviews = () => {
 						))}
 				</div>
 			</div>
-			<div className="reviews">
-				<div className="filters d-flex align-items-center justify-content-between">
+			<div className="">
+				<div className="filters d-flex align-items-center justify-content-between mt-5 mb-3">
 					<div className="bg-white px-3 py-2 d-flex gap-2 rounded-2">
-						<button onClick={() => setReviewType("latest")} className={`px-4 py-1 rounded-2 ${reviewType === "latest" ? "bg-primary-normal text-white" : "bg-transparent text-black"} border-0 cursor-pointer font-archivo fw-normal fs-sm`}>
+						<button
+							onClick={() => setReviewType("latest")}
+							className={`px-4 py-1 rounded-2 ${reviewType === "latest" ? "bg-primary-normal text-white" : "bg-transparent text-black"} border-0 cursor-pointer font-archivo fw-normal fs-sm`}
+						>
 							Latest
 						</button>
-						<button onClick={() => setReviewType("published")} className={`px-4 py-1 rounded-2 ${reviewType === "published" ? "bg-primary-normal text-white" : "bg-transparent text-black"} border-0 cursor-pointer font-archivo fw-normal fs-sm`}>
+						<button
+							onClick={() => setReviewType("published")}
+							className={`px-4 py-1 rounded-2 ${reviewType === "published" ? "bg-primary-normal text-white" : "bg-transparent text-black"} border-0 cursor-pointer font-archivo fw-normal fs-sm`}
+						>
 							Published
 						</button>
 					</div>
@@ -137,9 +145,66 @@ const Reviews = () => {
 						<button className="bg-white px-3 py-2 rounded-2 border-0 cursor-pointer font-archivo fw-normal text-black fs-sm">
 							Filters{" "}
 							<span className="ms-1">
-								<RiFilterLine/>
+								<RiFilterLine />
 							</span>
 						</button>
+					</div>
+				</div>
+				<div className="review-cards-display">
+					<div className="reviews row g-4">
+						{reviews.map((review) => (
+							<div
+								key={review._id}
+								className="review-card col-12 col-md-6 d-flex align-items-start"
+							>
+								<div className="d-flex align-items-center gap-1">
+									<div
+										className="reviewer-img p-1 rounded-circle"
+										style={{
+											width: "50px",
+											height: "50px",
+											border: `1px solid #00a859`,
+										}}
+									>
+										<div className="w-100 h-100 rounded-circle bg-grey-light"></div>
+									</div>
+									<GoTriangleRight className="text-primary-normal" />
+								</div>
+								<div className="review-details bg-white rounded-3 p-4 w-100">
+									<div className="d-flex align-items-center justify-content-between mb-3">
+										<p className="font-inter text-black fw-medium">
+											{review.reviewerName}
+										</p>
+										<p className="text-grey font-inter fs-sm fw-light">
+											{formatMongoDate(review.createdAt)}
+										</p>
+									</div>
+									<div
+										className="d-flex align-items-center justify-content-between mb-3"
+										style={{ maxWidth: "100%", width: "100%" }}
+									>
+										<p className="text-red-light fw-normal fs-sm font-archivo">
+											<span>
+												<GoHome />
+											</span>{" "}
+											{review.productName}
+										</p>
+										<div className="d-flex align-items-center gap-2">
+											{renderRatingStars(review.rating)}
+										</div>
+									</div>
+									<p className="text-red-light fw-normal fs-sm font-archivo mb-3">
+										{review.headline}
+									</p>
+									<p className="font-archivo fs-sm fw-normal text-black mb-3">
+										{review.comment}
+									</p>
+									<button className={`w-100 border-0 py-3 rounded-2 ${review.status === "published" ? "bg-secondary-normal" : "bg-primary-normal"} font-inter text-white fw-semibold`}>
+										{review.status === "published" ? ("Unpublish") : ("Publish to website")}
+									</button>
+								</div>
+							</div>
+						))}
 					</div>
 				</div>
 			</div>

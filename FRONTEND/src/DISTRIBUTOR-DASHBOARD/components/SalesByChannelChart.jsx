@@ -26,6 +26,7 @@ const SalesByChannelChart = () => {
 	const [loading, setLoading] = useState(false);
 	const [timePeriod, setTimePeriod] = useState("monthly");
 	const [error, setError] = useState("");
+	
 	const fetchCharts = async (period) => {
 		try {
 			setLoading(true);
