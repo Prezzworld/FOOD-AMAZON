@@ -10,11 +10,20 @@ const DashboardLayout = () => {
 	const closeSidebar = () => setSideBarOpen(false);
 	return (
 		<>
-			<div className=" overflow-hidden">
+			<div className="dashboard-wrapper">
 				<Header onMenuToggle={toggleSidebar} />
-				{sideBarOpen && (<div className="sidebar-overlay" onClick={closeSidebar} aria-label="close sidebar" role="button"/>)}
-				<div className="d-flex">
-					<div className={`sidebar-container bg-white ${sideBarOpen ? "sidebar-open" : ""}`}>
+				{sideBarOpen && (
+					<div
+						className="sidebar-overlay"
+						onClick={closeSidebar}
+						aria-label="close sidebar"
+						role="button"
+					/>
+				)}
+				<div className="dashboard-body d-flex">
+					<div
+						className={`sidebar-container bg-white ${sideBarOpen ? "sidebar-open" : ""}`}
+					>
 						<Sidebar onClose={closeSidebar} />
 					</div>
 					<div className="main-content bg-white-toned w-100 p-3 p-md-4">

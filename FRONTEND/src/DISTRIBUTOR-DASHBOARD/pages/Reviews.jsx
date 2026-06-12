@@ -1,24 +1,62 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
-import { GoTriangleDown, GoTriangleUp, GoHome, GoTriangleRight } from "react-icons/go";
+import {
+	GoTriangleDown,
+	GoTriangleUp,
+	GoHome,
+	GoTriangleRight,
+} from "react-icons/go";
 import { FaStar } from "react-icons/fa";
-import {formatMongoDate} from "../../utils/dateFormatter"
+import { BsRepeat, BsRepeat1 } from "react-icons/bs";
+import { FiRefreshCcw, FiX } from "react-icons/fi";
+import { formatMongoDate } from "../../utils/dateFormatter";
 import { RiFilterLine } from "react-icons/ri";
-// import {showAlert} from ""
+import FilterDropdown from "../components/FilterDropdown";
+import SubFilterModal from "../components/SubFilterModal";
+import "./review.css";
+
+const FILTER_KEY_MAP = {
+	Date: "days",
+	Rating: "rating",
+	Product: "productId",
+	Status: "status",
+};
 
 const Reviews = () => {
 	const [reviews, setReviews] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [bestWorstRated, setBestWorstRated] = useState([]);
 	const [reviewType, setReviewType] = useState("latest");
+	const [filterOptions, setFilterOptions] = useState(false);
+	const [activeSubFilter, setActiveSubfilter] = useState(null);
+	const [activeFilters, setActiveFilters] = useState({});
+	const filterDropdownRef = useRef(null);
+
+	useEffect(() => {
+		const handleClickOutside = (e) => {
+			const clickedInsideDropdown = filterDropdownRef.current?.contains(e.target);
+			if (!clickedInsideDropdown) {
+				setFilterOptions(false);
+			}
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, []);
 
 	const fetchReviews = async () => {
 		try {
 			setLoading(true);
-			// let params = new URLSearchParams();
+			let params = new URLSearchParams();
+			params.set(reviewType, "true");
+
+			if (activeFilters.rating) params.set("rating", activeFilters.rating);
+			if (activeFilters.status) params.set("status", activeFilters.status);
+			if (activeFilters.date) params.set("date", activeFilters.date);
+			if (activeFilters.productId)
+				params.set("productId", activeFilters.productId);
 
 			const response = await distributorAxiosInstance.get(
-				`/food-amazon-database/review/all-reviews-for-distributor?${reviewType}=true`,
+				`/food-amazon-database/review/all-reviews-for-distributor?${params.toString()}`,
 			);
 			console.log("Distributor reviews: ", response.data);
 			if (response.data.success) {
@@ -45,7 +83,42 @@ const Reviews = () => {
 
 	useEffect(() => {
 		fetchReviews();
-	}, [reviewType]);
+	}, [reviewType, activeFilters]);
+
+	const handleFilterRowClick = (menuItem) => {
+		setActiveSubfilter(menuItem);
+		setFilterOptions(true);
+	};
+
+	const handleApplyFilter = (value) => {
+		const key = FILTER_KEY_MAP[activeSubFilter];
+		if (value !== null && value !== undefined) {
+			setActiveFilters((prev) => ({ ...prev, [key]: value }));
+		} else {
+			setActiveFilters((prev) => {
+				const updated = { ...prev };
+				delete updated[key];
+				return updated;
+			});
+		}
+
+		setActiveSubfilter(null);
+		setFilterOptions(false);
+	};
+
+	const handleCancelFilter = () => {
+		setActiveSubfilter(null);
+	};
+
+	const removeFilter = (key) => {
+		setActiveFilters((prev) => {
+			const updated = { ...prev };
+			delete updated[key];
+			return updated;
+		});
+	};
+
+	const resetAllFilters = () => setActiveFilters({});
 
 	const renderRatingStars = (rating) => {
 		return [...Array(5)].map((_, index) => (
@@ -66,67 +139,73 @@ const Reviews = () => {
 		));
 	};
 
+	const activeFilterCount = Object.keys(activeFilters).length;
+
 	return (
 		<div>
 			<h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
 				Reviews
 			</h2>
-			<div className="review-compare bg-white rounded-3 py-3 px-2">
-				<div className="row g-5">
-					{bestWorstRated
-						.filter((item) => item.review)
-						.map((rate) => (
-							<div key={rate._id} className="col-12 col-md-6 mb-4">
-								<h5 className="font-archivo text-black fw-medium fs-md1 mb-2">
-									{rate.label} <span className="ms-3">{rate.icon}</span>
-								</h5>
-								<p className="font-archivo text-black fw-normal fs-sm mb-3">
-									Average Rating - 360 Organic Foodie
-								</p>
-								<div className="bg-grey-lighter py-2 px-3 rounded-2 mb-3 d-inline-block">
-									<div className="d-flex align-items-center gap-2">
-										{renderAverageRatingStars(rate.review.productId.rating)}
-									</div>
-								</div>
-
-								<div className="">
-									<div
-										className="d-flex align-items-center justify-content-between mb-3"
-										style={{ maxWidth: "90%", width: "100%" }}
-									>
-										<p className="font-archivo fs-sm text-black fw-normal">
-											{rate.review.reviewerName}
-										</p>
-										<p className="font-archivo fs-sm fw-normal text-black text-grey">
-											{formatMongoDate(rate.review.createdAt)}
-										</p>
-									</div>
-									<div
-										className="d-flex align-items-center justify-content-between mb-3"
-										style={{ maxWidth: "90%", width: "100%" }}
-									>
-										<p className="text-red-light fw-normal fs-sm font-archivo">
-											<span>
-												<GoHome />
-											</span>{" "}
-											{rate.review.productName}
-										</p>
+			{reviewType !== "published" && (
+				<div className="review-compare bg-white rounded-3 py-3 px-2">
+					<div className="row g-5">
+						{bestWorstRated
+							.filter((item) => item.review)
+							.map((rate) => (
+								<div key={rate._id} className="col-12 col-md-6 mb-4">
+									<h5 className="font-archivo text-black fw-medium fs-md1 mb-2">
+										{rate.label} <span className="ms-3">{rate.icon}</span>
+									</h5>
+									<p className="font-archivo text-black fw-normal fs-sm mb-3">
+										Average Rating - 360 Organic Foodie
+									</p>
+									<div className="bg-grey-lighter py-2 px-3 rounded-2 mb-3 d-inline-block">
 										<div className="d-flex align-items-center gap-2">
-											{renderRatingStars(rate.review.rating)}
+											{renderAverageRatingStars(rate.review.productId.rating)}
 										</div>
 									</div>
-									<div style={{ maxWidth: "90%", width: "100%" }}>
-										<p className="font-archivo fw-light fs-sm">
-											{rate.review.comment}
-										</p>
+
+									<div className="">
+										<div
+											className="d-flex align-items-center justify-content-between mb-3"
+											style={{ maxWidth: "90%", width: "100%" }}
+										>
+											<p className="font-archivo fs-sm text-black fw-normal">
+												{rate.review.reviewerName}
+											</p>
+											<p className="font-archivo fs-sm fw-normal text-black text-grey">
+												{formatMongoDate(rate.review.createdAt)}
+											</p>
+										</div>
+										<div
+											className="d-flex align-items-center justify-content-between mb-3"
+											style={{ maxWidth: "90%", width: "100%" }}
+										>
+											<p className="text-red-light fw-normal fs-sm font-archivo">
+												<span>
+													<GoHome />
+												</span>{" "}
+												{rate.review.productName}
+											</p>
+											<div className="d-flex align-items-center gap-2">
+												{renderRatingStars(rate.review.rating)}
+											</div>
+										</div>
+										<div style={{ maxWidth: "90%", width: "100%" }}>
+											<p className="font-archivo fw-light fs-sm">
+												{rate.review.comment}
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							))}
+					</div>
 				</div>
-			</div>
+			)}
 			<div className="">
-				<div className="filters d-flex align-items-center justify-content-between mt-5 mb-3">
+				<div
+					className={`filters d-flex align-items-center justify-content-between ${reviewType === "published" ? "mt-3" : "mt-5"} mb-3`}
+				>
 					<div className="bg-white px-3 py-2 d-flex gap-2 rounded-2">
 						<button
 							onClick={() => setReviewType("latest")}
@@ -141,23 +220,63 @@ const Reviews = () => {
 							Published
 						</button>
 					</div>
-					<div>
-						<button className="bg-white px-3 py-2 rounded-2 border-0 cursor-pointer font-archivo fw-normal text-black fs-sm">
+					<div className="position-relative" ref={filterDropdownRef}>
+						<button
+							onClick={() => setFilterOptions((prev) => !prev)}
+							className="bg-white px-3 py-2 rounded cursor-pointer font-archivo fw-normal text-black fs-sm"
+							style={{ border: "1px solid #f1f1f1" }}
+						>
 							Filters{" "}
+							{activeFilterCount > 0 && (
+								<span className="filter-badge">{activeFilterCount}</span>
+							)}
 							<span className="ms-1">
 								<RiFilterLine />
 							</span>
 						</button>
+						{filterOptions && (
+							<FilterDropdown
+								activeFilters={activeFilters}
+								onFilterClick={handleFilterRowClick}
+								onClose={() => setFilterOptions(false)}
+								onReset={resetAllFilters}
+								activeSubFilter={activeSubFilter}
+							/>
+						)}
 					</div>
 				</div>
+
+				{activeFilterCount > 0 && (
+					<div className="d-flex align-items-center gap-2 flex-wrap mb-3">
+						<span className="font-archivo fs-xsm text-content-dark">
+							Active:
+						</span>
+						{Object.entries(activeFilters).map(([key, value]) => (
+							<span
+								key={key}
+								className="filter-chip d-inline-flex align-items-center gap-1"
+							>
+								{key}: {String(value)}
+								<button
+									onClick={() => removeFilter(key)}
+									className="bg-transparent border-0 p-0 cursor-pointer"
+								>
+									<FiX size={11} />
+								</button>
+							</span>
+						))}
+					</div>
+				)}
+
 				<div className="review-cards-display">
 					<div className="reviews row g-4">
 						{reviews.map((review) => (
 							<div
 								key={review._id}
-								className="review-card col-12 col-md-6 d-flex align-items-start"
+								className="review-card col-12 col-md-6 d-flex h-100"
+								style={{ minHeight: "330px" }}
 							>
-								<div className="d-flex align-items-center gap-1">
+								<div className="d-flex align-items-center gap-1 align-self-start">
 									<div
 										className="reviewer-img p-1 rounded-circle"
 										style={{
@@ -170,37 +289,46 @@ const Reviews = () => {
 									</div>
 									<GoTriangleRight className="text-primary-normal" />
 								</div>
-								<div className="review-details bg-white rounded-3 p-4 w-100">
-									<div className="d-flex align-items-center justify-content-between mb-3">
-										<p className="font-inter text-black fw-medium">
-											{review.reviewerName}
-										</p>
-										<p className="text-grey font-inter fs-sm fw-light">
-											{formatMongoDate(review.createdAt)}
-										</p>
-									</div>
-									<div
-										className="d-flex align-items-center justify-content-between mb-3"
-										style={{ maxWidth: "100%", width: "100%" }}
-									>
-										<p className="text-red-light fw-normal fs-sm font-archivo">
-											<span>
-												<GoHome />
-											</span>{" "}
-											{review.productName}
-										</p>
-										<div className="d-flex align-items-center gap-2">
-											{renderRatingStars(review.rating)}
+								<div
+									className="review-details bg-white rounded-3 p-4 w-100 d-flex flex-column"
+									style={{ flex: 1 }}
+								>
+									<div style={{ flex: 1 }}>
+										<div className="d-flex align-items-center justify-content-between mb-3">
+											<p className="font-inter text-black fw-medium">
+												{review.reviewerName}
+											</p>
+											<p className="text-grey font-inter fs-sm fw-light">
+												{formatMongoDate(review.createdAt)}
+											</p>
 										</div>
+										<div
+											className="d-flex align-items-center justify-content-between mb-3"
+											style={{ maxWidth: "100%", width: "100%" }}
+										>
+											<p className="text-red-light fw-normal fs-sm font-archivo">
+												<span>
+													<GoHome />
+												</span>{" "}
+												{review.productName}
+											</p>
+											<div className="d-flex align-items-center gap-2">
+												{renderRatingStars(review.rating)}
+											</div>
+										</div>
+										<p className="text-red-light fw-normal fs-sm font-archivo mb-3">
+											{review.headline}
+										</p>
+										<p className="font-archivo fs-sm fw-normal text-black mb-3">
+											{review.comment}
+										</p>
 									</div>
-									<p className="text-red-light fw-normal fs-sm font-archivo mb-3">
-										{review.headline}
-									</p>
-									<p className="font-archivo fs-sm fw-normal text-black mb-3">
-										{review.comment}
-									</p>
-									<button className={`w-100 border-0 py-3 rounded-2 ${review.status === "published" ? "bg-secondary-normal" : "bg-primary-normal"} font-inter text-white fw-semibold`}>
-										{review.status === "published" ? ("Unpublish") : ("Publish to website")}
+									<button
+										className={`w-100 border-0 py-3 rounded-2 ${review.status === "published" ? "bg-secondary-normal" : "bg-primary-normal"} font-inter text-white fw-semibold`}
+									>
+										{review.status === "published"
+											? "Unpublish"
+											: "Publish to website"}
 									</button>
 								</div>
 							</div>
@@ -208,6 +336,14 @@ const Reviews = () => {
 					</div>
 				</div>
 			</div>
+			{activeSubFilter && (
+				<SubFilterModal
+					activeSubFilter={activeSubFilter}
+					currentValue={activeFilters[FILTER_KEY_MAP[activeSubFilter]] ?? null}
+					onApply={handleApplyFilter}
+					onCancel={handleCancelFilter}
+				/>
+			)}
 		</div>
 	);
 };

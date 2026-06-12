@@ -29,9 +29,16 @@ router.post("/add-review", auth, async (req, res) => {
 
 		const verifiedOrder = await Order.findOne({
 			userId,
-			"paymentInfo.paymentStatus": "paid",
+			"paymentInfo.paymentStatus": "paid",  
 			"items.productId": productId,
 		});
+
+		if(!verifiedOrder) {
+			return res.status(403).json({ 
+				success: false,
+				message: "You can ony review products you have purchased"
+			})
+		}
 
 		const user = await User.findById(userId).select("name");
 		const product = await Product.findById(productId);
@@ -177,8 +184,8 @@ router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res)
 	} catch (err) {
 		console.error("Error getting all reviews: ", err);
 		res.status(500).json({
-			success: false,
-			message: "Couldn't get all reviews, server error: " + err.message, 
+			success: false, 
+			message: "Couldn't get all reviews, server error: " + err.message,  
 		});
 	}
 });

@@ -56,7 +56,7 @@
 
 
 .logout-btn-wrapper {
-	bottom: 10%;
+	bottom: 0%;
 	left: 15%;
 }
 
@@ -94,6 +94,17 @@
 
 .sidebar-close-btn:hover {
 	background-color: #f1f1f5;
+}
+
+.dashboard-wrapper {
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+}
+
+.dashboard-body {
+	flex: 1;
+	height: 100%;
 }
 
 .item-icon {
