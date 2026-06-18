@@ -16,6 +16,7 @@ router.get("/", async (req, res) => {
 			hasOffer,
 			category,
 			bulkOrderEligible,
+			search,
 			limit = 10,
 			page = 1,
 		} = req.query;
@@ -25,10 +26,14 @@ router.get("/", async (req, res) => {
 
 		let sortOptions = {};
 
+		if(search) {
+			query.name = {$regex: search, $options: "i"}
+		}
+
 		if (category) {
 			query["category._id"] = category;
 		}
-
+ 
 		if (popular === "true") {
 			query.rating = { $gte: 4 };
 		}

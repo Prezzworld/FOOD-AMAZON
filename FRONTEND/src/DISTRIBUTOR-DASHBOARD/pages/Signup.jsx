@@ -285,7 +285,7 @@ const Signup = () => {
 								</>
 							)} */}
 							<div className="mb-4">
-								<button className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-flex gap-3 w-100 py-3">
+								<button className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-flex justify-content-center gap-3 w-100 py-3">
 									<img src={GoogleImg} alt="" />
 									<p>Sign Up with Google</p>
 								</button>

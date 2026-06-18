@@ -10,15 +10,12 @@
    background-color: var(--white-toned) !important;
    /* position: relative !important; */
    /* width: 100% !important; */
-   height: 100vh !important;
+   min-height: 100vh !important;
+   padding: 3rem 0px !important;
 }
 
 .body .container {
-   height: 100vh !important;
-   display: flex !important;
-   align-items: center !important;
-   justify-content: center !important;
-   padding-block: 5rem !important;
+   height: 100%;
 }
 
 .form{
@@ -27,7 +24,7 @@
 }
 
 form.form {
-   padding: 80px 130px !important;
+   padding: 60px 100px !important;
 }
 
 .form-verify {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Logo } from "../../LANDING-PAGES/pages/Images";
 import { IoSearch, IoNotificationsOutline, IoPerson, IoChevronDown, IoMenu } from "react-icons/io5";
 import { BsCart } from "react-icons/bs";
+import GlobalSearchDropdown from "./GlobalSearchDropdown";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
 const Header = ({onMenuToggle}) => {
@@ -55,18 +56,7 @@ const Header = ({onMenuToggle}) => {
 								360 Organic Foodie
 							</h3>
 						</div>
-						<div className="text-content-dark position-relative search-input">
-							<label htmlFor="search" className="position-absolute search">
-								<IoSearch className="fs-3" />
-							</label>
-							<input
-								type="search"
-								name=""
-								id="search"
-								placeholder="Search here..."
-								className="bg-white-toned border-0 rounded-2 h-100 w-100 fs-sm text-content-dark"
-							/>
-						</div>
+						<GlobalSearchDropdown/>
 						</div>
 					</div>
 

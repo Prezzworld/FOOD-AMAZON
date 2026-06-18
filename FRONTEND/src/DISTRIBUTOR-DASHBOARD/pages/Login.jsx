@@ -132,7 +132,7 @@ const Login = () => {
 			<div className="body">
 				<div className="container">
 					<form
-						className="form bg-white mx-auto rounded-3"
+						className="form bg-white mx-auto rounded-5"
 						onSubmit={handleSubmit}
 					>
 						<div className="form-heading mb-4">

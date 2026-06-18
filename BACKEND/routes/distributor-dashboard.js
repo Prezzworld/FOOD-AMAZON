@@ -5,6 +5,109 @@ const { Order } = require("../models/order");
 const auth = require("../middleware/auth");
 const distributor = require("../middleware/distributor");
 const { DistributorCustomer } = require("../models/distributorCustomer");
+const {Product} = require("../models/product");
+const {Review} = require("../models/review");
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+} 
+
+router.get("/search", [auth, distributor], async (req, res) => {
+	try {
+		const distributorId = new mongoose.Types.ObjectId(req.user._id);
+		const {q} = req.query;
+		if (!q || q.trim().length < 2) {
+			return res.status(200).json({
+				success: true,
+				query: q || "",
+				data: {products: [], orders: [], customers: [], reviews: []},
+			})
+		}
+		const safeQuery = escapeRegex(q.trim());
+		const regex = { $regex: safeQuery, $options: "i" };
+
+		const [products, orders, customers, reviews] = await Promise.all([
+			Product.find({ distributorId, name: regex }).select("name price productImg").limit(5).lean(),
+			Order.find({
+				distributorId, 
+				$or: [
+					{shortId: regex},
+					{"customerSnapshot.firstName": regex},
+					{"customerSnapshot.lastName": regex},
+					{"customerSnapshot.email": regex},
+				]
+			}).select("shortId customerSnapshot totalAmount paymentInfo").limit(5).lean(),
+			DistributorCustomer.find({
+				distributorId,
+				$or: [
+					{firstName: regex},
+					{lastName: regex},
+					{ customerEmail: regex },
+					{shortId: regex},
+				]
+			}).select("firstName lastName customerEmail shortId").limit(5).lean(),
+			Review.find({
+				distributorId, 
+				$or: [{reviewerName: regex}, {productName: regex}]
+			}).select("reviewerName productName rating status").limit(5).lean()
+		]);
+
+		const nairaFormatter = new Intl.NumberFormat("en-NG", {
+			style: "currency",
+			currency: "NGN",
+		})
+
+		res.status(200).json({
+			success: true,
+			query: q,
+			data: {
+				products: products.map((p) => ({
+					_id: p._id,
+					type: "product",
+					label: p.name,
+					subLabel: nairaFormatter.format(p.price),
+					image: p.productImg, 
+					path: "/distributor/dashboard/inventory",
+				})),
+				orders: orders.map((o) => ({
+					_id: o._id,
+					type: "order",
+					label: o.shortId || "Order",
+					subLabel: o.customerSnapshot
+						? `${o.customerSnapshot.firstName || ""} ${o.customerSnapshot.lastName || ""}`.trim()
+						: "Walk-in order",
+					image: o.customerSnapshot.profileImg,
+					path: `/distributor/dashboard/orders`,
+					state: { orderId: o._id },
+				})),
+				customers: customers.map((c) => ({
+					_id: c._id,
+					type: "customer",
+					label:
+						`${c.firstName || ""} ${c.lastName || ""}`.trim() ||
+						c.customerEmail,
+					subLabel: c.shortId,
+					path: "/distributor/dashboard/customers",
+					state: { customerId: c._id },
+				})),
+				reviews: reviews.map((r) => ({
+					_id: r._id,
+					type: "review",
+					label: r.reviewerName,
+					subLabel: r.productName,
+					path: "/distributor/dashboard/reviews",
+					state: { reviewId: r._id },
+				})),
+			},
+		});
+	} catch (error) {
+		console.error("Global search error: ", error);
+		res.status(500).json({
+			success: false,
+			message: "Search failed: " + error.message,
+		});
+	}
+})
 
 router.get("/overview", [auth, distributor], async (req, res) => {
 	try {

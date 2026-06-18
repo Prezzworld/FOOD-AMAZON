@@ -146,29 +146,51 @@ router.get("/product-reviews/:productId", async (req, res) => {
 router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res) => {
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
-		const { latest, published, limit = 6, page = 1 } = req.query;
-		let query = {};
-		let sortOptions = {};
-
-		if (latest === "true") {
-			sortOptions.createdAt = -1;
-		}
+		const { latest, published, rating, days, status, productId, limit = 6, page = 1 } = req.query;
+		let query = {distributorId};
+		let sortOptions = {createdAt: -1};
 
 		if (published === "true") {
 			query.status = "published";
-			sortOptions.createdAt = -1;
+		} else if (status) {
+			const allowedStatuses = ["pending", "published"];
+			if (allowedStatuses.includes(status)) query.status = status;
+		}
+
+		if (rating) {
+			const ratingValue = parseInt(rating, 10);
+			if (!isNaN(ratingValue) && ratingValue >= 1 && ratingValue <= 5) {
+				query.rating = ratingValue;
+			}
+		}
+
+		if (days) {
+      const daysNum = parseInt(days, 10);
+      if (!isNaN(daysNum) && daysNum > 0) {
+        const since = new Date();
+        since.setDate(since.getDate() - daysNum);
+        query.createdAt = { $gte: since };
+      }
+    }
+
+		if (productId) {
+			try {
+				query.productId = new mongoose.Types.ObjectId(productId);
+			} catch (err) {
+				// Invalid productId format — ignore this filter rather than crashing
+			}
 		}
 
 		const skip = (page - 1) * parseInt(limit);
 
-		const reviews = await Review.find({distributorId, ...query}).sort(sortOptions).populate("productId", "name rating reviewCount").limit(parseInt(limit)).skip(skip);
+		const reviews = await Review.find(query).sort(sortOptions).populate("productId", "name rating reviewCount").limit(parseInt(limit)).skip(skip);
 
 		const topRated = await Review.findOne({distributorId}).sort({rating: -1, createdAt: -1}).populate("productId", "name rating reviewCount");
 		const worstRated = await Review.findOne({ distributorId })
 			.sort({ rating: 1, createdAt: -1 })
 			.populate("productId", "name rating reviewCount");
 
-			const total = await Review.countDocuments({ distributorId, ...query });
+			const total = await Review.countDocuments(query);
 		res.status(200).json({
 			success: true,
 			data: reviews,

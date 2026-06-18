@@ -13,16 +13,55 @@
 
 .search {
 	top: 5px !important;
-	left: 7px !important;
+	left: 10px !important;
 	cursor: pointer;
 }
 
 .search-input input {
-	padding-left: 2.3rem !important;
+	padding-left: 2rem !important;
+	padding-right: 0.75rem !important;
+}
+
+.search-input input:focus {
+	box-shadow: none !important;
+	outline: 1px solid #ccc !important;
 }
 
 .search-input input::placeholder {
 	color: var(--content-dark) !important;
+}
+
+.global-search-dropdown {
+	top: calc(100% + 8px);
+	left: 0;
+	width: 100%;
+	height: 400px;
+	overflow-y: auto;
+	z-index: 250;
+	border: 1px solid #f1f1f1;
+}
+
+.global-search-group:not(:last-child) {
+	border-bottom: 1px solid #f8f9fa;
+}
+
+.global-search-group-label {
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.global-search-result {
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.global-search-result:hover {
+	background-color: #f8f9fa;
+}
+
+.global-search-result-icon {
+	font-size: 16px;
+	flex-shrink: 0;
 }
 
 .icon {
@@ -44,7 +83,7 @@
 	border-radius: 8px;
 	transition: background-color 0.2s ease;
 }
- 
+
 .hamburger-btn:hover {
 	background-color: #f1f1f5;
 }
@@ -52,8 +91,6 @@
 .chevron {
 	cursor: pointer;
 }
-
-
 
 .logout-btn-wrapper {
 	bottom: 0%;
@@ -78,7 +115,8 @@
 	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar-overlay, .sidebar-header {
+.sidebar-overlay,
+.sidebar-header {
 	display: none; /* Hidden by default */
 }
 
@@ -136,17 +174,20 @@
 	grid-column: 9 / 13;
 }
 
-.best-selling-grid, .customer-order-grid {
+.best-selling-grid,
+.customer-order-grid {
 	grid-column: 1 / 13;
 }
 
-.chart-card-wider, .chart-card-widest {
+.chart-card-wider,
+.chart-card-widest {
 	max-width: 70% !important;
 	width: 100% !important;
 	/* grid-column: 1 / 10; */
 }
 
-.chart-card-shorter, .chart-card-shortest {
+.chart-card-shorter,
+.chart-card-shortest {
 	/* grid-column: 10 / 13; */
 	max-width: 30% !important;
 	width: 100% !important;
@@ -271,7 +312,7 @@
 	}
 }
 
-@media(max-width: 998px) {
+@media (max-width: 998px) {
 	.hamburger-btn {
 		display: flex;
 	}
@@ -317,7 +358,7 @@
 		/* Nice shadow to give depth when it slides in */
 		box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
 	}
- 
+
 	/* 
     The OPEN state: we add this class via React state when user clicks hamburger.
     translateX(0) = element is at its natural position. Fully visible.
@@ -341,7 +382,7 @@
 		align-items: center;
 		justify-content: center;
 	}
- 
+
 	/* On mobile, show the logo + close button at the top of the sidebar */
 	.sidebar-header {
 		display: flex !important;
