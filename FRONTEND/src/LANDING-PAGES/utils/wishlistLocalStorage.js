@@ -23,7 +23,6 @@ export const wishlistLocalStorage = {
 			const exists = wishlist.some((item) => item._id === product._id);
 
 			if (exists) {
-				console.log("Product is already in wishlist");
 				return false;
 			}
 
@@ -58,7 +57,6 @@ export const wishlistLocalStorage = {
 	
 			if (exists) {
 				wishlistLocalStorage.removeFromWishlist(product._id);
-				console.log("Product removed from wishlist");
 				return false;
 			} else {
 				wishlistLocalStorage.addToWishlist(product);
@@ -75,7 +73,6 @@ export const wishlistLocalStorage = {
 			const wishlist = wishlistLocalStorage.getWishlist();
 			return wishlist.some((item) => item._id === productId);
 		} catch (error) {
-			console.log("Failed to check if item is in wishlist", error);
 			return false;
 		}
 	},

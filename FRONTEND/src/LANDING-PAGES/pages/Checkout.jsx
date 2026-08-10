@@ -64,10 +64,8 @@ const Checkout = () => {
 			const response = await axiosInstance.get(
 				"/food-amazon-database/cart/get-cart",
 			);
-			console.log(response.data);
 			setCart(response.data);
 			setCartId(response.data._id);
-			console.log("Response data body: ", response.data._id);
 			setLoading(false);
 		} catch (error) {
 			console.error("Error fetching cart: ", error);
@@ -159,12 +157,10 @@ const Checkout = () => {
 				},
 				residence: formData.residence,
 			};
-			console.log("Submitting order: ", orderData);
 			const response = await axiosInstance.post(
 				`${endpoint_url}create`,
 				orderData,
 			);
-			console.log("Order created successfully:", response.data);
 			await showToast("Order created successfully!", "success", 2000);
 			setSubmitting(false);
 			if (response.data.authorizationUrl) {

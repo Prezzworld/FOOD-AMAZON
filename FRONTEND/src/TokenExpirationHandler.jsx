@@ -9,7 +9,6 @@ export const TokenExpirationHandler = () => {
 
 	useEffect(() => {
 		const handleTokenExpired = (event) => {
-			console.log("Token expired event received");
 			const currentPath = window.location.pathname;
 			showAlert(
 				event.detail.message ||

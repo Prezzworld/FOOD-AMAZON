@@ -65,8 +65,6 @@ axiosInstance.interceptors.response.use(
 		// if (error.response?.status === 401 && !originalRequest._retry) {
 		originalRequest._retry = true;
 		isRefreshing = true;
-
-		console.log("Access token expired, attempting to refresh...");
 		// Get refresh token
 		const refreshToken = localStorage.getItem("refreshToken");
 		if (!refreshToken) {
@@ -91,7 +89,6 @@ axiosInstance.interceptors.response.use(
 
 			// Save new access token
 			localStorage.setItem("token", accessToken);
-			console.log("Access token refreshed successfully");
 
 			// Retry original request with new token
 			originalRequest.headers["x-auth-token"] = accessToken;

@@ -43,17 +43,14 @@ const Signup = () => {
 			setLoading(false);
 			return;
 		}
-		console.log("Hello signup page!!!");
 
 		const verifyToken = async () => {
 			try {
 				const response = await axios.get(
 					`${api_endpoint}/invitation/verify-invitation/${token}`,
 				);
-				console.log(response.data);
 				if (response.data.success) {
 					setInvitationData(response.data);
-					console.log(response.data);
 					// setError("");
 				} else {
 					showAlert(
@@ -89,7 +86,7 @@ const Signup = () => {
 			}
 		};
 		verifyToken();
-	}, [token]);
+	}, [token, api_endpoint, showAlert]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -113,7 +110,6 @@ const Signup = () => {
 				token: token,
 				...formData,
 			});
-			console.log(response.data);
 			if (response.data.success) {
 				localStorage.setItem("disToken", response.data.token);
 				localStorage.setItem("distributor", JSON.stringify(response.data.user));
@@ -122,7 +118,6 @@ const Signup = () => {
 			}
 		} catch (error) {
 			console.error("Signup error:", error);
-			console.log(error);
 			if (error.response && error.response.data) {
 				showAlert(
 					error.response.data.error ||

@@ -56,15 +56,8 @@ const Cart = () => {
 	};
 
 	const handleRemoveItem = async (productId) => {
-		console.log("🗑️ Remove item requested");
-		console.log("  - Product ID to remove:", productId);
-		console.log("  - Current cart before removal:", cart);
-		console.log("  - Cart length before:", cart.length);
 		try {
 			const updatedCart = await cartService.removeFromCart(productId);
-			console.log("✅ Remove successful");
-			console.log("  - Updated cart returned:", updatedCart);
-			console.log("  - Cart length after:", updatedCart.length);
 
 			const normalizedCart = updatedCart.map((item) => {
 				if (item.product) {
@@ -82,7 +75,6 @@ const Cart = () => {
 				return item;
 			});
 
-			console.log("  - Normalized cart:", normalizedCart);
 			setCart(normalizedCart);
 		} catch (error) {
 			console.error("❌ Error removing item:", error);

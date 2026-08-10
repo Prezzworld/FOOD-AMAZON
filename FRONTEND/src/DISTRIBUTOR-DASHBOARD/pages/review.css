@@ -14,8 +14,13 @@
   transition: background-color 0.2s ease;
 }
 
-.filter-menu-item:hover { background-color: #f8f9fa; }
-.filter-menu-item--active { background-color: #f0fdf7; color: #00a859; }
+.filter-menu-item:hover {
+  background-color: #f8f9fa;
+}
+.filter-menu-item--active {
+  background-color: #f0fdf7;
+  color: #00a859;
+}
 
 .filter-menu-item input[type="checkbox"] {
   width: 24px;
@@ -48,7 +53,9 @@
   border-bottom: 1px solid #f8f9fa;
 }
 
-.sub-filter-option-row:last-child { border-bottom: none; }
+.sub-filter-option-row:last-child {
+  border-bottom: none;
+}
 
 .sub-filter-checkbox {
   width: 15px;
@@ -73,4 +80,50 @@
   font-size: 14px;
 }
 
-.sub-filter-search-input::placeholder { color: #aaa; }
+.sub-filter-search-input::placeholder {
+  color: #aaa;
+}
+
+.pagination-button {
+  min-width: 38px;
+  height: 36px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #222222;
+  font-family: var(--font-archivo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pagination-button:hover {
+  border-color: #00a859;
+  color: #00a859;
+}
+
+.pagination-button.active {
+  background: #00a859;
+  color: #ffffff;
+  border-color: #00a859;
+}
+
+.pagination-button--edge {
+  padding: 0.65rem 0.75rem;
+}
+
+.pagination-button.disabled,
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #e5e5e5;
+}
+
+.pagination-ellipsis {
+  color: #6c757d;
+  font-size: 0.95rem;
+  min-width: 22px;
+  text-align: center;
+}

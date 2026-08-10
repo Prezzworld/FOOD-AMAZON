@@ -53,16 +53,6 @@ const Login = () => {
 		}
 
 		try {
-			console.log(
-				`Submitting request to ${API_BASE_URL + LOGIN_ENDPOINT} with data:`,
-				loginData
-			);
-			console.log("Login data being sent:", {
-				email: loginData.email,
-				password: loginData.password,
-				rememberMe: loginData.rememberMe, // Optional field
-			});
-
 			const response = await fetch(API_BASE_URL + LOGIN_ENDPOINT, {
 				method: "POST",
 				headers: {
@@ -70,15 +60,7 @@ const Login = () => {
 				},
 				body: JSON.stringify(loginData),
 			});
-			// console.log("Response status:", response.status);
-			// console.log(
-			// 	"Response headers:",
-			// 	Object.fromEntries(response.headers.entries())
-			// );
-			// console.log("Response: ", response);
-
 			const responseText = await response.text();
-			console.log("Response body:", responseText);
 
 			let responseData;
 			try {
@@ -118,18 +100,13 @@ const Login = () => {
 			}
 			localStorage.setItem("token", accessToken);
 			localStorage.setItem("refreshToken", refreshToken);
-			console.log("Tokens saved successfully");
-			console.log("Access token preview:", accessToken.substring(0, 30) + "...");
-			console.log("Refresh token preview:", refreshToken.substring(0, 30) + "...");
 
 			if (user) {
 				localStorage.setItem("user", JSON.stringify(user));
-				console.log("✅ User info saved:", user);
 			}
 
 			try {
 				await cartService.syncCartOnLogin(accessToken);
-				console.log("Cart synced successfully after login");
 
 				window.dispatchEvent(new CustomEvent('cartUpdated'))
 			} catch (error) {

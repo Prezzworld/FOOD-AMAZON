@@ -25,9 +25,7 @@ const useBestSellingData = (initialLimit = 5) => {
 				const response = await distributorAxiosInstance.get(
 					`/food-amazon-database/distributors/dashboard/best-selling?year=${year}&limit=${limit}`,
 				);
-				console.log("best sellers: ", response.data);
 				if (response.data.success) {
-					console.log("Best sellers gotten successfully: ", response.data.data);
 					setTotalCount(response.data.totalCount);
 					setBestSellingProducts(response.data.data);
 					setLoading(false);

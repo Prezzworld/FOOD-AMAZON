@@ -66,8 +66,6 @@ const ProductDetails = () => {
 				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/review/product-reviews/${productId}`,
 			);
 			if (response.data.success) {
-				console.log("Reviews for this product: ", response.data.data);
-				console.log("Review stats for this product: ", response.data.stats);
 				setReviewList(response.data.data);
 				setReviewStats(response.data.stats);
 			}
@@ -190,7 +188,6 @@ const ProductDetails = () => {
 				"success",
 			);
 			setTimeout(() => setIsAdded(false), 2000);
-			console.log("Added to cart", { product, quantity });
 		} catch (error) {
 			console.error("Error adding to cart", error);
 

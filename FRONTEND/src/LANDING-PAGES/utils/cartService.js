@@ -13,10 +13,8 @@ class CartService {
 
 	checkAuthStatus() {
 		this.authToken = localStorage.getItem("token");
-		console.log("Auth Token:", this.authToken);
 
 		this.isAuthenticated = !!this.authToken;
-		console.log("Is Authenticated:", this.isAuthenticated);
 
 		return this.isAuthenticated;
 	}
@@ -58,19 +56,19 @@ class CartService {
 		try {
 			return await requestFn();
 		} catch (error) {
-			// if (error.response?.status === 401 || error.response?.status === 403) {
-			// 	const errorMessage = error.response?.data?.toLowerCase() || "";
+			if (error.response?.status === 401 || error.response?.status === 403) {
+				const errorMessage = error.response?.data?.toLowerCase() || "";
 
-			// 	if (
-			// 		errorMessage.includes("token") &&
-			// 		(errorMessage.includes("expired") ||
-			// 			errorMessage.includes("invalid") ||
-			// 			errorMessage.includes("unauthorized"))
-			// 	) {
-			// 		this.handleTokenExpiration();
-			// 		throw new Error("Your session has expired. Please log in again.");
-			// 	}
-			// }
+				if (
+					errorMessage.includes("token") &&
+					(errorMessage.includes("expired") ||
+						errorMessage.includes("invalid") ||
+						errorMessage.includes("unauthorized"))
+				) {
+					this.handleTokenExpiration();
+					throw new Error("Your session has expired. Please log in again.");
+				}
+			}
 
 			throw error;
 		}
@@ -82,13 +80,10 @@ class CartService {
 
 			if (this.isAuthenticated) {
 				return await this.makeAuthenticatedRequest(async () => {
-					console.log("📦 Fetching cart from backend...");
-
 					const response = await axiosInstance.get(
 						`/${endpointUrl}get-cart`
 						// this.getAxiosConfig()
 					);
-					console.log("Cart response: ", response.data);
 					const items = response.data.items || [];
 					localStorage.setItem("foodAmazonCart", JSON.stringify(items));
 					return items;
@@ -127,7 +122,6 @@ class CartService {
 						// this.getAxiosConfig()
 					);
 					const backendItems = response.data.cart.items;
-					console.log(backendItems);
 					// Overwrite local storage with backend data to get the new cartItemIds
 					localStorage.setItem("foodAmazonCart", JSON.stringify(backendItems));
 					return backendItems || [];
@@ -194,35 +188,21 @@ class CartService {
 
 	async removeFromCart(itemId) {
 		try {
-			console.log("🗑️ CartService: Removing item");
-			console.log("  - Product ID:", itemId);
-			console.log("  - Is authenticated:", this.isAuthenticated);
 			this.checkAuthStatus();
 
 			if (this.isAuthenticated) {
 				const items = await this.makeAuthenticatedRequest(async () => {
-					console.log("  - Making DELETE request to backend");
-					console.log(
-						"  - Endpoint:",
-						`/${endpointUrl}remove-item/${itemId}`
-					);
 					const response = await axiosInstance.delete(
 						`/${endpointUrl}remove-item/${itemId}`
 						// this.getAxiosConfig()
 					);
-					console.log("  - Backend response:", response.data);
-					console.log("  - Items returned:", response.data.cart.items);
-					console.log("  - Number of items:", response.data.cart.items?.length);
 					return response.data.cart.items || [];
 				});
-				console.log("  - Dispatching cartUpdated event");
 				window.dispatchEvent(
 					new CustomEvent("cartUpdated", { detail: { cart: items } })
 				);
-				console.log("✅ Item removed, returning updated cart");
 				return items;
 			} else {
-				console.log("Using localStorage to remove item");
 				return cartLocalStorage.removeFromCart(itemId);
 			}
 		} catch (error) {
@@ -281,17 +261,14 @@ class CartService {
 
 			if (this.isAuthenticated) {
 				return await this.makeAuthenticatedRequest(async () => {
-					console.log("📦 Fetching cart count from backend...");
 					const response = await axiosInstance.get(
 						`/${endpointUrl}get-cart`
 						// this.getAxiosConfig()
 					);
-					console.log("Cart count response: ", response.data.totalItems);
 					return response.data.totalItems || 0;
 				});
 			} else {
 				const count = cartLocalStorage.getCartCount();
-				console.log("Local cart count: ", count);
 				return count;
 			}
 			// return cartLocalStorage.getCartCount();
@@ -327,7 +304,6 @@ class CartService {
 			const token = authToken || localStorage.getItem("token");
 
 			if (!token) {
-				console.warn("No auth token found for syncing cart");
 				return [];
 			}
 
@@ -336,34 +312,11 @@ class CartService {
 			const localCartItems = cartLocalStorage.getCart();
 
 			if (localCartItems.length === 0) {
-				console.log("No local cart items to sync");
 				return await this.getCart();
 			}
 
-			console.log(
-				`Syncing ${localCartItems.length} local cart items to server`
-			);
+			// const backendCart = await this.getCart();
 
-			const backendCart = await this.getCart();
-			console.log(`Backend cart has ${backendCart.length} items before sync`);
-
-			// const syncPromises = localCartItems.map(async (item) => {
-			// 	try {
-			// 		await this.addToCart(
-			// 			{
-			// 				_id: item._id,
-			// 				name: item.name,
-			// 				price: item.price,
-			// 				productImg: item.productImg,
-			// 			},
-			// 			item.quantity,
-			// 			item.variety
-			// 		);
-			// 		console.log("Successfully synced item", item);
-			// 	} catch (error) {
-			// 		console.error("Failed to sync item", item, error);
-			// 	}
-			// });
 
 			// await Promise.allSettled(syncPromises);
 
@@ -378,18 +331,15 @@ class CartService {
 						},
 						item.quantity,
 						item.variety
-					)
-					console.log("Successfully synced item: ", item);
+					);
 				} catch (error) {
 					console.error("Failed to sync item: ", item, error)
 				}
 			}
 
 			cartLocalStorage.clearCart();
-			console.log("localStorage cart cleared after sync");
 
 			const finalCart = await this.getCart();
-			console.log(`Final cart has ${finalCart.length} items after sync`);
 
 			return finalCart;
 		} catch (error) {
@@ -401,11 +351,8 @@ class CartService {
 	async syncCartOnLogout() {
 		try {
 			if (!this.isAuthenticated) {
-				console.log("Not authenticated, skipping logout cart sync");
 				return;
 			}
-
-			console.log("Syncing backend cart to localStorage on logout");
 
 			const backendCart = await this.getCart();
 
@@ -426,9 +373,6 @@ class CartService {
 				);
 			}
 
-			console.log(
-				`Synced ${backendCart.length} items to localStorage on logout`
-			);
 			return cartLocalStorage.getCart();
 		} catch (error) {
 			console.error("Error syncing cart on logout:", error);

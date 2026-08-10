@@ -34,13 +34,11 @@ const SalesByChannelChart = () => {
 			const response = await distributorAxiosInstance.get(
 				`/food-amazon-database/distributors/dashboard/sales-by-channel?timePeriod=${period}`,
 			);
-			console.log("Response data: ", response.data);
 			if (response.data.success) {
 				const transformedData = transformDataForChart(
 					response.data.data,
 					period,
 				);
-				console.log("Transformed data for recharts: ", transformedData);
 				setChartData(transformedData);
 			}
 		} catch (error) {

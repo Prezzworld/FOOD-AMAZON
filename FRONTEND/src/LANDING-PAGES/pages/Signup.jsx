@@ -67,12 +67,6 @@ const Signup = () => {
 		}
 
 		try {
-			console.log(
-				`Submitting request to ${API_BASE_URL + SIGNUP_ENDPOINT} with data:`,
-				formData
-			);
-			console.log("Submitting form data:", formData);
-
 			const response = await fetch(API_BASE_URL + SIGNUP_ENDPOINT, {
 				method: "POST",
 				headers: {
@@ -80,15 +74,7 @@ const Signup = () => {
 				},
 				body: JSON.stringify(formData),
 			});
-			console.log("Response status:", response.status);
-			console.log(
-				"Response headers:",
-				Object.fromEntries(response.headers.entries())
-			);
-			console.log("Response: ", response);
-
 			const responseText = await response.text();
-			console.log("Response body:", responseText);
 
 			// Try to parse as JSON
 			let responseData;
@@ -125,10 +111,7 @@ const Signup = () => {
 			const token = response.headers.get("x-auth-token");
 			if (token) {
 				localStorage.setItem("token", token);
-				console.log("Token saved: ", token);
 			}
-
-			console.log("Signup successful:", responseData);
 			setSuccess("Signup successful!");
 
 			showAlert(

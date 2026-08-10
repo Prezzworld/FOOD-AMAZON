@@ -51,21 +51,10 @@ const Login = () => {
 		}
 
 		try {
-			console.log(
-				`Submitting request to ${api_endpoint} with data:`,
-				loginData,
-			);
-			console.log("Login data being sent:", {
-				email: loginData.email,
-				password: loginData.password,
-				rememberMe: loginData.rememberMe, // Optional field
-			});
-
 			const response = await axios.post(`${api_endpoint}`, {
 				...loginData,
 			});
 			const data = response.data;
-			console.log(data);
 			if (response.data.success) {
 				const { accessToken, refreshToken, user } = data;
 				if (!accessToken || !refreshToken) {
@@ -74,19 +63,9 @@ const Login = () => {
 				}
 				localStorage.setItem("disToken", accessToken);
 				localStorage.setItem("disRefreshToken", refreshToken);
-				console.log("Tokens saved successfully");
-				console.log(
-					"Access token preview:",
-					accessToken.substring(0, 30) + "...",
-				);
-				console.log(
-					"Refresh token preview:",
-					refreshToken.substring(0, 30) + "...",
-				);
 
 				if (user) {
 					localStorage.setItem("distributor", JSON.stringify(user));
-					console.log("✅ Distributor info saved:", user);
 				}
 				showToast("Login successful!", "success", 2000);
 				setTimeout(() => {

@@ -16,9 +16,7 @@ const RecentOrderTable = () => {
 				const response = await distributorAxiosInstance.get(
 					`/food-amazon-database/distributors/dashboard/recent-orders`,
 				);
-				console.log("Response data for order list: ", response.data);
 				if (response.data.success) {
-					console.log("Orders list: ", response.data.data);
 					setOrders(response.data.data);
 				}
 			} catch (error) {

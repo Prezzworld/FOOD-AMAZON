@@ -31,8 +31,6 @@ import Reviews from "./DISTRIBUTOR-DASHBOARD/pages/Reviews"
 import Settings from "./DISTRIBUTOR-DASHBOARD/pages/Settings"
 
 function App() {
-	console.log("API URL: ", import.meta.env.VITE_API_URL);
-	console.log("All env vars: ", import.meta.env);
 	return (
 		<>
 			<AlertProvider>

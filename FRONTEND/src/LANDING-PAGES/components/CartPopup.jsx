@@ -67,7 +67,6 @@ const CartPopup = () => {
 		try {
 			setLoading(true);
 			const savedCart = await cartService.getCart();
-			console.log("Loaded cart: ", savedCart);
 
 			const normalizedCart = savedCart.map((item) => {
 				if (item.product) {
@@ -149,15 +148,8 @@ const CartPopup = () => {
 	};
 
 	const handleRemoveItem = async (productId) => {
-		console.log("🗑️ Remove item requested");
-		console.log("  - Product ID to remove:", productId);
-		console.log("  - Current cart before removal:", cart);
-		console.log("  - Cart length before:", cart.length);
 		try {
 			const updatedCart = await cartService.removeFromCart(productId);
-			console.log("✅ Remove successful");
-			console.log("  - Updated cart returned:", updatedCart);
-			console.log("  - Cart length after:", updatedCart.length);
 
 			const normalizedCart = updatedCart.map((item) => {
 				if (item.product) {
@@ -175,7 +167,6 @@ const CartPopup = () => {
 				return item;
 			});
 
-			console.log("  - Normalized cart:", normalizedCart);
 			setCart(normalizedCart);
 
 			// Recalculate the subtotal based on the normalized cart

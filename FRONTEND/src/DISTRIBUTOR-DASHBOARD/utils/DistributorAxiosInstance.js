@@ -61,8 +61,6 @@ distributorAxiosInstance.interceptors.response.use(
 		// if (error.response?.status === 401 && !originalRequest._retry) {
 		originalRequest._retry = true;
 		isRefreshing = true;
-
-		console.log("Access token expired, attempting to refresh...");
 		// Get refresh token
 		const refreshToken = localStorage.getItem("disRefreshToken");
 		if (!refreshToken) {
@@ -87,7 +85,6 @@ distributorAxiosInstance.interceptors.response.use(
 
 			// Save new access token
 			localStorage.setItem("disToken", accessToken);
-			console.log("Access token refreshed successfully");
 
 			originalRequest.headers["x-auth-token"] = accessToken;
 			processQueue(null, accessToken);

@@ -55,8 +55,6 @@ const Wishlist = () => {
 		try {
 			await cartService.addToCart(product, 1);
 			setAddedItem((prev) => ({ ...prev, [product._id]: true }));
-			// Here you would dispatch to Redux or Context
-			console.log("Added to cart:", product);
 
 			showToast("Product added to cart", "success");
 
@@ -114,7 +112,6 @@ const Wishlist = () => {
 					confirmText: "Ok",
 				});
 			}
-			console.log("Added all to cart:", inStockItems);
 
 			setTimeout(() => {
 				setAddedItem({});
@@ -165,8 +162,6 @@ const Wishlist = () => {
 			</div>
 		);
 	}
-
-	console.log("Your wishlist:", wishlist);
 
 	return (
 		<>

@@ -28,15 +28,11 @@ const PaymentStatus = () => {
 				return;
 			}
 
-			console.log("Verifying payment with reference:", reference);
-
 			// Call your backend confirm endpoint
 			const response = await axiosInstance.post(
 				"/food-amazon-database/order/confirm",
 				{ reference }
 			);
-
-			console.log("Payment verification response:", response.data);
 
 			if (response.data.success) {
 				setStatus("success");

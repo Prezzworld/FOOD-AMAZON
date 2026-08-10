@@ -20,9 +20,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 	const [isFavorite, setIsFavorite] = useState(false);
 	const navigate = useNavigate();
 
-	console.log("Product data: ", product);
-	// console.log("Product image: ", product.productImg);
-
 	useEffect(() => {
 		const favorite = wishlistLocalStorage.isInWishlist(product._id);
 		setIsFavorite(favorite);
@@ -38,9 +35,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 
 			await cartService.addToCart(product, 1);
 			setIsAdded(true);
-		// Here you would dispatch to Redux or Context
-			console.log("Added to cart:", product);
-			
 			showToast("Product added to cart", "success")
 	
 			// Reset after 3 seconds
@@ -64,9 +58,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		setIsFavorite(wasAdded);
 
 		showToast(wasAdded ? "Added to your wishlist!" : "Removed from your wishlist", wasAdded ? "success" : "info")
-
-		console.log("Wishlist toggled:", wasAdded);
-		console.log("Favorite toggled:", !isFavorite);
 	};
 
 	const getCardClassname = () => {
@@ -111,8 +102,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 				confirmText: "Ok",
 			},
 		);
-		// Here you would typically send the inquiry to your backend
-		console.log("Bulk order inquiry for:", product);
 
 		navigate(`/product-details/${product._id}`, {
 			state: {

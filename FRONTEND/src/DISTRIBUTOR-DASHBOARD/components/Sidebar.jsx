@@ -60,9 +60,7 @@ const Sidebar = ({ onClose }) => {
 				localStorage.removeItem("disToken");
 				localStorage.removeItem("disRefreshToken");
 				localStorage.removeItem("user");
-				console.log(localStorage.getItem("distributor"));
 			}
-			console.log(response);
 		} catch (error) {
 			console.error("An error occured while logging out" + error);
 		}

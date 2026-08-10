@@ -53,12 +53,7 @@ const ProductSection = ({ title, type, layoutMode = "flex", variant = "full", li
 				params.toString() ? "?" + params.toString() : ""
 			}`;
 
-			console.log("Fetching from url: ", url);
-
 			const response = await axios.get(url);
-			console.log("response received", response.data);
-
-			console.log("Products: ", products);
 
 			if (response.data.products) {
 				setProducts(response.data.products);

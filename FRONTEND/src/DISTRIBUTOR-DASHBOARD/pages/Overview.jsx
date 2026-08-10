@@ -17,12 +17,9 @@ const Overview = () => {
 		const fetchOverviewData = async () => {
 			try {
 				setLoading(true);
-				const token = localStorage.getItem("disToken");
-				console.log("Token being used in Overview:", token);
 				const response = await distributorAxiosInstance.get(
 					"/food-amazon-database/distributors/dashboard/overview",
 				);
-				console.log("Overview response data:", response.data);
 				if (response.data.success) {
 					setSaleOverview(response.data.data);
 				}

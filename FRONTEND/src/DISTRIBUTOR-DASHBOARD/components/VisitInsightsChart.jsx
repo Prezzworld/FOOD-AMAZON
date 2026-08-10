@@ -81,21 +81,15 @@ const VisitInsightsChart = () => {
 		try {
 			setLoading(true);
 			const token = localStorage.getItem("disToken");
-			console.log("Token being used to fecth insights: ", token);
 			const response = await distributorAxiosInstance.get(
 				`/food-amazon-database/distributors/dashboard/visit-insights?timePeriod=${period}`,
 			);
-			console.log(response.data);
 			if (response.data.success) {
-				console.log("Visit insights: ", response.data.data);
 				const transformedData = transformDataForChart(
 					response.data.data,
 					period,
 				);
 				setVisitInsights(transformedData);
-				console.log("transformed data for insights chart: ", transformedData);
-			} else {
-				console.log("error fetching insights");
 			}
 		} catch (error) {
 			console.error("Error getting visit insights", error);
@@ -121,9 +115,6 @@ const VisitInsightsChart = () => {
 	return (
 		<div
 			className="d-flex flex-column h-100"
-			onClick={(e) => {
-				console.log(e.target);
-			}}
 		>
 			<div className="flex-shrink-0">
 				<div className="d-flex justify-content-between align-items-center mb-3">
