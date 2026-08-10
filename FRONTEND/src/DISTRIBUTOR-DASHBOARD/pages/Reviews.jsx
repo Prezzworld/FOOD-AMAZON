@@ -401,7 +401,7 @@ const Reviews = () => {
               </div>
             </div>
 
-            <div className="w-100 d-flex flex-column flex-sm-row align-items-center justify-content-between mt-4">
+            <div className="w-100 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 mt-4">
               <p className="font-archivo text-content-accent mb-0 d-inline-block">{`Showing ${fromItem} - ${toItem} of ${totalReviews} items`}</p>
               <div className="pagination d-flex align-items-center justify-items-end gap-1">
                 <button
