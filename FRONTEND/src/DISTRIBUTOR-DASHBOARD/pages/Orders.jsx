@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useLocation, useNavigate} from "react-router-dom";
 import {
   FiList,
   FiCalendar,
@@ -10,6 +11,7 @@ import {
 } from "react-icons/fi";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
+import OrderDetails from './OrderDetails';
 
 const TABS = [
   { label: "All Orders", value: "all", statuses: null },
@@ -63,6 +65,8 @@ const getLocation = (order) =>
     : order.customerSnapshot?.city || "—";
 
 const Orders = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -71,6 +75,40 @@ const Orders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
+
+  useEffect(() => {
+    const incomingOrderId = location.state?.orderId;
+    if (!incomingOrderId) return;
+   const fetchOrderDetail = async () => {
+      try {
+        setDetailLoading(true);
+        setDetailError("");
+        const response = await distributorAxiosInstance.get(
+          `/food-amazon-database/order/distributor/orders/${incomingOrderId}`,
+        );
+        if (response.data.success) {
+          setSelectedOrder(response.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching order from search:", err);
+        setDetailError("Couldn't load that order.");
+      } finally {
+        setDetailLoading(false);
+      }
+    };
+    fetchOrderDetail();
+
+    // Clear the navigation state so refreshing or pressing back doesn't
+    // reopen the same order — the state has done its one job.
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate]);
+
+  const handleRowClick = (order) => setSelectedOrder(order);
+  const handleBackToList = () => setSelectedOrder(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -129,6 +167,38 @@ const Orders = () => {
 
   const fromItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const toItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  if (detailLoading) {
+    return (
+      <div>
+        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">Orders</h2>
+        <div className="bg-white rounded-4 p-4">
+          <p className="text-content-dark text-center py-5">Loading order...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (detailError) {
+    return (
+      <div>
+        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">Orders</h2>
+        <div className="bg-white rounded-4 p-4">
+          <div className="alert alert-danger">{detailError}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedOrder) {
+    return (
+      <div>
+        <div className="bg-white rounded-4 p-4">
+          <OrderDetails order={selectedOrder} onBack={handleBackToList} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
@@ -235,6 +305,7 @@ const Orders = () => {
             return (
               <div
                 key={order._id}
+                onClick={() => handleRowClick(order)}
                 className="d-flex align-items-center py-3"
                 style={{ borderBottom: "1px solid #f8f9fa" }}
               >
