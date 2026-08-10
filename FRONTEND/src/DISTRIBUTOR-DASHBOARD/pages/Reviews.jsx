@@ -8,7 +8,12 @@ import {
   GoHome,
 } from "react-icons/go";
 import { FaStar } from "react-icons/fa";
-import { BsRepeat, BsRepeat1, BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import {
+  BsRepeat,
+  BsRepeat1,
+  BsChevronLeft,
+  BsChevronRight,
+} from "react-icons/bs";
 import { FiRefreshCcw, FiX } from "react-icons/fi";
 import { formatMongoDate } from "../../utils/dateFormatter";
 import { RiFilterLine } from "react-icons/ri";
@@ -203,7 +208,53 @@ const Reviews = () => {
   return (
     <>
       {loading ? (
-        <div>Loading...</div>
+        <div className="d-flex flex-column justify-content-center align-items-center text-center py-5">
+          <div
+            className="d-flex justify-content-center align-items-center rounded-circle bg-white border border-2 border-primary mb-4"
+            style={{ width: 96, height: 96 }}
+          >
+            <FiRefreshCcw size={36} className="text-primary" />
+          </div>
+          <h3 className="fw-bold mb-2">Loading reviews…</h3>
+          <p className="text-secondary mb-0">
+            Hang tight while we fetch the latest review data for your dashboard.
+          </p>
+        </div>
+      ) : !reviews || reviews.length === 0 ? (
+        <div className="d-flex flex-column justify-content-center align-items-center text-center py-5">
+          <div
+            className="d-flex justify-content-center align-items-center rounded-circle bg-white border border-2 border-primary mb-4"
+            style={{ width: 96, height: 96 }}
+          >
+            <BsRepeat1 size={36} className="text-primary-normal" />
+          </div>
+          <h3 className="fw-bold mb-2">No reviews found</h3>
+          <p className="text-content-dark mb-4">
+            There are no reviews to show for this distributor or selected filters.
+            Return to the default reviews view or refresh to try again.
+          </p>
+          <div className="d-flex flex-column flex-sm-row gap-2">
+            <button
+              type="button"
+              className="bg-primary-normal border-0 text-white fw-medium rounded-3 py-3 px-5"
+              onClick={() => {
+                setActiveFilters({});
+                setReviewType("latest");
+                setCurrentPage(1);
+                setFilterOptions(false);
+              }}
+            >
+             Clear filters
+            </button>
+            <button
+              type="button"
+              className="bg-secondary-normal border-0 text-white rounded-3 py-3 px-5 fw-medium "
+              onClick={() => setCurrentPage(1)}
+            >
+              Refresh reviews
+            </button>
+          </div>
+        </div>
       ) : (
         <div>
           <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
