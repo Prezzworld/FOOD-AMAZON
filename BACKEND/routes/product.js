@@ -69,7 +69,6 @@ router.get("/", async (req, res) => {
 
 		const total = await Product.countDocuments(query);
 
-		console.log("✅ Found products:", products.length);
 		res.json({
 			success: true,
 			products,
@@ -105,8 +104,6 @@ const uploadImageFromUrl = async (imageUrl) => {
 			throw new Error("URL does not appear to point to an image file");
 		}
 
-		console.log("📥 Fetching image from URL:", imageUrl);
-
 		const response = await axios.get(imageUrl, {
 			responseType: "arraybuffer",
 			timeout: 60000, // 1 minute timeout in case the external server is slow
@@ -118,14 +115,10 @@ const uploadImageFromUrl = async (imageUrl) => {
 		const contentType = response.headers["content-type"];
 		const base64String = `data:${contentType};base64,${base64Image}`;
 
-		console.log("☁️ Uploading to Cloudinary...");
-
 		const uploadResult = await cloudinary.uploader.upload(base64String, {
 			folder: "food-amazon/products",
 			resource_type: "auto", // Auto-detect if it's an image
 		});
-
-		console.log("✅ Upload successful:", uploadResult.secure_url);
 
 		return {
 			url: uploadResult.secure_url,
@@ -199,10 +192,6 @@ router.post(
 	[auth, admin, upload.single("image")],
 	async (req, res) => {
 		try {
-			console.log("📝 Add product request received");
-			console.log("📎 Has file upload:", !!req.file);
-			console.log("🔗 Has image URL:", !!req.body.imageUrl);
-
 			const { error } = validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -220,13 +209,10 @@ router.post(
 			let productImagePublicId = null;
 
 			if (req.file) {
-				console.log("📤 Processing uploaded file");
 				// Multer already uploaded this to Cloudinary for us
 				productImageUrl = req.file.path;
 				productImagePublicId = req.file.filename;
 			} else if (req.body.imageUrl) {
-				console.log("🔗 Processing image URL");
-
 				const uploadedImage = await uploadImageFromUrl(req.body.imageUrl);
 				productImageUrl = uploadedImage.url;
 				productImagePublicId = uploadedImage.publicId;
@@ -279,10 +265,6 @@ router.put(
 	[auth, admin, upload.single("image")],
 	async (req, res) => {
 		try {
-			console.log("📝 Update request received");
-			console.log("📎 Has file upload:", !!req.file);
-			console.log("🔗 Has image URL:", !!req.body.imageUrl);
-
 			const { error } = validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -299,7 +281,6 @@ router.put(
 
 			// PATH 1: User uploaded a file through form-data
 			if (req.file) {
-				console.log("📤 Processing uploaded file");
 				newImageUrl = req.file.path;
 				newImagePublicId = req.file.filename;
 
