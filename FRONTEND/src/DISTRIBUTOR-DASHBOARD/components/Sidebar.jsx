@@ -1,50 +1,58 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { Logo } from "../../LANDING-PAGES/pages/Images";
 import { FaCartPlus } from "react-icons/fa";
 import { MdInventory } from "react-icons/md";
 import { RiHome4Fill, RiMessage2Line, RiSettings3Fill } from "react-icons/ri";
 import { HiUser, HiBellAlert, HiPower, HiXMark } from "react-icons/hi2";
+import { LiaMoneyBillWaveSolid } from "react-icons/lia"
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
 const Sidebar = ({ onClose }) => {
+	const navigate = useNavigate();
 	const navItems = [
-		{
-			path: "/distributor/dashboard",
-			label: "Dashboard",
-			icon: <RiHome4Fill />,
-		},
-		{
-			path: "/distributor/dashboard/orders",
-			label: "Orders",
-			icon: <FaCartPlus />,
-		},
-		{
-			path: "/distributor/dashboard/customers",
-			label: "Customers",
-			icon: <HiUser />,
-		},
-		{
-			path: "/distributor/dashboard/inventory",
-			label: "Inventory",
-			icon: <MdInventory />,
-		},
-		{
-			path: "/distributor/dashboard/notifications",
-			label: "Notifications",
-			icon: <HiBellAlert />,
-		},
-		{
-			path: "/distributor/dashboard/reviews",
-			label: "Reviews",
-			icon: <RiMessage2Line />,
-		},
-		{
-			path: "/distributor/dashboard/settings",
-			label: "Settings",
-			icon: <RiSettings3Fill />,
-		},
-	];
+    {
+      path: "/distributor/dashboard",
+      label: "Dashboard",
+      icon: <RiHome4Fill />,
+    },
+    {
+      path: "/distributor/dashboard/pos",
+      label: "Point of Sale",
+      icon: <LiaMoneyBillWaveSolid />,
+    },
+    {
+      path: "/distributor/dashboard/orders",
+      label: "Orders",
+      icon: <FaCartPlus />,
+    },
+    {
+      path: "/distributor/dashboard/customers",
+      label: "Customers",
+      icon: <HiUser />,
+    },
+    {
+      path: "/distributor/dashboard/inventory",
+      label: "Inventory",
+      icon: <MdInventory />,
+    },
+    {
+      path: "/distributor/dashboard/notifications",
+      label: "Notifications",
+      icon: <HiBellAlert />,
+    },
+    {
+      path: "/distributor/dashboard/reviews",
+      label: "Reviews",
+      icon: <RiMessage2Line />,
+    },
+    {
+      path: "/distributor/dashboard/settings",
+      label: "Settings",
+      icon: <RiSettings3Fill />,
+    },
+  ];
 
 	const handleLogout = async (userId) => {
 		try {
@@ -61,6 +69,7 @@ const Sidebar = ({ onClose }) => {
 				localStorage.removeItem("disRefreshToken");
 				localStorage.removeItem("user");
 			}
+			navigate("/distributor/login");
 		} catch (error) {
 			console.error("An error occured while logging out" + error);
 		}

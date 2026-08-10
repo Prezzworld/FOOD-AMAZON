@@ -32,67 +32,68 @@ import Settings from "./DISTRIBUTOR-DASHBOARD/pages/Settings"
 
 function App() {
 	return (
-		<>
-			<AlertProvider>
-				<ToastProvider>
-					<ToastContainer />
-					<Alert/>
-					<BrowserRouter>
-						<TokenExpirationHandler />
-						<DistributorTokenExpirationHandler />
-						<Routes>
-							<Route path="/" element={<Home />} />
-							<Route path="/Home" element={<Home />} />
-							<Route
-								path={`product-details/:id`}
-								element={<ProductDetails />}
-							/>
-							<Route path="/bulk-products" element={<BulkProducts />} />
-							<Route path="/wishlist" element={<Wishlist />} />
-							<Route path="/cart" element={<Cart />} />
-							<Route
-								path="/checkout"
-								element={
-									<AuthStatus>
-										<Checkout />
-									</AuthStatus>
-								}
-							/>
-							<Route path="/signup" element={<Signup />} />
-							<Route path="/login" element={<Login />} />
-							<Route path="/payment-status" element={<PaymentStatus />} />
-							<Route
-								path="/distributor/signup"
-								element={<DistributorSignup />}
-							/>
-							<Route path="/distributor/login" element={<DistributorLogin />} />
-							<Route path="/auth/callback" element={<AuthCallback />} />
-							<Route
-								path="/distributor/confirm-email"
-								element={<ConfirmEmail />}
-							/>
-							<Route
-								path="/distributor/reset-password"
-								element={<PasswordReset />}
-							/>
-							<Route
-								path="/distributor/dashboard"
-								element={<DashboardLayout />}
-							>
-								<Route index element={<Overview />} />
-								<Route path="orders" element={<Orders />} />
-								<Route path="customers" element={<Customers />} />
-								<Route path="inventory" element={<Inventory />} />
-								<Route path="notifications" element={<Notifications />} />
-								<Route path="reviews" element={<Reviews />} />
-								<Route path="settings" element={<Settings />} />
-							</Route>
-						</Routes>
-					</BrowserRouter>
-				</ToastProvider>
-			</AlertProvider>
-		</>
-	);
+    <>
+      <AlertProvider>
+        <ToastProvider>
+          <ToastContainer />
+          <Alert />
+          <BrowserRouter>
+            <TokenExpirationHandler />
+            <DistributorTokenExpirationHandler />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/Home" element={<Home />} />
+              <Route
+                path={`product-details/:id`}
+                element={<ProductDetails />}
+              />
+              <Route path="/bulk-products" element={<BulkProducts />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route
+                path="/checkout"
+                element={
+                  <AuthStatus>
+                    <Checkout />
+                  </AuthStatus>
+                }
+              />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/payment-status" element={<PaymentStatus />} />
+              <Route
+                path="/distributor/signup"
+                element={<DistributorSignup />}
+              />
+              <Route path="/distributor/login" element={<DistributorLogin />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route
+                path="/distributor/confirm-email"
+                element={<ConfirmEmail />}
+              />
+              <Route
+                path="/distributor/reset-password"
+                element={<PasswordReset />}
+              />
+              <Route
+                path="/distributor/dashboard"
+                element={<DashboardLayout />}
+              >
+                <Route index element={<Overview />} />
+                {/* <Route path="pos" element={<PointOfSale />} /> */}
+                <Route path="orders" element={<Orders />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="reviews" element={<Reviews />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
+      </AlertProvider>
+    </>
+  );
 }
 
 export default App;

@@ -94,7 +94,7 @@ router.post("/add-review", auth, async (req, res) => {
 router.get("/product-reviews/:productId", async (req, res) => {
 	try {
 		const { productId } = req.params;
-		const { limit = 6, page = 1 } = req.query;
+		const { limit = 10, page = 1 } = req.query;
 
 		const reviews = await Review.find({ productId, status: "published" })
 			.populate("userId", "name")
@@ -146,7 +146,7 @@ router.get("/product-reviews/:productId", async (req, res) => {
 router.get("/all-reviews-for-distributor", [auth, distributor], async (req, res) => {
 	try {
 		const distributorId = new mongoose.Types.ObjectId(req.user._id);
-		const { latest, published, rating, days, status, productId, limit = 6, page = 1 } = req.query;
+		const { latest, published, rating, days, status, productId, limit = 10, page = 1 } = req.query;
 		let query = {distributorId};
 		let sortOptions = {createdAt: -1};
 
