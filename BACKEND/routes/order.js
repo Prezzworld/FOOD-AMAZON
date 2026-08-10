@@ -469,7 +469,7 @@ router.post("/webhook", async (req, res) => {
 const ALLOWED_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
 const ALLOWED_CHANNELS = ["walk-in", "delivery"];
 
-router.get("/orders", [auth, distributor], async (req, res) => {
+router.get("/distributor/orders", [auth, distributor], async (req, res) => {
   try {
     const distributorId = new mongoose.Types.ObjectId(req.user._id);
     const { page = 1, limit = 10, channel, status } = req.query;
@@ -527,6 +527,38 @@ router.get("/orders", [auth, distributor], async (req, res) => {
       success: false,
       message: "Failed to fetch orders: " + error.message,
     });
+  }
+});
+
+router.get("/distributor/orders/:orderId", [auth, distributor], async (req, res) => {
+  try {
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.orderId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid order ID" });
+    }
+
+    const distributorId = new mongoose.Types.ObjectId(req.user._id);
+    const order = await Order.findOne({
+      _id: req.params.orderId,
+      distributorId,
+    });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    console.error("Error fetching order detail:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch order: " + error.message,
+      });
   }
 });
 

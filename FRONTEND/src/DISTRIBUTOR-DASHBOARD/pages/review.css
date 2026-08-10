@@ -127,3 +127,33 @@
   min-width: 22px;
   text-align: center;
 }
+
+.status-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1.25rem;
+}
+
+.status-modal-card {
+  max-width: 540px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(15, 11, 11, 0.16);
+  position: relative;
+}
+
+.status-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: none;
+  background: transparent;
+  color: #3f4a5a;
+  cursor: pointer;
+}

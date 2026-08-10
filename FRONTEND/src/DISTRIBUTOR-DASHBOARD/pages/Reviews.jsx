@@ -11,12 +11,13 @@ import { FaStar } from "react-icons/fa";
 import {
   BsRepeat,
   BsRepeat1,
+  BsCheckCircle,
   BsChevronLeft,
   BsChevronRight,
 } from "react-icons/bs";
 import { FiRefreshCcw, FiX } from "react-icons/fi";
 import { formatMongoDate } from "../../utils/dateFormatter";
-import { RiFilterLine } from "react-icons/ri";
+import { RiFilterLine, RiChatNewLine } from "react-icons/ri";
 import FilterDropdown from "../components/FilterDropdown";
 import SubFilterModal from "../components/SubFilterModal";
 import "./review.css";
@@ -39,8 +40,11 @@ const Reviews = () => {
   const [filterOptions, setFilterOptions] = useState(false);
   const [activeSubFilter, setActiveSubfilter] = useState(null);
   const [activeFilters, setActiveFilters] = useState({});
+  const [statusModalData, setStatusModalData] = useState(null);
   const filterDropdownRef = useRef(null);
   const itemsPerPage = 10;
+
+  const closeStatusModal = () => setStatusModalData(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -183,6 +187,35 @@ const Reviews = () => {
   };
 
   const resetAllFilters = () => setActiveFilters({});
+
+  const handleReviewStatusChange = async (reviewId, newStatus) => {
+    try {
+      const response = await distributorAxiosInstance.patch(
+        `/food-amazon-database/review/update-review/${reviewId}/status`,
+        { status: newStatus },
+      );
+
+      if (response.data.success) {
+        const updatedReview = response.data.review;
+        setReviews((prevReviews) =>
+          prevReviews.map((review) =>
+            review._id === reviewId ? { ...review, status: newStatus } : review,
+          ),
+        );
+        setStatusModalData({
+          title:
+            updatedReview.status === "published"
+              ? "Review Published Successfully"
+              : "Review Unpublished Successfully",
+          message: `${updatedReview.reviewerName}'s review has been ${
+            updatedReview.status === "published" ? "published" : "unpublished"
+          }`,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update review status", error);
+    }
+  };
 
   const renderRatingStars = (rating) => {
     return [...Array(5)].map((_, index) => (
@@ -441,6 +474,14 @@ const Reviews = () => {
                       </div>
                       <button
                         className={`w-100 border-0 py-3 rounded-2 ${review.status === "published" ? "bg-secondary-normal" : "bg-primary-normal"} font-inter text-white fw-semibold`}
+                        onClick={() =>
+                          handleReviewStatusChange(
+                            review._id,
+                            review.status === "published"
+                              ? "rejected"
+                              : "published",
+                          )
+                        }
                       >
                         {review.status === "published"
                           ? "Unpublish"
@@ -505,6 +546,32 @@ const Reviews = () => {
               onCancel={handleCancelFilter}
             />
           )}
+        </div>
+      )}
+      {statusModalData && (
+        <div className="status-modal-backdrop" onClick={closeStatusModal}>
+          <div
+            className="status-modal-card d-flex align-items-center justify-content-center flex-column bg-white rounded-4 p-4 p-md-5 position-relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="status-modal-close"
+              onClick={closeStatusModal}
+              aria-label="Close review status modal"
+            >
+              <FiX size={18} />
+            </button>
+            <div className="status-modal-icon d-flex justify-content-center align-items-center mb-4">
+              <RiChatNewLine size={129} className="text-red-light" />
+            </div>
+            <h3 className="font-archivo fw-semibold fs-4 text-dark-blue text-center mb-2">
+              {statusModalData.title}
+            </h3>
+            <p className="text-content-dark text-center mb-0">
+              {statusModalData.message}
+            </p>
+          </div>
         </div>
       )}
     </>
