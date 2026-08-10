@@ -230,8 +230,8 @@ const Reviews = () => {
           </div>
           <h3 className="fw-bold mb-2">No reviews found</h3>
           <p className="text-content-dark mb-4">
-            There are no reviews to show for this distributor or selected filters.
-            Return to the default reviews view or refresh to try again.
+            There are no reviews to show for this distributor or selected
+            filters. Return to the default reviews view or refresh to try again.
           </p>
           <div className="d-flex flex-column flex-sm-row gap-2">
             <button
@@ -244,7 +244,7 @@ const Reviews = () => {
                 setFilterOptions(false);
               }}
             >
-             Clear filters
+              Clear filters
             </button>
             <button
               type="button"
