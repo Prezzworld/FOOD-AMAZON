@@ -3,7 +3,9 @@ const router = express.Router();
 const axios = require("axios");
 const { Product, validate } = require("../models/product");
 const { Category } = require("../models/category");
+const {Order} = require("../models/order");
 const auth = require("../middleware/auth");
+const distributor = requrie("../middleware/distributor");
 const admin = require("../middleware/admin");
 const { cloudinary, upload } = require("../config/cloudinary");
 
@@ -145,7 +147,7 @@ const uploadImageFromUrl = async (imageUrl) => {
 
 router.post(
 	"/upload-image",
-	[auth, admin, upload.single("image")],
+	[auth, distributor, upload.single("image")],
 	async (req, res) => {
 		try {
 			console.log("📤 Upload request received");
@@ -189,7 +191,7 @@ router.post(
 
 router.post(
 	"/add-product",
-	[auth, admin, upload.single("image")],
+	[auth, distributor, upload.single("image")],
 	async (req, res) => {
 		try {
 			const { error } = validate(req.body);
@@ -227,6 +229,7 @@ router.post(
 				name: req.body.name,
 				price: req.body.price,
 				discountPrice: req.body.discountPrice || null,
+				buyingPrice: req.body.buyingPrice || null,
 				category: {
 					_id: category._id,
 					name: category.name,
@@ -234,6 +237,8 @@ router.post(
 				varieties: req.body.varieties,
 				description: req.body.description,
 				inStock: req.body.inStock,
+				lowStockThreshold: req.body.lowStockThreshold || 10,
+				expiryDate: req.body.expiryDate,
 				rating: req.body.rating,
 				productImg: productImageUrl, // ✅ Cloudinary URL
 				imagePublicId: productImagePublicId,
@@ -262,7 +267,7 @@ router.post(
 
 router.put(
 	"/update-product/:id",
-	[auth, admin, upload.single("image")],
+	[auth, distributor, upload.single("image")],
 	async (req, res) => {
 		try {
 			const { error } = validate(req.body);
@@ -308,29 +313,37 @@ router.put(
 				newImagePublicId = existingProduct.imagePublicId;
 			}
 
+			const newInStock = req.body.inStock;
+      const newThreshold = req.body.lowStockThreshold ?? existingProduct.lowStockThreshold ?? 10;
+      const stillLowOrOut = newInStock <= newThreshold;
+
 			const product = await Product.findByIdAndUpdate(
-				req.params.id,
-				{
-					name: req.body.name,
-					price: req.body.price,
-					discountPrice: req.body.discountPrice || null,
-					category: {
-						_id: category._id,
-						name: category.name,
-					},
-					varieties: req.body.varieties,
-					description: req.body.description,
-					inStock: req.body.inStock,
-					rating: req.body.rating,
-					productImg: newImageUrl,
-					imagePublicId: newImagePublicId,
-					bulkOrderEligible: req.body.bulkOrderEligible || false,
-					bulkDescription: req.body.bulkDescription || "",
-					minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
-					distributorId: req.body.distributorId,
-				},
-				{ new: true },
-			);
+        req.params.id,
+        {
+          name: req.body.name,
+          price: req.body.price,
+          buyingPrice: req.body.buyingPrice ?? existingProduct.buyingPrice,
+          discountPrice: req.body.discountPrice || null,
+          category: {
+            _id: category._id,
+            name: category.name,
+          },
+          varieties: req.body.varieties,
+          description: req.body.description,
+          inStock: req.body.inStock,
+          lowStockThreshold: newThreshold,
+          expiryDate: req.body.expiryDate ?? existingProduct.expiryDate,
+          rating: req.body.rating,
+          productImg: newImageUrl,
+          imagePublicId: newImagePublicId,
+          bulkOrderEligible: req.body.bulkOrderEligible || false,
+          bulkDescription: req.body.bulkDescription || "",
+          minimumBulkQuantity: req.body.minimumBulkQuantity || 50,
+          distributorId: req.body.distributorId,
+					reorderRequested: stillLowOrOut ? existingProduct.reorderRequested : false,
+        },
+        { new: true },
+      );
 
 			res.json({
 				status: "Success",
@@ -348,7 +361,7 @@ router.put(
 	},
 );
 
-router.delete("/delete-product/:id", [auth, admin], async (req, res) => {
+router.delete("/delete-product/:id", [auth, distributor], async (req, res) => {
 	try {
 		const product = await Product.findById(req.params.id);
 		if (!product)
@@ -393,5 +406,47 @@ router.get("/get-single-product/:id", async (req, res) => {
 
 	res.send(product);
 });
+
+router.patch(
+  "/distributor/products/:productId/toggle-reorder",
+  [auth, distributor],
+  async (req, res) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(req.params.productId)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid product ID" });
+      }
+
+      const product = await Product.findOne({
+        _id: req.params.productId,
+        distributorId: req.user._id,
+      });
+
+      if (!product) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Product not found" });
+      }
+
+      product.reorderRequested = !product.reorderRequested;
+      await product.save();
+
+      res.status(200).json({
+        success: true,
+        message: `Reorder ${product.reorderRequested ? "marked" : "unmarked"}`,
+        data: product,
+      });
+    } catch (error) {
+      console.error("Error toggling reorder status:", error);
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to toggle reorder: " + error.message,
+        });
+    }
+  },
+);
 
 module.exports = router;
