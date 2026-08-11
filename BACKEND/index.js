@@ -16,7 +16,8 @@ const login = require("./routes/auth");
 const googleAuth = require("./routes/googleAuth");
 const cart = require("./routes/cart");
 const order = require("./routes/order");
-const review = require("./routes/review")
+const review = require("./routes/review");
+const inventory = require("./routes/inventory");
 const distributor = require("./routes/distributor")
 const invitation = require('./routes/invitations');
 const dashboard = require("./routes/distributor-dashboard");
@@ -70,6 +71,7 @@ app.use("/auth", googleAuth);
 app.use("/api/food-amazon-database/cart", cart);
 app.use("/api/food-amazon-database/order", order);
 app.use("/api/food-amazon-database/review", review);
+app.use("/api/food-amazon-database/inventory", inventory);
 app.use('/api/food-amazon-database/distributors', distributor);
 app.use("/api/food-amazon-database/distributors/dashboard", dashboard);
 app.use('/api/food-amazon-database/invitation', invitation);

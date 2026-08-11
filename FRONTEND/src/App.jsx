@@ -23,6 +23,7 @@ import ConfirmEmail from "./DISTRIBUTOR-DASHBOARD/pages/ConfirmEmail"
 import PasswordReset from "./DISTRIBUTOR-DASHBOARD/pages/PasswordReset";
 import DashboardLayout from "./DISTRIBUTOR-DASHBOARD/components/DashboardLayout"
 import Overview from "./DISTRIBUTOR-DASHBOARD/pages/Overview"
+import PointOfSale from "./DISTRIBUTOR-DASHBOARD/pages/PointOfSale";
 import Orders from "./DISTRIBUTOR-DASHBOARD/pages/Orders"
 import Customers from "./DISTRIBUTOR-DASHBOARD/pages/Customers"
 import Inventory from "./DISTRIBUTOR-DASHBOARD/pages/Inventory"
@@ -80,7 +81,7 @@ function App() {
                 element={<DashboardLayout />}
               >
                 <Route index element={<Overview />} />
-                {/* <Route path="pos" element={<PointOfSale />} /> */}
+                <Route path="pos" element={<PointOfSale />} />
                 <Route path="orders" element={<Orders />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="inventory" element={<Inventory />} />

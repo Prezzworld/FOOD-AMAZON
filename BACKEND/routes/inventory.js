@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
+// const axios = require("axios");
+const mongoose = require("mongoose")
 const { Product, validate } = require("../models/product");
 const { Order } = require("../models/order");
 const auth = require("../middleware/auth");
-const distributor = requrie("../middleware/distributor");
+const distributor = require("../middleware/distributor");
 
 
 router.get("/distributor/inventory-overview", [auth, distributor], async (req, res) => {
@@ -118,3 +119,5 @@ router.get("/distributor/products", [auth, distributor], async (req, res) => {
 		res.status(500).json({ success: false, message: "Failed to fetch products: " + error.message });
 	}
 });
+
+module.exports = router

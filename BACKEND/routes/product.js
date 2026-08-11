@@ -5,7 +5,7 @@ const { Product, validate } = require("../models/product");
 const { Category } = require("../models/category");
 const {Order} = require("../models/order");
 const auth = require("../middleware/auth");
-const distributor = requrie("../middleware/distributor");
+const distributor = require("../middleware/distributor");
 const admin = require("../middleware/admin");
 const { cloudinary, upload } = require("../config/cloudinary");
 
