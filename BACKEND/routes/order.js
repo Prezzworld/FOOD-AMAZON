@@ -44,6 +44,9 @@ router.post("/create", auth, async (req, res) => {
     }
     const cart = await Cart.findById(req.body.cartId);
     if (!cart) return res.status(404).send("Cart not found");
+    if(cart.user.toString() !== req.user._id.toString()) {
+      return res.status(403).send("You do not have access to this cart")
+    }
     if (cart.items.length === 0) return res.status(400).send("Cart is empty");
     let distributorId;
     if (orderChannel === "delivery") {
