@@ -23,9 +23,6 @@ const invitation = require('./routes/invitations');
 const dashboard = require("./routes/distributor-dashboard");
 const test = require("./routes/test");
 
-console.log("JWT Key loaded:", !!config.get("jwtPrivateKey"));
-console.log("JWT Refresh Key loaded:", !!config.get("jwtRefreshKey"));
-
 if (!config.get("jwtPrivateKey")) {
 	console.error("FATAL ERROR: jwtPrivateKey is not defined.");
 	process.exit(1);
@@ -54,10 +51,6 @@ app.use(passport.initialize());
 
 
 app.use('/api', (req, res, next) => {
-	console.log(`${req.method} ${req.path}`);
-	console.log("Headers:", req.headers);
-	console.log("Body:", req.body);
-
 	res.set('Cache-Control', 'no-store');
 	next();
 });
