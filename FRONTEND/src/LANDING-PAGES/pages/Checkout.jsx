@@ -38,7 +38,7 @@ const Checkout = () => {
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState("");
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchCartData();
@@ -80,7 +80,7 @@ const Checkout = () => {
 			});
 		}
 	};
-	const validateForm = async () => {
+	const validateForm = () => {
 		const required = [
 			"email",
 			"firstName",
@@ -102,13 +102,11 @@ const Checkout = () => {
 						.toLowerCase()}`,
 				);
 				showAlert(
-					`Please fill in your ${field
-						.replace(/([A-Z])/g, ` $1`)
-						.toLowerCase()}`,
+					error,
 					"error",
 					{ mode: "inline" },
 				);
-				// return false;
+				return false;
 			}
 		}
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -118,7 +116,7 @@ const Checkout = () => {
 			showAlert("Please enter a valid email address", "error", {
 				mode: "inline",
 			});
-			// return false;
+			return false;
 		}
 		return true;
 	};
