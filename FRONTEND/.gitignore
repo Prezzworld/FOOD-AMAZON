@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+assets/
+/src/LANDING-PAGES/assets/
+/src/DISTRIBUTOR-DASHBOARD/assets/
 .env
 .env.local
 .env.production
