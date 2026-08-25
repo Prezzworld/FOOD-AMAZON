@@ -64,10 +64,8 @@ const Sidebar = ({ onClose }) => {
 			);
 			if (response.statusText === "OK") {
 				localStorage.removeItem("distributor");
-				localStorage.removeItem("token");
 				localStorage.removeItem("disToken");
 				localStorage.removeItem("disRefreshToken");
-				localStorage.removeItem("user");
 			}
 			navigate("/distributor/login");
 		} catch (error) {
