@@ -205,8 +205,12 @@ router.post("/confirm", auth, async (req, res) => {
     console.log("payment data: ", data);
     if (data.status === "success") {
       console.log("Payment successful, updating order...");
+      const existingOrder = await Order.findOne({"paymentInfo.paymentReference": reference})
+      if(existingOrder?.paymentInfo?.paymentStatus === "paid") {
+        return res.json({success: true, message: "Payment already confirmed", order: existingOrder})
+      }
       const order = await Order.findOneAndUpdate(
-        { "paymentInfo.paymentReference": reference },
+        { "paymentInfo.paymentReference": reference, "paymentInfo.paymentStatus": "pending" },
         {
           $set: {
             "paymentInfo.paymentStatus": "paid",
@@ -392,14 +396,14 @@ router.post("/webhook", async (req, res) => {
         console.log("Order not found after retries for reference: ", reference);
         return res.sendStatus(200); // Acknowledge the webhook to prevent retries, even if we can't find the order
       }
-      if (existingOrder.paymentInfo?.paymentStatus === "paid") {
+      if (existingOrder?.paymentInfo?.paymentStatus === "paid") {
         console.log(
           `Order ${existingOrder._id} already processed, skipping webhook duplicate`,
         );
         return res.sendStatus(200);
       }
       const order = await Order.findOneAndUpdate(
-        { "paymentInfo.paymentReference": reference },
+        { "paymentInfo.paymentReference": reference, "paymentInfo.paymentStatus": "pending" },
         {
           $set: {
             "paymentInfo.paymentStatus": "paid",
@@ -409,7 +413,9 @@ router.post("/webhook", async (req, res) => {
         },
         { new: true },
       );
-      console.log("Order udated by webhook: ", order._id);
+      if(!order) {
+        return res.sendStatus(200)
+      }
       for (const item of order.items) {
         await Product.findByIdAndUpdate(
           item.productId,
