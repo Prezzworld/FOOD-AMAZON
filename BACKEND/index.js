@@ -22,6 +22,7 @@ const distributor = require("./routes/distributor")
 const invitation = require('./routes/invitations');
 const dashboard = require("./routes/distributor-dashboard");
 const test = require("./routes/test");
+const rateLimit = require("express-rate-limit")
 
 if (!config.get("jwtPrivateKey")) {
 	console.error("FATAL ERROR: jwtPrivateKey is not defined.");
@@ -48,18 +49,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 100,
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: {success: false, message: "Too many requests, please try again later"}
+})
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests, please try again later",
+  },
+});
 
 app.use('/api', (req, res, next) => {
 	res.set('Cache-Control', 'no-store');
 	next();
 });
 
+app.use("/api", apiLimiter)
 app.use("/api/food-amazon-database/categories", category);
 app.use("/api/food-amazon-database/products", product);
 app.use("/api/food-amazon-database/customers", customer);
-app.use("/api/food-amazon-database/users/register", register);
-app.use("/api/food-amazon-database/users/login", login);
+app.use("/api/food-amazon-database/users/register", authLimiter, register);
+app.use("/api/food-amazon-database/users/login", authLimiter, login);
 app.use("/auth", googleAuth);
 app.use("/api/food-amazon-database/cart", cart);
 app.use("/api/food-amazon-database/order", order);
