@@ -153,7 +153,7 @@ const Cart = () => {
 						sectionType=""
 						layoutStyle="scroll"
 						limit={8}
-						buttonLink="http://localhost:3004/api/food-amazon-database/products?popular=true"
+						buttonLink="/products?popular=true"
 					/>
 				</>
 			)}

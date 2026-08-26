@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import { formatToNaira } from "../../utils/nairaFormatter";
 
 const BulkProducts = () => {
@@ -17,8 +17,8 @@ const BulkProducts = () => {
   const fetchBulkProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:3004/api/food-amazon-database/products?bulkOrderEligible=true&limit=20",
+      const response = await axiosInstance.get(
+        "/food-amazon-database/products?bulkOrderEligible=true&limit=20",
       );
       setProducts(response.data.products || []);
     } catch (error) {
