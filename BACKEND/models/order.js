@@ -116,6 +116,10 @@ orderSchema.pre("save", function () {
 	this.totalAmount = this.subTotal + (this.shipping || 0) + (this.salesTax || 0);
 });
 
+orderSchema.index({"paymentInfo.paymentReference": 1})
+orderSchema.index({distributorId: 1, createdAt: -1})
+orderSchema.index({userId: 1, createdAt: -1})
+
 const Order = mongoose.model("Order", orderSchema);
 
 // --- Joi Validation ---

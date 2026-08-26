@@ -104,6 +104,12 @@ const productSchema = new mongoose.Schema(
   },
 );
 
+productSchema.index({distributorId: 1})
+productSchema.index({"category._id": 1})
+productSchema.index({rating: 1})
+productSchema.index({bulkOrderEligible: 1})
+productSchema.index({name: "text"})
+
 const Product = new mongoose.model("Product", productSchema);
 
 function validateProduct(product) {

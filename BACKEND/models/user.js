@@ -69,6 +69,8 @@ const userSchema = new mongoose.Schema({
 	},
 });
 
+userSchema.index({googleId: 1})
+
 // Automatically set isAdmin to true if role is super-admin
 userSchema.pre("save", async function () {
 	if (this.role === "super-admin") {

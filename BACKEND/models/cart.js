@@ -78,6 +78,8 @@ const cartSchema = new mongoose.Schema({
 	},
 });
 
+cartSchema.index({user: 1})
+
 cartSchema.methods.calculateTotals = function () {
 	this.totalItems = this.items.reduce(
 		(total, item) => total + item.quantity,
