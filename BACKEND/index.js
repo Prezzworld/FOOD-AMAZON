@@ -23,6 +23,7 @@ const invitation = require('./routes/invitations');
 const dashboard = require("./routes/distributor-dashboard");
 const test = require("./routes/test");
 const rateLimit = require("express-rate-limit")
+const helmet  = require("helmet")
 
 if (!config.get("jwtPrivateKey")) {
 	console.error("FATAL ERROR: jwtPrivateKey is not defined.");
@@ -48,6 +49,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
+
+app.use(helmet())
 
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
