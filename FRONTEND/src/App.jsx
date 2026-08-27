@@ -21,6 +21,7 @@ import DistributorLogin from "./DISTRIBUTOR-DASHBOARD/pages/Login";
 import AuthCallback from "./DISTRIBUTOR-DASHBOARD/pages/AuthCallback";
 import ConfirmEmail from "./DISTRIBUTOR-DASHBOARD/pages/ConfirmEmail"
 import PasswordReset from "./DISTRIBUTOR-DASHBOARD/pages/PasswordReset";
+import ProtectedRoute from "./DISTRIBUTOR-DASHBOARD/components/ProtectedRoute";
 import DashboardLayout from "./DISTRIBUTOR-DASHBOARD/components/DashboardLayout"
 import Overview from "./DISTRIBUTOR-DASHBOARD/pages/Overview"
 import PointOfSale from "./DISTRIBUTOR-DASHBOARD/pages/PointOfSale";
@@ -78,7 +79,11 @@ function App() {
               />
               <Route
                 path="/distributor/dashboard"
-                element={<DashboardLayout />}
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
               >
                 <Route index element={<Overview />} />
                 <Route path="pos" element={<PointOfSale />} />
