@@ -43,57 +43,70 @@ const ProductDetails = () => {
 	const { state } = useLocation();
 	const navigate = useNavigate();
 
-	const fetchProductById = async (productId) => {
-		try {
-			setLoading(true);
-			const response = await axiosInstance.get(
-				`/food-amazon-database/products/get-single-product/${productId}`,
-			);
-			setProduct(response.data);
-		} catch (error) {
-			console.error("Error fetching product:", error);
-			showAlert("An error occured, please try again", "error", {mode: "confirm"});
-			setLoading(false);
-		} finally {
-			setLoading(false);
-		}
-	};
-	const fetchReviews = async (productId) => {
-		try {
-			setReviewsLoading(true);
-			const response = await axiosInstance.get(
-				`/food-amazon-database/review/product-reviews/${productId}`,
-			);
-			if (response.data.success) {
-				setReviewList(response.data.data);
-				setReviewStats(response.data.stats);
-			}
-		} catch (error) {
-			console.error("Error fetching reviews:", error);
-			showAlert("An error occured, please try again", "error", {mode: "confirm"});
-		} finally {
-			setReviewsLoading(false);
-		}
-	};
-
 	useEffect(() => {
-		if (state?.product) {
-			// If product is passed via state (from navigation)
-			setProduct(state.product);
-			setLoading(false);
+		const controller = new AbortController()
+
+		if(state?.product) {
+			setProduct(state.product)
+			setLoading(false)
 		} else if (id) {
-			// If only ID is in URL, fetch from backend
-			fetchProductById(id);
+			const fetchProductById = async (productId) => {
+        try {
+          setLoading(true);
+          const response = await axiosInstance.get(
+            `/food-amazon-database/products/get-single-product/${productId}`,
+						{signal: controller.signal}
+          );
+          setProduct(response.data);
+        } catch (error) {
+          console.error("Error fetching product:", error);
+          showAlert("An error occured, please try again", "error", {
+            mode: "confirm",
+          });
+          setLoading(false);
+        } finally {
+          setLoading(false);
+        }
+      };
+			fetchProductById(id)
 		} else {
-			setLoading(false);
+			setLoading(false)
 		}
-	}, [id, state]);
+
+		return controller.abort()
+	}, [id, state])
 
 	useEffect(() => {
-		if (id) {
-			fetchReviews(id);
+		const controller = new AbortController()
+		if(id) {
+			const fetchReviews = async (productId) => {
+        try {
+          setReviewsLoading(true);
+          const response = await axiosInstance.get(
+            `/food-amazon-database/review/product-reviews/${productId}`,
+						{signal: controller.signal}
+          );
+          if (response.data.success) {
+            setReviewList(response.data.data);
+            setReviewStats(response.data.stats);
+          }
+        } catch (error) {
+          if(error.name !== "AbortError") {
+						console.error("Error fetching reviews:", error);
+            showAlert("An error occured, please try again", "error", {
+              mode: "confirm",
+            });
+					}
+        } finally {
+          setReviewsLoading(false);
+        }
+      };
+			fetchReviews(id)
 		}
-	}, [id]);
+
+		return controller.abort()
+	}, [id])
+
 
 	const handleChange = (e) => {
 		setReviewData({
@@ -149,7 +162,6 @@ const ProductDetails = () => {
 				comment: "",
 				headline: "",
 			});
-			fetchReviews(id);
 		} catch (error) {
 			console.error("Error submitting review:", error);
 			showAlert(
