@@ -11,7 +11,6 @@ const { cloudinary, upload } = require("../config/cloudinary");
 
 router.get("/", async (req, res) => {
 	try {
-		console.log("📥 Query params:", req.query);
 		const {
 			popular,
 			newest,
@@ -24,7 +23,6 @@ router.get("/", async (req, res) => {
 		} = req.query;
 
 		let query = {};
-		console.log("🔍 MongoDB query:", query);
 
 		let sortOptions = {};
 
@@ -82,7 +80,6 @@ router.get("/", async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error fetching products: ", error);
 		res.status(500).json({
 			success: false,
 			message: "Failed to fetch products",
@@ -150,10 +147,6 @@ router.post(
 	[auth, distributor, upload.single("image")],
 	async (req, res) => {
 		try {
-			console.log("📤 Upload request received");
-			console.log("📎 File:", req.file);
-			console.log("👤 User:", req.user);
-
 			if (!req.file) {
 				return res
 					.status(400)
@@ -172,14 +165,6 @@ router.post(
 				publicId: result.public_id, // Cloudinary public_id
 			});
 		} catch (error) {
-			console.error("🔴 UPLOAD ERROR:", error);
-			console.error("🔴 ERROR DETAILS:", {
-				message: error.message,
-				stack: error.stack,
-				name: error.name,
-			});
-
-			console.error("Error uploading image:", error);
 			res.status(500).json({
 				success: false,
 				message: "Failed to upload image",
@@ -248,14 +233,20 @@ router.post(
 				distributorId: req.body.distributorId,
 			});
 
-			product = await product.save();
+			try {
+				product = await product.save();
+			} catch (error) {
+				if(productImagePublicId) {
+					await cloudinary.uploader.destroy(productImagePublicId)
+				}
+				throw error
+			}
 
 			res.json({
 				status: "Success",
 				message: "Product successfully added",
 			});
 		} catch (error) {
-			console.error("🔴 Error adding product:", error);
 			res.status(500).json({
 				success: false,
 				message: "Failed to add product",
@@ -291,12 +282,9 @@ router.put(
 
 				// Delete old image from Cloudinary if it exists
 				if (existingProduct.imagePublicId) {
-					console.log("🗑️ Deleting old image from Cloudinary");
 					await cloudinary.uploader.destroy(existingProduct.imagePublicId);
 				}
 			} else if (req.body.imageUrl) {
-				console.log("🔗 Processing image URL");
-
 				// Use our helper function to download and upload the image
 				const uploadedImage = await uploadImageFromUrl(req.body.imageUrl);
 				newImageUrl = uploadedImage.url;
@@ -304,11 +292,9 @@ router.put(
 
 				// Delete old image from Cloudinary if it exists
 				if (existingProduct.imagePublicId) {
-					console.log("🗑️ Deleting old image from Cloudinary");
 					await cloudinary.uploader.destroy(existingProduct.imagePublicId);
 				}
 			} else {
-				console.log("📷 No new image, keeping existing");
 				newImageUrl = existingProduct.productImg;
 				newImagePublicId = existingProduct.imagePublicId;
 			}
@@ -344,6 +330,15 @@ router.put(
         },
         { new: true },
       );
+
+			try {
+        product = await product.save();
+      } catch (error) {
+        if (newImagePublicId) {
+          await cloudinary.uploader.destroy(newImagePublicId);
+        }
+        throw error;
+      }
 
 			res.json({
 				status: "Success",

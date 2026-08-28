@@ -30,19 +30,20 @@ const NotFound = () => {
       <p style={{ marginBottom: "1.5rem", color: "#666" }}>
         The page you're looking for doesn't exist or has been moved.
       </p>
-      <Link
-        to="/"
-        style={{
-          padding: "0.75rem 1.5rem",
-          backgroundColor: "#2D6A4F",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          textDecoration: "none",
-          fontSize: "1rem",
-        }}
-      >
-        Go Home
+      <Link to="/">
+        <button
+          style={{
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#2D6A4F",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            textDecoration: "none",
+            fontSize: "1rem",
+          }}
+        >
+          Go Home
+        </button>
       </Link>
     </div>
   );
