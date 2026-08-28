@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import Footer from "../components/Footer";
 import { stringToArray } from "../helper/Helper";
 import { FaCheck, FaStar } from "react-icons/fa";
@@ -45,10 +45,9 @@ const ProductDetails = () => {
 
 	const fetchProductById = async (productId) => {
 		try {
-			const backend_url = import.meta.env.VITE_API_URL;
 			setLoading(true);
-			const response = await axios.get(
-				`${backend_url}/api/food-amazon-database/products/get-single-product/${productId}`,
+			const response = await axiosInstance.get(
+				`/food-amazon-database/products/get-single-product/${productId}`,
 			);
 			setProduct(response.data);
 		} catch (error) {
@@ -62,8 +61,8 @@ const ProductDetails = () => {
 	const fetchReviews = async (productId) => {
 		try {
 			setReviewsLoading(true);
-			const response = await axios.get(
-				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/review/product-reviews/${productId}`,
+			const response = await axiosInstance.get(
+				`/food-amazon-database/review/product-reviews/${productId}`,
 			);
 			if (response.data.success) {
 				setReviewList(response.data.data);
@@ -134,15 +133,14 @@ const ProductDetails = () => {
 
 		try {
 			setSubmittingReview(true);
-			await axios.post(
-				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/review/add-review`,
+			await axiosInstance.post(
+				`/food-amazon-database/review/add-review`,
 				{
 					productId: id,
 					rating: selectedRating,
 					headline: reviewData.headline,
 					comment: reviewData.comment,
 				},
-				{ headers: { "x-auth-token": token } },
 			);
 			showToast("Review submitted successfully.", "success");
 
