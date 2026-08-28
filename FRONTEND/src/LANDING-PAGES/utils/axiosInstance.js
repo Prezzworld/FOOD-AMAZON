@@ -1,10 +1,11 @@
 import axios from "axios";
+import { API_URL } from "../../config";
 
 // const API_BASE_URL = "http://localhost:3004/api";
 
 // Create axios instance
 const axiosInstance = axios.create({
-	baseURL: `${import.meta.env.VITE_API_URL}/api`,
+	baseURL: `${API_URL}/api`,
 	// timeout: 10000,
 });
 
