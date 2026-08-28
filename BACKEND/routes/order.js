@@ -356,13 +356,10 @@ const findOrderWithRetry = async (reference, maxRetry = 3, delay = 1000) => {
 };
 
 router.post("/webhook", async (req, res) => {
-  console.log("🔥 PAYSTACK WEBHOOK HIT");
   try {
-    if (process.env.NODE_ENV === "production") {
       // Production signature verification
       const hash = req.headers["x-paystack-signature"];
       if (!hash) {
-        console.error("No signature provided in webhook");
         return res.status(400).send("No signature provided");
       }
       // const bodyString = JSON.stringify(req.body);
@@ -371,15 +368,11 @@ router.post("/webhook", async (req, res) => {
         .update(req.body)
         .digest("hex");
       if (hash !== expectedHash) {
-        console.error("Invalid webhook signature");
         return res.status(400).send("Invalid signature");
       }
 
-      req.body = JSON.parse(req.body); // Parse the raw body to JSON for further processing
-      console.log("Webhook signature verified successfully");
-    }
-    const event = req.body;
-    console.log("Webhook received: ", event.event);
+      const event = JSON.parse(req.body); // Parse the raw body to JSON for further processing
+
     if (event.event === "charge.success") {
       const reference = event.data.reference;
       console.log("Processing successful charge for reference: ", reference);
