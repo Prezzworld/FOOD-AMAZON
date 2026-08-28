@@ -32,6 +32,7 @@ import Inventory from "./DISTRIBUTOR-DASHBOARD/pages/Inventory"
 import Notifications from "./DISTRIBUTOR-DASHBOARD/pages/Notifications"
 import Reviews from "./DISTRIBUTOR-DASHBOARD/pages/Reviews"
 import Settings from "./DISTRIBUTOR-DASHBOARD/pages/Settings"
+import NotFound from "./NotFound";
 
 function App() {
 	return (
@@ -99,6 +100,7 @@ function App() {
                   <Route path="reviews" element={<Reviews />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
+                <Route path="*" element={<NotFound/>}/>
               </Routes>
             </BrowserRouter>
           </ToastProvider>
