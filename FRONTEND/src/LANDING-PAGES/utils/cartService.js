@@ -7,22 +7,16 @@ const endpointUrl = "food-amazon-database/cart/";
 class CartService {
 	constructor() {
 		this.isAuthenticated = false;
-		this.authToken = null;
 		this.checkAuthStatus();
 	}
 
 	checkAuthStatus() {
-		this.authToken = localStorage.getItem("token");
+		const token = localStorage.getItem("token");
 
-		this.isAuthenticated = !!this.authToken;
-
-		return this.isAuthenticated;
+		return !!token
 	}
 
 	setAuthStatus(isAuth, token = null) {
-		this.isAuthenticated = isAuth;
-		this.authToken = token;
-
 		if (isAuth && token) {
 			localStorage.setItem("token", token);
 		} else {
@@ -76,9 +70,9 @@ class CartService {
 
 	async getCart() {
 		try {
-			this.checkAuthStatus();
+			
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				return await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.get(
 						`/${endpointUrl}get-cart`
@@ -94,7 +88,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error fetching cart from server", error);
 			console.error("❌ Error response:", error.response?.data);
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				console.warn("Backend cart fetch failed, falling back to localStorage");
 			}
 
@@ -104,9 +98,8 @@ class CartService {
 
 	async addToCart(product, quantity = 1, variety = null) {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const requestBody = {
 						productId: product._id,
@@ -139,7 +132,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error adding item to cart", error);
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const errorMessage =
 					error.response?.data || error.message || "Faied to add item to cart";
 				throw new Error(errorMessage);
@@ -151,9 +144,8 @@ class CartService {
 
 	async updateQuantity(productId, quantity) {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.put(
 						`/${endpointUrl}update-item/${productId}`,
@@ -174,7 +166,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error updating item quantity", error);
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const errorMessage =
 					error.response?.data ||
 					error.message ||
@@ -188,9 +180,8 @@ class CartService {
 
 	async removeFromCart(itemId) {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.delete(
 						`/${endpointUrl}remove-item/${itemId}`
@@ -208,7 +199,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error removing item from cart", error);
 			console.error("  - Error message:", error.message);
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const errorMessage =
 					error.response?.data ||
 					error.message ||
@@ -222,9 +213,8 @@ class CartService {
 
 	async clearCart() {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				await this.makeAuthenticatedRequest(async () => {
 					await axiosInstance.delete(
 						`/${endpointUrl}clear-cart`
@@ -245,7 +235,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error clearing cart", error);
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				const errorMessage =
 					error.response?.data || error.message || "Failed to clear cart";
 				throw new Error(errorMessage);
@@ -257,9 +247,8 @@ class CartService {
 
 	async getCartCount() {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				return await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.get(
 						`/${endpointUrl}get-cart`
@@ -280,9 +269,8 @@ class CartService {
 
 	async getCartTotal() {
 		try {
-			this.checkAuthStatus();
 
-			if (this.isAuthenticated) {
+			if (this.checkAuthStatus()) {
 				return await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.get(
 						`/${endpointUrl}get-cart`
@@ -307,7 +295,7 @@ class CartService {
 				return [];
 			}
 
-			this.setAuthStatus(true, token);
+			localStorage.setItem("token", token)
 
 			const localCartItems = cartLocalStorage.getCart();
 
@@ -350,13 +338,13 @@ class CartService {
 
 	async syncCartOnLogout() {
 		try {
-			if (!this.isAuthenticated) {
+			if (!this.checkAuthStatus()) {
 				return;
 			}
 
 			const backendCart = await this.getCart();
 
-			this.setAuthStatus(false, null);
+			localStorage.removeItem("token")
 
 			cartLocalStorage.clearCart();
 
@@ -377,7 +365,7 @@ class CartService {
 		} catch (error) {
 			console.error("Error syncing cart on logout:", error);
 
-			this.setAuthStatus(false, null);
+			localStorage.removeItem("token")
 		}
 	}
 
