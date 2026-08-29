@@ -303,27 +303,23 @@ class CartService {
 				return await this.getCart();
 			}
 
-			// const backendCart = await this.getCart();
+			const syncPromises = localCartItems.map((item) =>
+        this.addToCart(
+          {
+            _id: item._id,
+            name: item.name,
+            price: item.price,
+            productImg: item.productImg,
+          },
+          item.quantity,
+          item.variety,
+        ).catch((error) => {
+          console.error("Failed to sync item: ", item, error);
+        }),
+      );
 
+      await Promise.allSettled(syncPromises);
 
-			// await Promise.allSettled(syncPromises);
-
-			for (const item of localCartItems) {
-				try {
-					await this.addToCart(
-						{
-							_id: item._id,
-							name: item.name,
-							price: item.price,
-							productImg: item.productImg,
-						},
-						item.quantity,
-						item.variety
-					);
-				} catch (error) {
-					console.error("Failed to sync item: ", item, error)
-				}
-			}
 
 			cartLocalStorage.clearCart();
 
