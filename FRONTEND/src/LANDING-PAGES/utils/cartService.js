@@ -10,6 +10,22 @@ class CartService {
 		this.checkAuthStatus();
 	}
 
+	_cartCache = null
+	_cartCacheTime = 0
+	_CART_CACHE_TTL = 3000
+
+	async _getCartCached() {
+    const now = Date.now();
+    if (this._cartCache && now - this._cartCacheTime < this._CART_CACHE_TTL) {
+      return this._cartCache;
+    }
+    const response = await axiosInstance.get(`/${endpointUrl}get-cart`);
+    this._cartCache = response.data;
+    this._cartCacheTime = now;
+    return this._cartCache;
+  }
+
+
 	checkAuthStatus() {
 		const token = localStorage.getItem("token");
 
@@ -98,7 +114,7 @@ class CartService {
 
 	async addToCart(product, quantity = 1, variety = null) {
 		try {
-
+			this._cartCache = null
 			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const requestBody = {
@@ -144,7 +160,7 @@ class CartService {
 
 	async updateQuantity(productId, quantity) {
 		try {
-
+			this._cartCache = null
 			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.put(
@@ -180,7 +196,7 @@ class CartService {
 
 	async removeFromCart(itemId) {
 		try {
-
+			this._cartCache = null
 			if (this.checkAuthStatus()) {
 				const items = await this.makeAuthenticatedRequest(async () => {
 					const response = await axiosInstance.delete(
@@ -213,7 +229,7 @@ class CartService {
 
 	async clearCart() {
 		try {
-
+			this._cartCache = null
 			if (this.checkAuthStatus()) {
 				await this.makeAuthenticatedRequest(async () => {
 					await axiosInstance.delete(
@@ -250,11 +266,8 @@ class CartService {
 
 			if (this.checkAuthStatus()) {
 				return await this.makeAuthenticatedRequest(async () => {
-					const response = await axiosInstance.get(
-						`/${endpointUrl}get-cart`
-						// this.getAxiosConfig()
-					);
-					return response.data.totalItems || 0;
+					const data = await this._getCartCached()
+					return data.totalItems || 0;
 				});
 			} else {
 				const count = cartLocalStorage.getCartCount();
@@ -272,11 +285,8 @@ class CartService {
 
 			if (this.checkAuthStatus()) {
 				return await this.makeAuthenticatedRequest(async () => {
-					const response = await axiosInstance.get(
-						`/${endpointUrl}get-cart`
-						// this.getAxiosConfig()
-					);
-					return response.data.totalAmount || 0;
+					const data = await this._getCartCached()
+					return data.totalAmount || 0;
 				});
 			} else {
 				return cartLocalStorage.getCartTotal();
