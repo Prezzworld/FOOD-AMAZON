@@ -9,6 +9,7 @@ import {
 	Label,
 } from "recharts";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const useBestSellingData = (initialLimit = 5) => {
 	const [loading, setLoading] = useState(false);
@@ -75,15 +76,6 @@ const BestSellingTable = () => {
 		);
 	}
 
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("en-NG", {
-			style: "currency",
-			currency: "NGN",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
-	};
-
 	return (
 		<div className="d-flex flex-column h-100">
 			<div className="flex-shrink-0 mb-4 d-flex align-items-center justify-content-between">
@@ -145,7 +137,7 @@ const BestSellingTable = () => {
 									<p>{product.currentStock}</p>
 								</td>
 								<td className="py-3">
-									<p>{formatCurrency(product.totalRevenue)}</p>
+									<p>{formatToNaira(product.totalRevenue)}</p>
 								</td>
 								<td className="py-3">
 									<p

@@ -6,6 +6,7 @@ import VisitInsightsChart from "../components/VisitInsightsChart";
 import { BestSellingTable, BestSellingChart } from "../components/BestSelling";
 import CustomerList from "../components/CustomerList";
 import RecentOrderTable from "../components/RecentOrderTable";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const Overview = () => {
 	const [saleOverview, setSaleOverview] = useState(null);
@@ -34,35 +35,26 @@ const Overview = () => {
 		fetchOverviewData();
 	}, []);
 
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("en-NG", {
-			style: "currency",
-			currency: "NGN",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
-	};
-
 	const metricConfig = [
 		{
 			key: "year",
 			title: "Total Distribution (Yearly)",
-			comparisonText: `Compared to (${formatCurrency(saleOverview?.year?.previousSales)} last year)`,
+			comparisonText: `Compared to (${formatToNaira(saleOverview?.year?.previousSales)} last year)`,
 		},
 		{
 			key: "today",
 			title: "Total Distribution (Daily)",
-			comparisonText: `Compared to (${formatCurrency(saleOverview?.today?.previousSales)} yesterday)`,
+			comparisonText: `Compared to (${formatToNaira(saleOverview?.today?.previousSales)} yesterday)`,
 		},
 		{
 			key: "week",
 			title: "Total Distribution (Weekly)",
-			comparisonText: `Compared to (${formatCurrency(saleOverview?.week?.previousSales)} last week)`,
+			comparisonText: `Compared to (${formatToNaira(saleOverview?.week?.previousSales)} last week)`,
 		},
 		{
 			key: "month",
 			title: "Total Distribution (Monthly)",
-			comparisonText: `Compared to (${formatCurrency(saleOverview?.month?.previousSales)} last month)`,
+			comparisonText: `Compared to (${formatToNaira(saleOverview?.month?.previousSales)} last month)`,
 		},
 	];
 
@@ -114,7 +106,7 @@ const Overview = () => {
 								</h6>
 								<div className="d-flex flex-wrap justify-content-between price-percentage align-items-center mb-3">
 									<p className="mb-0 font-archivo fw-semibold fs-5">
-										{formatCurrency(data.sales)}
+										{formatToNaira(data.sales)}
 									</p>
 									<p
 										className={`mb-0 font-archivo fs-sm ${data.percentageChange > 0 ? "text-primary-normal" : "text-danger"}`}

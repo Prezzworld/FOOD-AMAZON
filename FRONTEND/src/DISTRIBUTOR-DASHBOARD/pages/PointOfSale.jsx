@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiSearch, FiPlus, FiMinus, FiTrash2, FiUser } from "react-icons/fi";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const AVAILABILITY_VISUALS = {
   inStock: { label: "In Stock", color: "#00a859" },
@@ -13,14 +14,6 @@ const getAvailability = (inStock, threshold = 10) => {
   if (inStock <= threshold) return AVAILABILITY_VISUALS.lowStock;
   return AVAILABILITY_VISUALS.inStock;
 };
-
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount || 0);
 
 const MUTED_TEXT = "#8b93a7";
 const BORDER_COLOR = "#f1f1f5";
@@ -233,7 +226,7 @@ const PointOfSale = () => {
                         className="mb-0 font-archivo fs-xsm"
                         style={{ color: MUTED_TEXT }}
                       >
-                        {formatCurrency(product.price)} ·{" "}
+                        {formatToNaira(product.price)} ·{" "}
                         <span style={{ color: availability.color }}>
                           {availability.label}
                         </span>
@@ -301,7 +294,7 @@ const PointOfSale = () => {
                         className="mb-0 font-archivo fs-xsm"
                         style={{ color: MUTED_TEXT }}
                       >
-                        {formatCurrency(item.product.price)} each
+                        {formatToNaira(item.product.price)} each
                       </p>
                     </div>
                   </div>
@@ -408,7 +401,7 @@ const PointOfSale = () => {
                 Total
               </span>
               <span className="font-archivo fw-bold fs-5 text-dark-blue">
-                {formatCurrency(cart?.totalAmount)}
+                {formatToNaira(cart?.totalAmount)}
               </span>
             </div>
             <button
@@ -446,7 +439,7 @@ const PointOfSale = () => {
                 <span>
                   {item.name} × {item.quantity}
                 </span>
-                <span>{formatCurrency(item.price * item.quantity)}</span>
+                <span>{formatToNaira(item.price * item.quantity)}</span>
               </div>
             ))}
             <div
@@ -454,7 +447,7 @@ const PointOfSale = () => {
               style={{ borderTop: `1px solid ${BORDER_COLOR}` }}
             >
               <span>Total</span>
-              <span>{formatCurrency(receipt.totalAmount)}</span>
+              <span>{formatToNaira(receipt.totalAmount)}</span>
             </div>
             <button
               onClick={() => setReceipt(null)}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEllipsisH } from "react-icons/fa";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const RecentOrderTable = () => {
 	const [orders, setOrders] = useState([]);
@@ -70,15 +71,6 @@ const RecentOrderTable = () => {
 			),
 		};
 	}
-
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("en-NG", {
-			style: "currency",
-			currency: "NGN",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
-	};
 
 	if (loading) {
 		return (
@@ -165,7 +157,7 @@ const RecentOrderTable = () => {
 											<p className="py-2">{formatDate(order.createdAt)}</p>
 										</td>
 										<td className="">
-											<p className="py-2">{formatCurrency(order.totalAmount)}</p>
+											<p className="py-2">{formatToNaira(order.totalAmount)}</p>
 										</td>
 										<td className="py-2">
 											{

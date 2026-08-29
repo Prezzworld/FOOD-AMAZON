@@ -1,18 +1,11 @@
 import React from "react";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { FiArrowLeft } from "react-icons/fi";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const MUTED_TEXT = "#8b93a7";
 const AVATAR_RING = "#5AC8B8";
 const AVATAR_BG = "#F4B8B8";
-
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount || 0);
 
 const getInitials = (firstName, lastName) => {
   const a = firstName?.[0] || "";
@@ -86,7 +79,7 @@ const OrderDetails = ({ order, onBack }) => {
                     Quantity - {item.quantity}
                   </span>
                   <span className="font-archivo fw-semibold text-primary-normal">
-                    {formatCurrency(item.price * item.quantity)}
+                    {formatToNaira(item.price * item.quantity)}
                   </span>
                 </div>
               </div>

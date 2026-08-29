@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiPlus, FiSliders, FiDownload, FiRefreshCw } from "react-icons/fi";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import "./dashboard.css";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const AVAILABILITY_VISUALS = {
   inStock: { label: "In Stock", color: "#00a859" },
@@ -17,16 +18,6 @@ const getAvailability = (inStock, threshold = 10) => {
   if (inStock <= threshold) return AVAILABILITY_VISUALS.lowStock;
   return AVAILABILITY_VISUALS.inStock;
 };
-
-const formatCurrency = (amount) =>
-  amount == null
-    ? "—"
-    : new Intl.NumberFormat("en-NG", {
-        style: "currency",
-        currency: "NGN",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
 
 const formatDate = (dateString) => {
   if (!dateString) return "—";
@@ -163,7 +154,7 @@ const Inventory = () => {
                   {overview?.newProductsLast7Days ?? 0}
                 </p>
                 <p className="font-archivo fw-bold fs-4 text-dark-blue mb-2">
-                  {formatCurrency(overview?.revenueLast7Days)}
+                  {formatToNaira(overview?.revenueLast7Days)}
                 </p>
               </div>
               <div className="d-flex justify-content-between">
@@ -188,7 +179,7 @@ const Inventory = () => {
                   {overview?.topSellingQuantity ?? 0}
                 </p>
                 <p className="font-archivo fw-bold fs-4 text-dark-blue mb-2">
-                  {formatCurrency(overview?.topSellingRevenue)}
+                  {formatToNaira(overview?.topSellingRevenue)}
                 </p>
               </div>
               <div className="d-flex justify-content-between">
@@ -339,7 +330,7 @@ const Inventory = () => {
                   className="font-archivo fs-sm text-dark-blue"
                   style={{ width: COLUMN_WIDTHS.buyingPrice }}
                 >
-                  {formatCurrency(product.buyingPrice)}
+                  {formatToNaira(product.buyingPrice)}
                 </span>
                 <span
                   className="font-archivo fs-sm text-dark-blue"

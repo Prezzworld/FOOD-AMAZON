@@ -11,6 +11,7 @@ import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
 import { cartService } from "../utils/cartService";
 import { useAlert } from "../../alert/AlertContext";
 import { useToast } from "../../toast/ToastContext";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 	const { showAlert } = useAlert()
@@ -111,15 +112,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 		});
 	};
 
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("en-NG", {
-			style: "currency",
-			currency: "NGN",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
-	};
-
 	if (variant === "bulk") {
 		return (
 			<div className={getCardClassname()}>
@@ -206,7 +198,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 							{product.rating} (18)
 						</p>
 						<p className="fw-semibold font-inter fs-6 text-main-accent">
-							{formatCurrency(product.price)}
+							{formatToNaira(product.price)}
 						</p>
 					</div>
 				</div>

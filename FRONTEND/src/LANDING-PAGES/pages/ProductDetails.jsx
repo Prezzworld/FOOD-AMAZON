@@ -10,6 +10,7 @@ import { cartService } from "../utils/cartService";
 import { useAlert } from "../../alert/AlertContext";
 import "../pages/productDetails.css";
 import { useToast } from "../../toast/ToastContext";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const ProductDetails = () => {
 	const { showAlert } = useAlert();
@@ -316,15 +317,6 @@ const ProductDetails = () => {
 		return `${(count / reviewStats.totalCount) * 100}%`;
 	};
 
-	const formatCurrency = (amount) => {
-		return new Intl.NumberFormat("en-NG", {
-			style: "currency",
-			currency: "NGN",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
-	};
-
 	return (
 		<>
 			<Header shadow="shadow" />
@@ -391,10 +383,10 @@ const ProductDetails = () => {
 							<h2 className="font-nichrome mb-3 name">{product.name}</h2>
 							<p className="font-inter mb-4">
 								<strike className="fw-normal fs-5 text-content-accent">
-									{formatCurrency(product.price)}
+									{formatToNaira(product.price)}
 								</strike>
 								<span className="d-inline-block ms-2 text-secondary-accent fw-semibold">
-									{formatCurrency(product.discountPrice)}
+									{formatToNaira(product.discountPrice)}
 								</span>
 							</p>
 							<p className="font-inter fs-5 fw-normal text-content-accent rating">

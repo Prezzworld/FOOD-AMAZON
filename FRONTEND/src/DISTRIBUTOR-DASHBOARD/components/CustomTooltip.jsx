@@ -1,5 +1,6 @@
 import React from "react";
 import "../pages/dashboard.css";
+import formatToNaira from "../../utils/nairaFormatter";
 
 const CustomTooltip = ({ active, payload, label, coordinate, viewBox, showLine = true, formatValue }) => {
 	if (active && payload && payload.length) {
@@ -38,12 +39,7 @@ const CustomTooltip = ({ active, payload, label, coordinate, viewBox, showLine =
 					const revenue = formatValue
 						? formatValue(entry)
 						: entry.payload[salesKey];
-					const formattedRevenue = new Intl.NumberFormat("en-NG", {
-						style: "currency",
-						currency: "NGN",
-						minimumFractionDigits: 0,
-						maximumFractionDigits: 0,
-					}).format(revenue);
+					
 					return (
 						<p className="tooltip-item fs-v-small fw-medium" key={index}>
 							<span
@@ -56,7 +52,7 @@ const CustomTooltip = ({ active, payload, label, coordinate, viewBox, showLine =
 									borderRadius: "50%",
 								}}
 							></span>
-							<span className="tooltip-text">{formattedRevenue}</span>
+							<span className="tooltip-text">{formatToNaira(revenue)}</span>
 						</p>
 					);
 				})}
