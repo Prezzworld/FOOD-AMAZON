@@ -1,4 +1,4 @@
-import React, {Suspense, lazy} from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./ErrorBoundary";
 import { ToastProvider } from "./toast/ToastContext";
@@ -48,13 +48,13 @@ const Inventory = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Inventory"));
 const Notifications = lazy(
   () => import("./DISTRIBUTOR-DASHBOARD/pages/Notifications"),
 );
-const Reviews = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Reviews"))
-const Settings = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Settings"))
+const Reviews = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Reviews"));
+const Settings = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Settings"));
 
 import NotFound from "./NotFound";
 
 function App() {
-	return (
+  return (
     <>
       <ErrorBoundary>
         <AlertProvider>
@@ -66,8 +66,21 @@ function App() {
               <DistributorTokenExpirationHandler />
               <Suspense
                 fallback={
-                  <div class="spinner-grow text-primary-normal" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      minHeight: "100vh",
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      className="spinner-grow text-primary-normal"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
                   </div>
                 }
               >

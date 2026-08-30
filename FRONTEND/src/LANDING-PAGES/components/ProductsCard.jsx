@@ -195,7 +195,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 					<div className="d-flex align-items-center justify-content-between mb-3">
 						<p className="d-flex align-items-center gap-2 font-inter fs-6 text-content-accent">
 							<FaStar className="text-secondary-normal" size={20} />{" "}
-							{product.rating} (18)
+							{product.rating} ({product.reviewCount})
 						</p>
 						<p className="fw-semibold font-inter fs-6 text-main-accent">
 							{formatToNaira(product.price)}
