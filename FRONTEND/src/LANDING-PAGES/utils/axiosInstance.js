@@ -5,118 +5,127 @@ import { API_URL } from "../../config";
 
 // Create axios instance
 const axiosInstance = axios.create({
-	baseURL: `${API_URL}/api`,
-	// timeout: 10000,
+  baseURL: `${API_URL}/api`,
+  // timeout: 10000,
 });
 
 let isRefreshing = false;
 let failedQueue = [];
 const processQueue = (error, token = null) => {
-	failedQueue.forEach((prom) => {
-		if (error) {
-			prom.reject(error);
-		} else {
-			prom.resolve(token);
-		}
-	});
-	failedQueue = [];
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
 };
 
 // Request interceptor - add token to every request
 axiosInstance.interceptors.request.use(
-	(config) => {
-		const token = localStorage.getItem("token");
-		if (token) {
-			config.headers["x-auth-token"] = token;
-
-		}
-		return config;
-	},
-	(error) => {
-		return Promise.reject(error);
-	}
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers["x-auth-token"] = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
 );
 
 // Response interceptor - handle token expiration and auto-refresh
 axiosInstance.interceptors.response.use(
-	(response) => {
-		// If request succeeds, just return the response
-		return response;
-	},
-	async (error) => {
-		const originalRequest = error.config;
-		if (error.response?.status !== 401 || originalRequest._retry) {
-			return Promise.reject(error);
-		}
+  (response) => {
+    // If request succeeds, just return the response
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    const isAuthEndpoint =
+      originalRequest.url.includes("/users/login") ||
+      originalRequest.url.includes("/users/register");
+			
+    if (isAuthEndpoint) {
+      return Promise.reject(error);
+    }
 
-		if (isRefreshing) {
-			return new Promise((resolve, reject) => {
-				failedQueue.push({ resolve, reject });
-			})
-				.then((token) => {
-					originalRequest.headers["x-auth-token"] = token;
-					return axiosInstance(originalRequest);
-				})
-				.catch((err) => {
-					return Promise.reject(err);
-				});
-		}
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
 
-		// If error is 401 (Unauthorized) and we haven't tried to refresh yet
-		// if (error.response?.status === 401 && !originalRequest._retry) {
-		originalRequest._retry = true;
-		isRefreshing = true;
-		// Get refresh token
-		const refreshToken = localStorage.getItem("refreshToken");
-		if (!refreshToken) {
-			isRefreshing = false;
-			handleAuthFailure();
-			return Promise.reject(new Error("No refresh token available"));
-		}
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      })
+        .then((token) => {
+          originalRequest.headers["x-auth-token"] = token;
+          return axiosInstance(originalRequest);
+        })
+        .catch((err) => {
+          return Promise.reject(err);
+        });
+    }
 
-		try {
-			// Request new access token (don't use axiosInstance here to avoid infinite loop)
-			const response = await axios.post(
-				`${import.meta.env.VITE_API_URL}/api/food-amazon-database/users/login/refresh-token`,
-				{
-					refreshToken,
-				}
-			);
+    // If error is 401 (Unauthorized) and we haven't tried to refresh yet
+    // if (error.response?.status === 401 && !originalRequest._retry) {
+    originalRequest._retry = true;
+    isRefreshing = true;
+    // Get refresh token
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      isRefreshing = false;
+      handleAuthFailure();
+      return Promise.reject(new Error("No refresh token available"));
+    }
 
-			const { accessToken } = response.data;
-			if (!accessToken) {
-				throw new Error("No access token received from refresh");
-			}
+    try {
+      // Request new access token (don't use axiosInstance here to avoid infinite loop)
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/food-amazon-database/users/login/refresh-token`,
+        {
+          refreshToken,
+        },
+      );
 
-			// Save new access token
-			localStorage.setItem("token", accessToken);
+      const { accessToken } = response.data;
+      if (!accessToken) {
+        throw new Error("No access token received from refresh");
+      }
 
-			// Retry original request with new token
-			originalRequest.headers["x-auth-token"] = accessToken;
-			processQueue(null, accessToken);
-			isRefreshing = false;
-			return axiosInstance(originalRequest);
-		} catch (refreshError) {
-			console.error("Token refresh failed:", refreshError);
-			processQueue(refreshError, null);
-			isRefreshing = false;
-			handleAuthFailure();
-			return Promise.reject(refreshError);
-		}
-	}
+      // Save new access token
+      localStorage.setItem("token", accessToken);
+
+      // Retry original request with new token
+      originalRequest.headers["x-auth-token"] = accessToken;
+      processQueue(null, accessToken);
+      isRefreshing = false;
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      console.error("Token refresh failed:", refreshError);
+      processQueue(refreshError, null);
+      isRefreshing = false;
+      handleAuthFailure();
+      return Promise.reject(refreshError);
+    }
+  },
 );
 
 function handleAuthFailure() {
-	const isOnCallbackPage = window.location.pathname === "/auth/callback";
-	if (isOnCallbackPage) return;
+  const isOnCallbackPage = window.location.pathname === "/auth/callback";
+  if (isOnCallbackPage) return;
 
-	localStorage.removeItem("token");
-	localStorage.removeItem("refreshToken");
-	localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 
-	window.dispatchEvent(new CustomEvent("tokenExpired", {
-		detail: {message: "Session expired, please log in again."}
-	}))
+  window.dispatchEvent(
+    new CustomEvent("tokenExpired", {
+      detail: { message: "Session expired, please log in again." },
+    }),
+  );
 }
 
 export default axiosInstance;
