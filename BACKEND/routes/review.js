@@ -288,6 +288,21 @@ router.patch("/update-review/:reviewId", auth, async (req, res) => {
       {$set: { rating, headline, comment }},
 			{ new: true, runValidators: true },
     );
+
+		const product = await Product.findById(review.productId);
+		if(product) {
+			const allReviews = await Review.find({productId: product._id})
+			if(allReviews.length === 0) {
+				await Product.findByIdAndUpdate(product._id, {rating: 0, reviewCount: 0})
+			} else {
+				const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0)
+				const avgRating = totalRating / allReviews.length
+				await Product.findByIdAndUpdate(product._id, {
+					rating: Math.round(avgRating * 10) / 10,
+					reviewCount: allReviews.length
+				})
+			}
+		}
     
     res.status(200).json({
       success: true,
