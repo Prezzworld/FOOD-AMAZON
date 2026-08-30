@@ -63,7 +63,7 @@ export const wishlistLocalStorage = {
 				return true;
 			}
 		} catch (error) {
-			console.console.error("Error toggling wishlist", error);
+			console.error("Error toggling wishlist", error);
 			return false;
 		}
 	},
