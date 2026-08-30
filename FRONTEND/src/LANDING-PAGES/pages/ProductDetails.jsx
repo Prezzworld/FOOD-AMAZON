@@ -74,7 +74,7 @@ const ProductDetails = () => {
 			setLoading(false)
 		}
 
-		return controller.abort()
+		return () => controller.abort()
 	}, [id, state])
 
 	useEffect(() => {
@@ -102,10 +102,10 @@ const ProductDetails = () => {
           setReviewsLoading(false);
         }
       };
-			fetchReviews(id)
+			fetchReviews(id);
 		}
 
-		return controller.abort()
+		return () => controller.abort()
 	}, [id])
 
 
