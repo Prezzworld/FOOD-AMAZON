@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FaSearch, FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingBag } from "react-icons/md";
@@ -11,20 +11,19 @@ const Header = ({ shadow }) => {
 	const navItems = ["Home", "Our Products", "Health Benefits", "Blog", "FAQs"];
 	const [iconOpen, setIconOpen] = useState(false);
 	const [cartCount, setCartCount] = useState(0);
-	const [isLoadingCount, setIsLoadingCount] = useState(false);
+	const isLoadingCountRef = useRef(false);
 
 	useEffect(() => {
 		const updateCartCount = async () => {
-			if(isLoadingCount) return;
+			if(isLoadingCountRef.current) return;
 			try {
-				setIsLoadingCount(true);
+				isLoadingCountRef.current = true;
 				const count = await cartService.getCartCount();
 				setCartCount(count);
 			} catch (error) {
 				console.error("Error updating cart count:", error);
-				if(cartCount === 0) return setCartCount(0);
 			} finally {
-				setIsLoadingCount(false);
+				isLoadingCountRef.current = false
 			}
 		};
 

@@ -203,8 +203,7 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 					</div>
 				</div>
 				<div>
-					<Link onClick={handleAddToCart}>
-						<button className="bg-transparent border-0 rounded-2 browse-btn w-100 text-primary-normal fs-6 fw-semibold font-inter">
+						<button onClick={handleAddToCart} className="bg-transparent border-0 rounded-2 browse-btn w-100 text-primary-normal fs-6 fw-semibold font-inter">
 							{added ? (
 								<>
 									<FaCheck className="text-white me-1" /> Added
@@ -213,7 +212,6 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 								"Add to cart"
 							)}
 						</button>
-					</Link>
 				</div>
 			</div>
 		</>
