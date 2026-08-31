@@ -47,7 +47,7 @@ axiosInstance.interceptors.response.use(
     const isAuthEndpoint =
       originalRequest.url.includes("/users/login") ||
       originalRequest.url.includes("/users/register");
-			
+
     if (isAuthEndpoint) {
       return Promise.reject(error);
     }
@@ -77,6 +77,7 @@ axiosInstance.interceptors.response.use(
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
       isRefreshing = false;
+			processQueue(new Error("No refresh token"), null); 
       handleAuthFailure();
       return Promise.reject(new Error("No refresh token available"));
     }
