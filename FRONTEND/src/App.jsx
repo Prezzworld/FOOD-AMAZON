@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./ErrorBoundary";
 import { ToastProvider } from "./toast/ToastContext";
 import { AlertProvider } from "./alert/AlertContext";
@@ -65,6 +66,7 @@ function App() {
             <Alert />
             <BrowserRouter>
               <QueryClientProvider client={queryClient}>
+                <ReactQueryDevtools initialIsOpen={false}/>
                 <TokenExpirationHandler />
                 <DistributorTokenExpirationHandler />
                 <Suspense

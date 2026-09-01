@@ -1,7 +1,6 @@
 import axios from "axios";
 import { API_URL } from "../../config";
-
-// const API_BASE_URL = "http://localhost:3004/api";
+import useAuthStore from "../../store/authStore";
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -25,7 +24,7 @@ const processQueue = (error, token = null) => {
 // Request interceptor - add token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const {token} = useAuthStore.getState()
     if (token) {
       config.headers["x-auth-token"] = token;
     }
@@ -74,7 +73,7 @@ axiosInstance.interceptors.response.use(
     originalRequest._retry = true;
     isRefreshing = true;
     // Get refresh token
-    const refreshToken = localStorage.getItem("refreshToken");
+    const {refreshToken} = useAuthStore.getState()
     if (!refreshToken) {
       isRefreshing = false;
 			processQueue(new Error("No refresh token"), null); 
@@ -97,7 +96,7 @@ axiosInstance.interceptors.response.use(
       }
 
       // Save new access token
-      localStorage.setItem("token", accessToken);
+      useAuthStore.getState().setTokens(accessToken, refreshToken)
 
       // Retry original request with new token
       originalRequest.headers["x-auth-token"] = accessToken;
@@ -117,16 +116,7 @@ axiosInstance.interceptors.response.use(
 function handleAuthFailure() {
   const isOnCallbackPage = window.location.pathname === "/auth/callback";
   if (isOnCallbackPage) return;
-
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("user");
-
-  window.dispatchEvent(
-    new CustomEvent("tokenExpired", {
-      detail: { message: "Session expired, please log in again." },
-    }),
-  );
+  useAuthStore.getState().logout()
 }
 
 export default axiosInstance;
