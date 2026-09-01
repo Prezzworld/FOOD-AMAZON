@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./ErrorBoundary";
 import { ToastProvider } from "./toast/ToastContext";
 import { AlertProvider } from "./alert/AlertContext";
@@ -52,6 +53,7 @@ const Reviews = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Reviews"));
 const Settings = lazy(() => import("./DISTRIBUTOR-DASHBOARD/pages/Settings"));
 
 import NotFound from "./NotFound";
+import queryClient from "./queryClient";
 
 function App() {
   return (
@@ -62,86 +64,88 @@ function App() {
             <ToastContainer />
             <Alert />
             <BrowserRouter>
-              <TokenExpirationHandler />
-              <DistributorTokenExpirationHandler />
-              <Suspense
-                fallback={
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      minHeight: "100vh",
-                      width: "100%",
-                    }}
-                  >
+              <QueryClientProvider client={queryClient}>
+                <TokenExpirationHandler />
+                <DistributorTokenExpirationHandler />
+                <Suspense
+                  fallback={
                     <div
-                      className="spinner-grow text-primary-normal"
-                      role="status"
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: "100vh",
+                        width: "100%",
+                      }}
                     >
-                      <span className="visually-hidden">Loading...</span>
+                      <div
+                        className="spinner-grow text-primary-normal"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
                     </div>
-                  </div>
-                }
-              >
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/Home" element={<Home />} />
-                  <Route
-                    path={`product-details/:id`}
-                    element={<ProductDetails />}
-                  />
-                  <Route path="/bulk-products" element={<BulkProducts />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route
-                    path="/checkout"
-                    element={
-                      <AuthStatus>
-                        <Checkout />
-                      </AuthStatus>
-                    }
-                  />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/payment-status" element={<PaymentStatus />} />
-                  <Route
-                    path="/distributor/signup"
-                    element={<DistributorSignup />}
-                  />
-                  <Route
-                    path="/distributor/login"
-                    element={<DistributorLogin />}
-                  />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route
-                    path="/distributor/confirm-email"
-                    element={<ConfirmEmail />}
-                  />
-                  <Route
-                    path="/distributor/reset-password"
-                    element={<PasswordReset />}
-                  />
-                  <Route
-                    path="/distributor/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route index element={<Overview />} />
-                    <Route path="pos" element={<PointOfSale />} />
-                    <Route path="orders" element={<Orders />} />
-                    <Route path="customers" element={<Customers />} />
-                    <Route path="inventory" element={<Inventory />} />
-                    <Route path="notifications" element={<Notifications />} />
-                    <Route path="reviews" element={<Reviews />} />
-                    <Route path="settings" element={<Settings />} />
-                  </Route>
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                  }
+                >
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/Home" element={<Home />} />
+                    <Route
+                      path={`product-details/:id`}
+                      element={<ProductDetails />}
+                    />
+                    <Route path="/bulk-products" element={<BulkProducts />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route
+                      path="/checkout"
+                      element={
+                        <AuthStatus>
+                          <Checkout />
+                        </AuthStatus>
+                      }
+                    />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/payment-status" element={<PaymentStatus />} />
+                    <Route
+                      path="/distributor/signup"
+                      element={<DistributorSignup />}
+                    />
+                    <Route
+                      path="/distributor/login"
+                      element={<DistributorLogin />}
+                    />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route
+                      path="/distributor/confirm-email"
+                      element={<ConfirmEmail />}
+                    />
+                    <Route
+                      path="/distributor/reset-password"
+                      element={<PasswordReset />}
+                    />
+                    <Route
+                      path="/distributor/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <DashboardLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<Overview />} />
+                      <Route path="pos" element={<PointOfSale />} />
+                      <Route path="orders" element={<Orders />} />
+                      <Route path="customers" element={<Customers />} />
+                      <Route path="inventory" element={<Inventory />} />
+                      <Route path="notifications" element={<Notifications />} />
+                      <Route path="reviews" element={<Reviews />} />
+                      <Route path="settings" element={<Settings />} />
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </QueryClientProvider>
             </BrowserRouter>
           </ToastProvider>
         </AlertProvider>
