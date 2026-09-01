@@ -32,7 +32,7 @@ const Login = () => {
   const LOGIN_ENDPOINT = "/api/food-amazon-database/users/login/";
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
     setLoading(true);
 
     if (!loginData.email || !loginData.password) {
@@ -93,7 +93,7 @@ const Login = () => {
           mode: "confirm",
           confirmText: "Try Again",
           cancelText: "Cancel",
-          onConfirm: () => setLoading(false),
+          onConfirm: () => handleSubmit(),
           onCancel: () => setLoading(false),
         });
         return;
@@ -144,7 +144,7 @@ const Login = () => {
         mode: "confirm",
         confirmText: "Try Again",
         cancelText: "Cancel",
-        onConfirm: () => setLoading(false),
+        onConfirm: () => handleSubmit(),
         onCancel: () => setLoading(false),
       });
     }

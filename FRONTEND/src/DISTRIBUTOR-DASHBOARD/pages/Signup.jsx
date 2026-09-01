@@ -89,7 +89,7 @@ const Signup = () => {
 	}, [token, api_endpoint, showAlert]);
 
 	const handleSubmit = async (e) => {
-		e.preventDefault();
+		e?.preventDefault?.();
 		// setError("");
 
 		if (!formData.email || !formData.fullName || !formData.password) {
@@ -126,6 +126,7 @@ const Signup = () => {
 					"error",
 					{
 						mode: "confirm",
+						onConfirm: () => handleSubmit(),
 						confirmText: "Try again",
 					},
 				);

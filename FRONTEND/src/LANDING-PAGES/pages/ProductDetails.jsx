@@ -554,7 +554,7 @@ const ProductDetails = () => {
 									{selectedRating > 1 ? "s" : ""}
 								</p>
 							)}
-							<div class="mb-4">
+							<div className="mb-4">
 								<label
 									htmlFor="headline"
 									className="form-label mb-2 fw-semibold fs-5 text-main-accent"

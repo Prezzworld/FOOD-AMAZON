@@ -87,7 +87,7 @@ export const wishlistLocalStorage = {
 			const wishlist = wishlistLocalStorage.getWishlist();
 			return wishlist.length;
 		} catch (error) {
-			console.error("Error clearing wishlist", error)
+			console.error("Error getting wishlist count", error)
 		}
 	},
 };

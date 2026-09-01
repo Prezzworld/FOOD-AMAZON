@@ -27,7 +27,6 @@ const Overview = () => {
 			} catch (error) {
 				console.error("Error fetching overview data", error);
 				setError("Failed to load overview data. Please try again later.");
-				return {};
 			} finally {
 				setLoading(false);
 			}

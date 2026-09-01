@@ -30,7 +30,7 @@ const Login = () => {
 	};
 
 	const handleSubmit = async (e) => {
-		e.preventDefault();
+		e?.preventDefault?.();
 		setLoading(true);
 
 		if (!loginData.email || !loginData.password) {
@@ -57,7 +57,7 @@ const Login = () => {
 			const data = response.data;
 			if (response.data.success) {
 				const { accessToken, refreshToken, user } = data;
-				if (!accessToken || !refreshToken) {
+				if (!accessToken) {
 					console.error("Missing tokens in response:", data);
 					throw new Error("No authentication tokens received");
 				}
@@ -76,12 +76,14 @@ const Login = () => {
 			console.error("Error logging in: ", error);
 			if (error.response?.data) {
 				showAlert(
-					error.response.data.message || "Invalid email or password",
-					"error",
-					{
-						mode: "inline",
-					},
-				);
+          error.response.data.message || "Invalid email or password",
+          "error",
+          {
+            mode: "confirm",
+            onConfirm: () => handleSubmit(),
+            confirmText: "Try again",
+          },
+        );
 			} else if (error.request) {
 				showAlert(
 					"No response from server. Please check your connection.",
@@ -97,6 +99,7 @@ const Login = () => {
 					"error",
 					{
 						mode: "confirm",
+						onConfirm: () => handleSubmit(),
 						confirmText: "Try again",
 					},
 				);

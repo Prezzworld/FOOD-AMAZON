@@ -255,7 +255,7 @@ const Checkout = () => {
 									value={formData.country}
 									onChange={handleInputChange}
 								>
-									<option selected>Nigeria</option>
+									<option>Nigeria</option>
 									<option>United States of America</option>
 								</select>
 							</div>
