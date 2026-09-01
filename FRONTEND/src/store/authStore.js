@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 const getInitialAuth = () => {
-  const token = localStorage.getItem("accessToken")
+  const token = localStorage.getItem("token")
   const refreshToken = localStorage.getItem("refreshToken")
   const user = JSON.parse(localStorage.getItem("user") || null);
   return {token, refreshToken, user}
@@ -19,13 +19,13 @@ const useAuthStore = create(
       isAuthenticated: !!initial.token,
 
       login: (token, refreshToken, user) => {
-        localStorage.setItem("accessToken", token);
+        localStorage.setItem("token", token);
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("user", JSON.stringify(user));
         set({ token, refreshToken, user, isAuthenticated: true });
       },
       logout: () => {
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         set({
@@ -36,7 +36,7 @@ const useAuthStore = create(
         });
       },
       setTokens: (token, refreshToken) => {
-        localStorage.setItem("accessToken", token);
+        localStorage.setItem("token", token);
         localStorage.setItem("refreshToken", refreshToken);
         set({ token, refreshToken });
       },

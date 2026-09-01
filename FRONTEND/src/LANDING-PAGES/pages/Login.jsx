@@ -5,6 +5,7 @@ import "../pages/signin.css";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
 import AuthLayout from "../components/AuthLayout";
+import useAuthStore from "../../store/authStore";
 
 const Login = () => {
   const { showToast } = useToast();
@@ -101,21 +102,11 @@ const Login = () => {
 
       // Login successful
       const token = response.headers.get("x-auth-token");
-      if (token) {
-        localStorage.setItem("token", token);
-      }
 
       const { accessToken, refreshToken, user } = responseData;
-      if (accessToken) {
-        localStorage.setItem("token", accessToken);
-      }
-      if (refreshToken) {
-        localStorage.setItem("refreshToken", refreshToken);
-      }
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-
+      const finalToken = accessToken || token;
+      useAuthStore.getState().login(finalToken, refreshToken, user)
+     
       try {
         await cartService.syncCartOnLogin(accessToken || token);
 
