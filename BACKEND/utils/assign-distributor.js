@@ -8,11 +8,8 @@ async function assignDistributorByCity(city) {
       });
       
       if (!distributor) {
-         console.log(`No distributor found for this region: ${city}`);
          return null
       }
-
-      console.log(`Assigned order to distributor: ${distributor.name} (${distributor.distributorInfo.businessName})`);
       return distributor._id;
    } catch(error) {
       console.error("Error assigning distributor", error);

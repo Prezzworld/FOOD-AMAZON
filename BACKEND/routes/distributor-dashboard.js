@@ -150,29 +150,6 @@ router.get("/overview", [auth, distributor], async (req, res) => {
 			999,
 		);
 		const calculateSales = async (startDate, endDate) => {
-			console.log(
-				`Querying from ${startDate.toISOString()} to ${endDate.toISOString()}`,
-			);
-			console.log(`For distributor: ${distributorId}`);
-			console.log(`Distributor ID type: ${typeof distributorId}`);
-			console.log(
-				`Distributor ID is ObjectId: ${distributorId instanceof mongoose.Types.ObjectId}`,
-			);
-
-			// Add a test query to see what's actually in the database
-			const testCount = await Order.countDocuments({
-				"paymentInfo.paymentStatus": "paid",
-			});
-			console.log(`Total paid orders in database: ${testCount}`);
-
-			const testCountWithDistributor = await Order.countDocuments({
-				distributorId: distributorId,
-				"paymentInfo.paymentStatus": "paid",
-			});
-			console.log(
-				`Paid orders for this distributor: ${testCountWithDistributor}`,
-			);
-
 			const result = await Order.aggregate([
 				{
 					$match: {
@@ -192,10 +169,6 @@ router.get("/overview", [auth, distributor], async (req, res) => {
 					},
 				},
 			]);
-
-			console.log(
-				`Found ${result.length > 0 ? result[0].orderCount : 0} orders`,
-			);
 
 			return result.length > 0
 				? { totalSales: result[0].totalSales, orderCount: result[0].orderCount }

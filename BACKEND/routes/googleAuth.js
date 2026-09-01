@@ -14,7 +14,6 @@ router.get(
 		failureRedirect: `${config.get("frontendUrl")}/login?error=google_auth_failed`,
 	}), (req, res) => {
 		const user = req.user;
-		console.log(user);
 		const accessToken = user.generateAuthToken("1d");
 		const refreshToken = user.generateRefreshToken("7d");
 		user.refreshToken = refreshToken;

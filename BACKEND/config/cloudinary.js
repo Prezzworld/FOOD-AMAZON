@@ -2,20 +2,6 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
 
-console.log("🔍 Checking Cloudinary Config:");
-console.log(
-	"Cloud Name:",
-	process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing"
-);
-console.log(
-	"API Key:",
-	process.env.CLOUDINARY_API_KEY ? "✅ Loaded" : "❌ Missing"
-);
-console.log(
-	"API Secret:",
-	process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing"
-);
-
 // Configure Cloudinary
 cloudinary.config({
 	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -11,11 +11,9 @@ const auth = require("../middleware/auth");
 
 router.get("/get-cart", auth, async (req, res) => {
   try {
-    console.log("📦 Get cart request - User ID:", req.user._id);
     let cart = await Cart.findOne({ user: req.user._id });
 
     if (!cart) {
-      console.log("🛒 No cart found for user, creating new cart.");
       const user = await User.findById(req.user._id);
       cart = new Cart({
         user: req.user._id,
@@ -32,7 +30,6 @@ router.get("/get-cart", auth, async (req, res) => {
       await cart.save();
     }
 
-    console.log("✅ Cart sent to client successfully:", cart);
     res.send(cart);
   } catch (error) {
     console.error("get cart error:", error);
@@ -60,8 +57,6 @@ router.post("/add-item", auth, async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) return res.status(400).send("Invalid product.");
-
-    // console.log("Product from DB:", JSON.stringify(product, null, 2));
 
     if (!product.inStock)
       return res.status(400).send("Product is out of stock");
@@ -104,9 +99,7 @@ router.post("/add-item", auth, async (req, res) => {
       });
     }
 
-    // console.log("Cart before calculateTotals:", JSON.stringify(cart, null, 2));
     cart.calculateTotals();
-    // console.log("Cart after calculateTotals:", JSON.stringify(cart, null, 2));
     await cart.save();
 
     res.json({
@@ -161,13 +154,6 @@ router.delete("/remove-item/:itemId", auth, async (req, res) => {
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) return res.status(404).send("Cart not found");
 
-    console.log("  - Cart items before removal:", cart.items.length);
-
-    // Log the IDs to help debug
-    cart.items.forEach((item, index) => {
-      console.log(`  - Item ${index}: ${item._id.toString()}`);
-    });
-
     const itemsBefore = cart.items.length;
 
     cart.items = cart.items.filter(
@@ -176,11 +162,7 @@ router.delete("/remove-item/:itemId", auth, async (req, res) => {
 
     const itemsAfter = cart.items.length;
 
-    console.log("  - Cart items after removal:", itemsAfter);
-    console.log("  - Items actually removed:", itemsBefore - itemsAfter);
-
     if (itemsBefore === itemsAfter) {
-      console.log("⚠️ No items were removed - item ID not found in cart");
       return res.status(404).send("Item not found in cart");
     }
 

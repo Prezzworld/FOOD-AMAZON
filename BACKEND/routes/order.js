@@ -65,14 +65,11 @@ router.post("/create", auth, async (req, res) => {
         deviceType = "desktop";
       }
       // if (distributorId) {
-      // 	console.log(`Order assigned to distributor: ${distributorId}`);
       // } else {
-      // 	console.log(`No distributor found for city: ${customerSnapshot.city}`);
       // 	return res.status(400).send("No distributor available for your area");
       // }
     } else if (orderChannel === "walk-in") {
       distributorId = req.user._id;
-      console.log(`Walk-in order for distributor: ${distributorId}`);
     }
 
     const shortId = distributorId
@@ -101,7 +98,6 @@ router.post("/create", auth, async (req, res) => {
       salesTax: salesTax || 0,
     });
     await order.save();
-    console.log("Calculated Total Amount:", order.totalAmount);
     if (orderChannel === "walk-in") {
       order.paymentInfo = {
         paymentStatus: "paid",
@@ -186,13 +182,11 @@ router.post("/create", auth, async (req, res) => {
 });
 
 router.post("/confirm", auth, async (req, res) => {
-  console.log("Confirming payment...");
   try {
     const { reference } = req.body;
     if (!reference) {
       return res.status(400).send("Payment reference is required");
     }
-    console.log("Verifying payment for reference:", reference);
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -202,9 +196,7 @@ router.post("/confirm", auth, async (req, res) => {
       },
     );
     const data = response.data.data;
-    console.log("payment data: ", data);
     if (data.status === "success") {
-      console.log("Payment successful, updating order...");
       const existingOrder = await Order.findOne({"paymentInfo.paymentReference": reference})
       if(existingOrder?.paymentInfo?.paymentStatus === "paid") {
         return res.json({success: true, message: "Payment already confirmed", order: existingOrder})
@@ -221,10 +213,8 @@ router.post("/confirm", auth, async (req, res) => {
         { new: true },
       );
       if (!order) {
-        console.log("Order not found for reference: ", reference);
         return res.status(404).send("Order not found");
       }
-      (console.log("Order updated successfully: ", order._id),
         await upsertDistributorCustomer({
           distributorId: order.distributorId,
           customerEmail: order.customerSnapshot.email,
@@ -233,7 +223,7 @@ router.post("/confirm", auth, async (req, res) => {
           phone: order.customerSnapshot.phone,
           source: "order",
           orderDate: order.createdAt,
-        }));
+        });
       await Cart.findOneAndDelete({ user: order.userId });
       for (const item of order.items) {
         await Product.findByIdAndUpdate(
@@ -242,14 +232,12 @@ router.post("/confirm", auth, async (req, res) => {
           { new: true },
         );
       }
-      console.log("Cart cleared for user: ", order.userId);
       return res.json({
         success: true,
         message: "Payment confirmed successfully",
         order,
       });
     } else {
-      console.log("Payment verification failed, status: ", data.status);
       await Order.findOneAndUpdate(
         { "paymentInfo.paymentReference": reference },
         { $set: { "paymentInfo.paymentStatus": "failed" } },
@@ -301,7 +289,6 @@ router.post("/confirm", auth, async (req, res) => {
 
 const findOrderWithRetry = async (reference, maxRetry = 3, delay = 1000) => {
   // Log what we're about to search for
-  console.log(`Searching for order with reference: ${reference}`);
 
   // On the very first attempt, wait a moment to give MongoDB
   // time to propagate the write from the create route
@@ -314,17 +301,8 @@ const findOrderWithRetry = async (reference, maxRetry = 3, delay = 1000) => {
       }).lean(); // .lean() returns a plain JS object, faster for read-only use
 
       if (order) {
-        console.log(`✅ Order found on attempt ${retry}:`, order._id);
-        console.log(
-          `Order payment status: ${order.paymentInfo?.paymentStatus}`,
-        );
         return order;
       }
-
-      // This log tells you the query ran but found nothing
-      console.log(
-        `❌ Attempt ${retry}/${maxRetry}: No order found for reference ${reference}`,
-      );
 
       // On last attempt, do a broader search to help diagnose
       // Check if ANY recent orders exist, to confirm DB connection is working
@@ -332,16 +310,10 @@ const findOrderWithRetry = async (reference, maxRetry = 3, delay = 1000) => {
         const recentOrder = await Order.findOne({})
           .sort({ createdAt: -1 })
           .lean();
-        console.log(
-          `Most recent order in DB:`,
-          recentOrder?._id,
-          recentOrder?.paymentInfo?.paymentReference,
-        );
       }
 
       if (retry < maxRetry) {
         const waitTime = retry * delay; // 2s, 4s, 6s, 8s
-        console.log(`Waiting ${waitTime}ms before retry...`);
         await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
     } catch (queryError) {
@@ -375,24 +347,15 @@ router.post("/webhook", async (req, res) => {
 
     if (event.event === "charge.success") {
       const reference = event.data.reference;
-      console.log("Processing successful charge for reference: ", reference);
       const directCheck = await Order.findOne({
         "paymentInfo.paymentReference": reference,
       });
-      console.log(
-        "Direct DB check result:",
-        directCheck ? `Found order ${directCheck._id}` : "NOT FOUND",
-      );
 
       const existingOrder = await findOrderWithRetry(reference);
       if (!existingOrder) {
-        console.log("Order not found after retries for reference: ", reference);
         return res.sendStatus(200); // Acknowledge the webhook to prevent retries, even if we can't find the order
       }
       if (existingOrder?.paymentInfo?.paymentStatus === "paid") {
-        console.log(
-          `Order ${existingOrder._id} already processed, skipping webhook duplicate`,
-        );
         return res.sendStatus(200);
       }
       const order = await Order.findOneAndUpdate(
@@ -417,12 +380,10 @@ router.post("/webhook", async (req, res) => {
         );
       }
       await Cart.findOneAndDelete({ user: order.userId });
-      console.log("Cart cleared for user: ", order.userId);
     }
 
     if (event.event === "charge.failed") {
       const reference = event.data.reference;
-      console.log("❌ Charge failed for reference:", reference);
 
       const order = await Order.findOneAndUpdate(
         { "paymentInfo.paymentReference": reference },
@@ -434,12 +395,6 @@ router.post("/webhook", async (req, res) => {
         },
         { new: true },
       );
-
-      if (order) {
-        console.log("Order marked as failed:", order._id);
-      } else {
-        console.log("No order found for failed charge reference:", reference);
-      }
     }
     res.sendStatus(200);
   } catch (error) {

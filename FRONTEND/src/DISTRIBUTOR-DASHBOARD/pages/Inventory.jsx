@@ -231,20 +231,20 @@ const Inventory = () => {
           </h4>
           <div className="d-flex gap-2">
             <button
-              onClick={() => console.log("TODO: wire up Add Product flow")}
+             
               className="d-flex align-items-center gap-2 bg-primary-normal border-0 text-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium"
             >
               <FiPlus size={16} /> Add Product
             </button>
             <button
-              onClick={() => console.log("TODO: wire up Filters")}
+              
               className="d-flex align-items-center gap-2 bg-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium text-dark-blue"
               style={{ border: "1px solid #e5e7eb" }}
             >
               <FiSliders size={16} /> Filters
             </button>
             <button
-              onClick={() => console.log("TODO: wire up export/download")}
+              
               className="d-flex align-items-center gap-2 bg-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium text-dark-blue"
               style={{ border: "1px solid #e5e7eb" }}
             >
