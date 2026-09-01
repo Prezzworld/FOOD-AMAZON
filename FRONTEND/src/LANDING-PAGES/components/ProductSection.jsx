@@ -13,12 +13,6 @@ const ProductSection = ({ title, type, layoutMode = "flex", variant = "full", li
 		fetchProducts();
 	}, [type]);
 
-	useEffect(() => {
-		if (error) {
-			showAlert(`An error has occured ${error}`, "error", {mode: "confirm", confirmText: "Ok"})
-		}
-	}, [error]);
-
 	const fetchProducts = async () => {
 		try {
 			setLoading(true);

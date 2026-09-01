@@ -9,6 +9,24 @@ import "./cart.css";
 // import { cartLocalStorage } from "../utils/cartLocalStorage";
 // import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
 
+export const normalizeCart = (cartItems) => {
+	return cartItems.map(item => {
+		if (item.product) {
+      return {
+        itemId: item._id,
+        _id: item.product._id,
+        name: item.product.name,
+        price: item.product.price,
+        productImg: item.product.productImg,
+        quantity: item.quantity,
+        variety: item.variety,
+        cartItemId: item.cartItemId,
+      };
+    }
+    return item;
+	})
+}
+
 const Cart = () => {
 	const [cart, setCart] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -32,21 +50,7 @@ const Cart = () => {
 			setLoading(true);
 			const savedCart = await cartService.getCart();
 
-			const normalizedCart = savedCart.map((item) => {
-				if (item.product) {
-					return {
-						itemId: item._id,
-						_id: item.product._id,
-						name: item.product.name,
-						price: item.product.price,
-						productImg: item.product.productImg,
-						quantity: item.quantity,
-						variety: item.variety,
-						cartItemId: item.cartItemId
-					};
-				}
-				return item;
-			});
+			const normalizedCart = normalizeCart(savedCart)
 			setCart(normalizedCart);
 		} catch (error) {
 			console.error("Error fetching cart", error);
@@ -59,21 +63,7 @@ const Cart = () => {
 		try {
 			const updatedCart = await cartService.removeFromCart(productId);
 
-			const normalizedCart = updatedCart.map((item) => {
-				if (item.product) {
-					return {
-						itemId: item._id,
-						_id: item.product._id,
-						name: item.product.name,
-						price: item.product.price,
-						productImg: item.product.productImg, // Don't forget this!
-						quantity: item.quantity,
-						variety: item.variety,
-						cartItemId: item.cartItemId
-					};
-				}
-				return item;
-			});
+			const normalizedCart = normalizeCart(updatedCart)
 
 			setCart(normalizedCart);
 		} catch (error) {
@@ -87,21 +77,7 @@ const Cart = () => {
 		const updatedCart = await cartService.updateQuantity(productId, quantity);
 
 		// Normalize before setting state
-		const normalizedCart = updatedCart.map((item) => {
-			if (item.product) {
-				return {
-					itemId: item._id,
-					_id: item.product._id,
-					name: item.product.name,
-					price: item.product.price,
-					productImg: item.product.productImg,
-					quantity: item.quantity,
-					variety: item.variety,
-					cartItemId: item.cartItemId
-				};
-			}
-			return item;
-		});
+		const normalizedCart = normalizeCart(updatedCart)
 
 		setCart(normalizedCart);
 	};
