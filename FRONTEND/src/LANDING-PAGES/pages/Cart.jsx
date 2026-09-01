@@ -9,7 +9,7 @@ import "./cart.css";
 // import { cartLocalStorage } from "../utils/cartLocalStorage";
 // import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
 
-export const normalizeCart = (cartItems) => {
+const normalizeCart = (cartItems) => {
 	return cartItems.map(item => {
 		if (item.product) {
       return {
