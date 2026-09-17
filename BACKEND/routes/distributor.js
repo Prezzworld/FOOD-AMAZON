@@ -72,7 +72,7 @@ router.get("/me", [auth, distributor], async (req, res) => {
 		res.json({
 			success: true,
 			distributor: {
-				id: currentDistributor._id,
+				_id: currentDistributor._id,
 				name: currentDistributor.name,
 				email: currentDistributor.email,
 				phoneNumber: currentDistributor.phoneNumber,
@@ -160,7 +160,7 @@ router.post("/signup", async (req, res) => {
 			message: "Account created successfully",
 			token: jwtToken,
 			user: {
-				id: distributor._id,
+				_id: distributor._id,
 				name: distributor.name,
 				email: distributor.email,
 				role: distributor.role,

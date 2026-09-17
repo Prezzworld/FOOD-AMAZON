@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { Logo } from "../../LANDING-PAGES/pages/Images";
 import {
   IoSearch,
@@ -9,34 +8,11 @@ import {
 } from "react-icons/io5";
 import { BsCart } from "react-icons/bs";
 import GlobalSearchDropdown from "./GlobalSearchDropdown";
-import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
+import useDistributorStore from "../../store/distributorStore";
 
 const Header = ({ onMenuToggle }) => {
-  const [distributor, setDistributor] = useState(null);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const fetchDistributorInfo = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("disToken");
-        const response = await distributorAxiosInstance.get(
-          "/food-amazon-database/distributors/me",
-        );
-        if (response.data.success) {
-          setDistributor(response.data.distributor.name);
-        }
-      } catch (error) {
-        console.error("Error fetching distributor Info", error);
-        return "distributor";
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDistributorInfo();
-  }, []);
-  // if (loading) {
-  // 	return <p className="mb-0">Loading...</p>;
-  // }
+  const {distributor} = useDistributorStore()
+  
   return (
     <>
       <div className="">
@@ -76,7 +52,7 @@ const Header = ({ onMenuToggle }) => {
                 <IoPerson size={17} />
               </div>
               <p className="d-none d-sm-block mb-0 font-inter fw-medium fs-sm text-dark-blue">
-                {distributor}
+                {distributor?.name}
               </p>
               <IoChevronDown
                 className="d-none d-sm-block ms-sm-2 mb-0 chevron text-dark-blue"

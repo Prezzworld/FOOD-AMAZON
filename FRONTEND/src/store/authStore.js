@@ -45,7 +45,7 @@ const useAuthStore = create(
         set({ user });
       },
     };
-  }, {name: "AuthStore"}),
+  }, {name: "AuthStore", enabled: true}),
 );
 
 export default useAuthStore

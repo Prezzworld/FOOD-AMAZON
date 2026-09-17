@@ -6,6 +6,7 @@ import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
 import {GoogleImg} from '../../LANDING-PAGES/pages/Images'
 import "./distributorAuth.css";
+import useDistributorStore from "../../store/distributorStore";
 
 const Login = () => {
 	const BASE_URL = import.meta.env.VITE_API_URL;
@@ -56,17 +57,19 @@ const Login = () => {
 			});
 			const data = response.data;
 			if (response.data.success) {
-				const { accessToken, refreshToken, user } = data;
-				if (!accessToken) {
-					console.error("Missing tokens in response:", data);
-					throw new Error("No authentication tokens received");
-				}
-				localStorage.setItem("disToken", accessToken);
-				localStorage.setItem("disRefreshToken", refreshToken);
 
-				if (user) {
-					localStorage.setItem("distributor", JSON.stringify(user));
-				}
+				const { accessToken, refreshToken, user } = data;
+				// if (!accessToken) {
+				// 	console.error("Missing tokens in response:", data);
+				// 	throw new Error("No authentication tokens received");
+				// }
+				// localStorage.setItem("disToken", accessToken);
+				// localStorage.setItem("disRefreshToken", refreshToken);
+
+				// if (user) {
+				// 	localStorage.setItem("distributor", JSON.stringify(user));
+				// }
+				useDistributorStore.getState().login(accessToken, refreshToken, user)
 				showToast("Login successful!", "success", 2000);
 				setTimeout(() => {
 					navigate("/distributor/dashboard");

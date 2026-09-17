@@ -1,17 +1,23 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Navigate } from "react-router-dom";
 import { isTokenExpired } from "../../utils/tokenUtils";
+import useDistributorStore from "../../store/distributorStore";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("disToken");
-  const distributor = localStorage.getItem("distributor");
+  const {disToken, distributor, isAuthenticated} = useDistributorStore()
 
-  if (!token || !distributor || isTokenExpired(token)) {
-    localStorage.removeItem("disToken")
-    localStorage.removeItem("distributor")
-    localStorage.removeItem("disRefreshToken")
-    return <Navigate to="/distributor/login" replace />;
-  }
+   const shouldRedirect =
+     !disToken || !distributor || !isAuthenticated || isTokenExpired(disToken);
+
+   useEffect(() => {
+     if (shouldRedirect) {
+       useDistributorStore.getState().logout();
+     }
+   }, [shouldRedirect]);
+
+   if (shouldRedirect) {
+     return <Navigate to="/distributor/login" replace />;
+   }
 
   return children;
 };

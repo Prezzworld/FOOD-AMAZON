@@ -481,7 +481,7 @@ router.get("/visit-insights", [auth, distributor], async (req, res) => {
 		console.error("Error getting visit insights", error);
 		res.status(500).json({
 			success: false,
-			message: "Failed to load visit insights: " + error.message,
+			message: "Failed to load visit insights: " + error.message, 
 		});
 	}
 });

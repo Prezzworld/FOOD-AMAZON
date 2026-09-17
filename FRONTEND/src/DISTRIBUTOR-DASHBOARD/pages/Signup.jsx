@@ -6,6 +6,7 @@ import "./distributorAuth.css";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
 import { GoogleImg } from "../../LANDING-PAGES/pages/Images";
+import useDistributorStore from "../../store/distributorStore";
 
 const Signup = () => {
 	const { showToast } = useToast();
@@ -111,8 +112,7 @@ const Signup = () => {
 				...formData,
 			});
 			if (response.data.success) {
-				localStorage.setItem("disToken", response.data.token);
-				localStorage.setItem("distributor", JSON.stringify(response.data.user));
+				useDistributorStore.getState().login(response.data.token, null, response.data.user)
 				showToast("Account created successfully, welcome aboard!", "success", 2000);
 				setTimeout(() => navigate("/distributor/dashboard"), 2000)
 			}

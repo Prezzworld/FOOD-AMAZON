@@ -8,6 +8,7 @@ import { RiHome4Fill, RiMessage2Line, RiSettings3Fill } from "react-icons/ri";
 import { HiUser, HiBellAlert, HiPower, HiXMark } from "react-icons/hi2";
 import { LiaMoneyBillWaveSolid } from "react-icons/lia"
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
+import useDistributorStore from "../../store/distributorStore";
 
 const Sidebar = ({ onClose }) => {
 	const navigate = useNavigate();
@@ -54,18 +55,16 @@ const Sidebar = ({ onClose }) => {
     },
   ];
 
+	const distributor = useDistributorStore(state => state.distributor)
 	const handleLogout = async (userId) => {
 		try {
-			const distributor = JSON.parse(localStorage.getItem("distributor"));
 			userId = distributor._id;
 			const response = await distributorAxiosInstance.post(
 				"/food-amazon-database/distributors/logout",
 				{ userId },
 			);
 			if (response.statusText === "OK") {
-				localStorage.removeItem("distributor");
-				localStorage.removeItem("disToken");
-				localStorage.removeItem("disRefreshToken");
+				useDistributorStore.getState().logout()
 			}
 			navigate("/distributor/login");
 		} catch (error) {

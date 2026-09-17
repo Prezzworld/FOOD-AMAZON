@@ -13,7 +13,6 @@ const CustomerList = () => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("disToken");
         const response = await distributorAxiosInstance.get('/food-amazon-database/distributors/dashboard/new-customers');
         if (response.data.success) {
           setCustomers(response.data.data);

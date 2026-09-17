@@ -1,4 +1,5 @@
 import axios from "axios";
+import useDistributorStore from "../../store/distributorStore";
 
 // const API_BASE_URL = "http://localhost:3004/api";
 
@@ -22,7 +23,7 @@ const processQueue = (error, token = null) => {
 
 distributorAxiosInstance.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem("disToken");
+		const token = useDistributorStore.getState().disToken;
 		if (token) {
 			config.headers["x-auth-token"] = token;
 		}
@@ -62,7 +63,7 @@ distributorAxiosInstance.interceptors.response.use(
 		originalRequest._retry = true;
 		isRefreshing = true;
 		// Get refresh token
-		const refreshToken = localStorage.getItem("disRefreshToken");
+		const refreshToken = useDistributorStore.getState().disRefreshToken;
 		if (!refreshToken) {
 			isRefreshing = false;
 			handleDistributorAuthFailure();
@@ -84,7 +85,7 @@ distributorAxiosInstance.interceptors.response.use(
 			}
 
 			// Save new access token
-			localStorage.setItem("disToken", accessToken);
+			useDistributorStore.getState().setTokens(accessToken, refreshToken);
 
 			originalRequest.headers["x-auth-token"] = accessToken;
 			processQueue(null, accessToken);
@@ -104,9 +105,7 @@ const handleDistributorAuthFailure = () => {
 	const isOnCallbackPage = window.location.pathname === "/auth/callback";
 	if (isOnCallbackPage) return;
 
-	localStorage.removeItem("disToken");
-	localStorage.removeItem("disRefreshToken");
-	localStorage.removeItem("user");
+	useDistributorStore.getState().logout();
 
 	window.dispatchEvent(
 		new CustomEvent("distributorTokenExpired", {
