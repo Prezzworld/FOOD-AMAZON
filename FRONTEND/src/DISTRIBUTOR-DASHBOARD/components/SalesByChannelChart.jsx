@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import {useQuery} from "@tanstack/react-query"
 import {
 	LineChart,
 	Line,
@@ -21,104 +22,102 @@ const LEGEND_ITEMS = [
 
 const Y_AXIS_WIDTH = 45; // For the chart and header to align properly
 
-const SalesByChannelChart = () => {
-	const [chartData, setChartData] = useState([]);
-	const [loading, setLoading] = useState(false);
-	const [timePeriod, setTimePeriod] = useState("monthly");
-	const [error, setError] = useState("");
-	
+const transformDataForChart = (backendData, period) => {
+  const dataByDate = {};
+  backendData.map((item) => {
+    let formattedDate;
+    switch (period) {
+      case "daily":
+        formattedDate = new Date(
+          item._id.year,
+          item._id.month - 1,
+          item._id.day,
+        ).toLocaleDateString("en-Us", {
+          day: "numeric",
+          month: "short",
+          // year: "numeric",
+        });
+        break;
+      case "weekly":
+        formattedDate = `Week ${item._id.week}`;
+        break;
+      case "monthly":
+        formattedDate = new Date(
+          item._id.year,
+          item._id.month - 1,
+          1,
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        });
+        break;
+      case "yearly":
+        formattedDate = item._id.year.toString();
+        break;
+      default:
+        formattedDate = "Unknown time period";
+    }
+
+    if (!dataByDate[formattedDate]) {
+      dataByDate[formattedDate] = {
+        date: formattedDate,
+        delivery: 0,
+        deliverySales: 0,
+        walkIn: 0,
+        walkInSales: 0,
+      };
+    }
+
+    if (item._id.channel === "delivery") {
+      dataByDate[formattedDate].delivery = item.orderCount;
+      dataByDate[formattedDate].deliverySales = item.totalSales;
+    } else if (item._id.channel === "walk-in") {
+      dataByDate[formattedDate].walkIn = item.orderCount;
+      dataByDate[formattedDate].walkInSales = item.totalSales;
+    }
+  });
+  return Object.values(dataByDate);
+};
+
 	const fetchCharts = async (period) => {
-		try {
-			setLoading(true);
-			setError("");
-			const response = await distributorAxiosInstance.get(
-				`/food-amazon-database/distributors/dashboard/sales-by-channel?timePeriod=${period}`,
-			);
-			if (response.data.success) {
-				const transformedData = transformDataForChart(
-					response.data.data,
-					period,
-				);
-				setChartData(transformedData);
-			}
-		} catch (error) {
-			console.error("Error fetching chart data:", error);
-			setError("Failed to load chart data. Please try again later.");
-		} finally {
-			setLoading(false);
-		}
-	};
+    const response = await distributorAxiosInstance.get(
+      `/food-amazon-database/distributors/dashboard/sales-by-channel?timePeriod=${period}`,
+    );
 
-	const transformDataForChart = (backendData, period) => {
-		const dataByDate = {};
-		backendData.map((item) => {
-			let formattedDate;
-			switch (period) {
-				case "daily":
-					formattedDate = new Date(
-						item._id.year,
-						item._id.month - 1,
-						item._id.day,
-					).toLocaleDateString("en-Us", {
-						day: "numeric",
-						month: "short",
-						// year: "numeric",
-					});
-					break;
-				case "weekly":
-					formattedDate = `Week ${item._id.week}`;
-					break;
-				case "monthly":
-          formattedDate = new Date(item._id.year, item._id.month - 1, 1).toLocaleDateString('en-US', {
-            month: 'short',
-            year: 'numeric'
-          });
-					break;
-				case "yearly":
-					formattedDate = item._id.year.toString();
-					break;
-				default:
-					formattedDate = "Unknown time period";
-			}
+    if (!response.data.success) {
+      throw new Error("Failed to fetch sales by channel");
+    }
+    return transformDataForChart(response.data.data, period);
+  };
 
-			if (!dataByDate[formattedDate]) {
-				dataByDate[formattedDate] = {
-					date: formattedDate,
-					delivery: 0,
-					deliverySales: 0,
-					walkIn: 0,
-					walkInSales: 0,
-				};
-			}
 
-			if (item._id.channel === "delivery") {
-				dataByDate[formattedDate].delivery = item.orderCount;
-				dataByDate[formattedDate].deliverySales = item.totalSales;
-			} else if (item._id.channel === "walk-in") {
-				dataByDate[formattedDate].walkIn = item.orderCount;
-				dataByDate[formattedDate].walkInSales = item.totalSales;
-			}
-		});
-		return Object.values(dataByDate);
-	};
+const SalesByChannelChart = () => {
+	const [timePeriod, setTimePeriod] = useState("monthly");
 
-	useEffect(() => {
-		fetchCharts(timePeriod);
-	}, [timePeriod]);
+	const {data: chartData = [], isPending: loading, error} = useQuery({
+		queryKey: ["sales-by-channel", timePeriod],
+		queryFn: () => fetchCharts(timePeriod)
+	})
 
+	
 	if (loading) {
 		return (
-			<div
-				className="d-flex justify-content-center align-items-center"
-				style={{ height: "400px" }}
-			>
-				<p className="text-muted">Loading chart data...</p>
-			</div>
-		);
+      <div className="d-flex justify-content-center align-items-center h-100">
+        <div className="spinner-border text-primary-normal" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
 	}
 
 	if (error) {
-		return <div className="alert alert-danger">{error}</div>;
+		return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error.message}</p>
+        </div>
+      </div>
+    );
 	}
 
 	if (!loading && !error && chartData.length === 0) {

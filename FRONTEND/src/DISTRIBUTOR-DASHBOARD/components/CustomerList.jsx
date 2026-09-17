@@ -1,48 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import {useQuery} from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { FaEllipsisH, FaUser } from 'react-icons/fa';
 import distributorAxiosInstance from '../utils/DistributorAxiosInstance';
 
+const fetchCustomers = async () => {
+	const response = await distributorAxiosInstance.get(
+    "/food-amazon-database/distributors/dashboard/new-customers",
+  );
+	if(!response.data.success) {
+		throw new Error("Failed to load customers")
+	}
+	return response.data.data
+}
+
 const CustomerList = () => {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
-        const response = await distributorAxiosInstance.get('/food-amazon-database/distributors/dashboard/new-customers');
-        if (response.data.success) {
-          setCustomers(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching customers: ", error);
-        setError("Failed to load customers. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCustomers();
-  }, []);
+	const {data: customers = [], isPending: loading, error} = useQuery({
+		queryKey: ["new-customer"],
+		queryFn: fetchCustomers
+	})
 
   if (loading) {
 		return (
-			<div className="p-4">
-				<div className="flex items-center justify-center h-64">
-					<p className="text-gray-500">Loading...</p>
-				</div>
-			</div>
-		);
+      <div className="d-flex justify-content-center align-items-center h-100">
+        <div className="spinner-border text-primary-normal" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
 	}
 
 	if (error) {
 		return (
 			<div className="p-4">
 				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-red-600">{error}</p>
+					<p className="text-red-600">{error.message}</p>
 				</div>
 			</div>
 		);
