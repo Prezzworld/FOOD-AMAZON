@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from 'react';
-import {useLocation, useNavigate} from "react-router-dom";
+import { useState, useEffect } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiList,
   FiCalendar,
@@ -11,7 +12,7 @@ import {
 } from "react-icons/fi";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
-import OrderDetails from './OrderDetails';
+import OrderDetails from "./OrderDetails";
 
 const TABS = [
   { label: "All Orders", value: "all", statuses: null },
@@ -64,26 +65,54 @@ const getLocation = (order) =>
     ? "Walk-in"
     : order.customerSnapshot?.city || "—";
 
+const fetchOrders = async (tabValue, page) => {
+  const activeTabConfig = TABS.find((t) => t.value === tabValue);
+  const params = new URLSearchParams({
+    page,
+    limit: 10,
+  });
+  if (activeTabConfig.statuses) params.set("status", activeTabConfig.statuses);
+
+  const response = await distributorAxiosInstance.get(
+    `/food-amazon-database/order/distributor/orders?${params.toString()}`,
+  );
+  if (!response.data.success) {
+    throw new Error("Failed to fetch orders");
+  }
+  return {
+    orders: response.data.data,
+    pagination: response.data.pagination,
+  };
+};
+
 const Orders = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
 
+  const {
+    data,
+    isPending: loading,
+    error,
+  } = useQuery({
+    queryKey: ["orders", activeTab, currentPage],
+    queryFn: () => fetchOrders(activeTab, currentPage),
+    placeholderData: keepPreviousData,
+  });
+
+  const orders = data?.orders ?? [];
+  const totalPages = data?.pagination?.pages || 1;
+  const totalItems = data?.pagination?.total || 0;
+
   useEffect(() => {
     const incomingOrderId = location.state?.orderId;
     if (!incomingOrderId) return;
-   const fetchOrderDetail = async () => {
+    const fetchOrderDetail = async () => {
       try {
         setDetailLoading(true);
         setDetailError("");
@@ -110,37 +139,6 @@ const Orders = () => {
   const handleRowClick = (order) => setSelectedOrder(order);
   const handleBackToList = () => setSelectedOrder(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const activeTabConfig = TABS.find((t) => t.value === activeTab);
-        const params = new URLSearchParams({
-          page: currentPage,
-          limit: itemsPerPage,
-        });
-        if (activeTabConfig.statuses)
-          params.set("status", activeTabConfig.statuses);
-
-        const response = await distributorAxiosInstance.get(
-          `/food-amazon-database/order/distributor/orders?${params.toString()}`,
-        );
-        if (response.data.success) {
-          setOrders(response.data.data);
-          setTotalPages(response.data.pagination.pages || 1);
-          setTotalItems(response.data.pagination.total || 0);
-        }
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("Couldn't load orders. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, [activeTab, currentPage])
-
   const handleTabChange = (value) => {
     setActiveTab(value);
     setCurrentPage(1); // any filter change starts back on page 1
@@ -165,13 +163,15 @@ const Orders = () => {
     setCurrentPage(page);
   };
 
-  const fromItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-  const toItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const fromItem = totalItems === 0 ? 0 : (currentPage - 1) * 10 + 1;
+  const toItem = Math.min(currentPage * 10, totalItems);
 
   if (detailLoading) {
     return (
       <div>
-        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">Orders</h2>
+        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
+          Orders
+        </h2>
         <div className="bg-white rounded-4 p-4">
           <p className="text-content-dark text-center py-5">Loading order...</p>
         </div>
@@ -182,7 +182,9 @@ const Orders = () => {
   if (detailError) {
     return (
       <div>
-        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">Orders</h2>
+        <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
+          Orders
+        </h2>
         <div className="bg-white rounded-4 p-4">
           <div className="alert alert-danger">{detailError}</div>
         </div>
@@ -286,11 +288,17 @@ const Orders = () => {
 
         {/* Rows */}
         {loading ? (
-          <p className="text-content-dark text-center py-5">
-            Loading orders...
-          </p>
+          <div className="d-flex justify-content-center align-items-center h-100">
+            <div className="spinner-border text-primary-normal" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
         ) : error ? (
-          <div className="alert alert-danger mt-3">{error}</div>
+          <div className="p-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-600">{error.message}</p>
+            </div>
+          </div>
         ) : orders.length === 0 ? (
           <p className="text-content-dark text-center py-5">
             No orders found for this filter.
@@ -408,6 +416,6 @@ const Orders = () => {
       </div>
     </div>
   );
-}
+};
 
-export default Orders
+export default Orders;

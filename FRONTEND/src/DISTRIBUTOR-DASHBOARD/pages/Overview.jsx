@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import {useQuery} from "@tanstack/react-query"
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import SalesByChannelChart from "../components/SalesByChannelChart";
@@ -8,32 +8,21 @@ import CustomerList from "../components/CustomerList";
 import RecentOrderTable from "../components/RecentOrderTable";
 import formatToNaira from "../../utils/nairaFormatter";
 
+const fetchOverviewData = async () => {
+    const response = await distributorAxiosInstance.get(
+      "/food-amazon-database/distributors/dashboard/overview",
+    );
+    if (!response.data.success) {
+      throw new Error("Failed to fetch sale overview")
+    }
+		return response.data.data
+};
+
 const Overview = () => {
-	const [saleOverview, setSaleOverview] = useState(null);
-	// const [salesTrend, setSalesTrend] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
-
-	useEffect(() => {
-		const fetchOverviewData = async () => {
-			try {
-				setLoading(true);
-				const response = await distributorAxiosInstance.get(
-					"/food-amazon-database/distributors/dashboard/overview",
-				);
-				if (response.data.success) {
-					setSaleOverview(response.data.data);
-				}
-			} catch (error) {
-				console.error("Error fetching overview data", error);
-				setError("Failed to load overview data. Please try again later.");
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchOverviewData();
-	}, []);
-
+	const {data: saleOverview = [], isPending: loading, error} = useQuery({
+		queryKey: ["sales-overview"],
+		queryFn: fetchOverviewData
+	})
 	const metricConfig = [
 		{
 			key: "year",
@@ -59,33 +48,23 @@ const Overview = () => {
 
 	if (loading) {
 		return (
-			<div className="p-4">
-				<div className="flex items-center justify-center h-64">
-					<p className="text-gray-500">Loading dashboard...</p>
-				</div>
-			</div>
-		);
+      <div className="d-flex justify-content-center align-items-center h-100">
+        <div className="spinner-border text-primary-normal" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
 	}
 
 	// CRITICAL: Check error state
 	if (error) {
 		return (
-			<div className="p-4">
-				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-red-600">Error loading dashboard: {error}</p>
-				</div>
-			</div>
-		);
-	}
-
-	if (!saleOverview) {
-		return (
-			<div className="p-4">
-				<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-					<p className="text-yellow-600">No dashboard data available</p>
-				</div>
-			</div>
-		);
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error.message}</p>
+        </div>
+      </div>
+    );
 	}
 
 	return (
