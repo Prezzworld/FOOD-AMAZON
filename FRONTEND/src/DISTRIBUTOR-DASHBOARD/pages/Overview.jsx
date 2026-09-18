@@ -7,6 +7,8 @@ import { BestSellingTable, BestSellingChart } from "../components/BestSelling";
 import CustomerList from "../components/CustomerList";
 import RecentOrderTable from "../components/RecentOrderTable";
 import formatToNaira from "../../utils/nairaFormatter";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorBanner from "../components/ErrorBanner";
 
 const fetchOverviewData = async () => {
     const response = await distributorAxiosInstance.get(
@@ -19,7 +21,7 @@ const fetchOverviewData = async () => {
 };
 
 const Overview = () => {
-	const {data: saleOverview = [], isPending: loading, error} = useQuery({
+	const {data: saleOverview = {}, isPending: loading, error, refetch} = useQuery({
 		queryKey: ["sales-overview"],
 		queryFn: fetchOverviewData
 	})
@@ -47,24 +49,11 @@ const Overview = () => {
 	];
 
 	if (loading) {
-		return (
-      <div className="d-flex justify-content-center align-items-center h-100">
-        <div className="spinner-border text-primary-normal" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
+		return <LoadingSpinner fullHeight />;
 	}
 
-	// CRITICAL: Check error state
 	if (error) {
-		return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error.message}</p>
-        </div>
-      </div>
-    );
+		return <ErrorBanner fullHeight message={error.message} onRetry={refetch} />;
 	}
 
 	return (

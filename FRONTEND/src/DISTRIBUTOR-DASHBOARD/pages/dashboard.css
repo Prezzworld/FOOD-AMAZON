@@ -443,3 +443,27 @@
     opacity: 1;
   }
 }
+
+/* Shared state components (LoadingSpinner / ErrorBanner / EmptyState) */
+.state-icon-circle {
+  width: 96px;
+  height: 96px;
+}
+
+.state-icon-circle--compact {
+  width: 56px;
+  height: 56px;
+}
+
+.state-icon-spin {
+  animation: stateIconSpin 1.2s linear infinite;
+}
+
+@keyframes stateIconSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

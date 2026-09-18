@@ -1,4 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import {
   GoTriangleDown,
@@ -15,11 +21,14 @@ import {
   BsChevronLeft,
   BsChevronRight,
 } from "react-icons/bs";
-import { FiRefreshCcw, FiX } from "react-icons/fi";
+import { FiX } from "react-icons/fi";
 import { formatMongoDate } from "../../utils/dateFormatter";
 import { RiFilterLine, RiChatNewLine } from "react-icons/ri";
 import FilterDropdown from "../components/FilterDropdown";
 import SubFilterModal from "../components/SubFilterModal";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorBanner from "../components/ErrorBanner";
+import EmptyState from "../components/EmptyState";
 import "./review.css";
 
 const FILTER_KEY_MAP = {
@@ -29,20 +38,43 @@ const FILTER_KEY_MAP = {
   Status: "status",
 };
 
+const ITEMS_PER_PAGE = 10;
+
+const fetchReviews = async ({ reviewType, activeFilters, page }) => {
+  const params = new URLSearchParams();
+  params.set(reviewType, "true");
+
+  if (activeFilters.rating) params.set("rating", activeFilters.rating);
+  if (activeFilters.status) params.set("status", activeFilters.status);
+  if (activeFilters.date) params.set("date", activeFilters.date);
+  if (activeFilters.productId)
+    params.set("productId", activeFilters.productId);
+
+  params.set("page", page);
+  params.set("limit", ITEMS_PER_PAGE);
+
+  const response = await distributorAxiosInstance.get(
+    `/food-amazon-database/review/all-reviews-for-distributor?${params.toString()}`,
+  );
+  if (!response.data.success) {
+    throw new Error("Failed to load reviews. Please try again.");
+  }
+  return {
+    reviews: response.data.data,
+    topRated: response.data.topRated,
+    worstRated: response.data.worstRated,
+    pagination: response.data.pagination,
+  };
+};
+
 const Reviews = () => {
-  const [reviews, setReviews] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalReviews, setTotalReviews] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [bestWorstRated, setBestWorstRated] = useState([]);
   const [reviewType, setReviewType] = useState("latest");
   const [filterOptions, setFilterOptions] = useState(false);
   const [activeSubFilter, setActiveSubfilter] = useState(null);
   const [activeFilters, setActiveFilters] = useState({});
   const [statusModalData, setStatusModalData] = useState(null);
   const filterDropdownRef = useRef(null);
-  const itemsPerPage = 10;
 
   const closeStatusModal = () => setStatusModalData(null);
 
@@ -59,50 +91,71 @@ const Reviews = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        let params = new URLSearchParams();
-        params.set(reviewType, "true");
+  const queryClient = useQueryClient();
 
-        if (activeFilters.rating) params.set("rating", activeFilters.rating);
-        if (activeFilters.status) params.set("status", activeFilters.status);
-        if (activeFilters.date) params.set("date", activeFilters.date);
-        if (activeFilters.productId)
-          params.set("productId", activeFilters.productId);
+  const { data, isPending: loading, error, refetch } = useQuery({
+    queryKey: ["reviews", reviewType, activeFilters, currentPage],
+    queryFn: () =>
+      fetchReviews({ reviewType, activeFilters, page: currentPage }),
+    placeholderData: keepPreviousData,
+  });
 
-        params.set("page", currentPage);
-        params.set("limit", itemsPerPage);
+  const reviews = data?.reviews ?? [];
+  const totalReviews = data?.pagination?.total ?? 0;
+  const totalPages = data?.pagination?.pages ?? 1;
 
-        const response = await distributorAxiosInstance.get(
-          `/food-amazon-database/review/all-reviews-for-distributor?${params.toString()}`,
-        );
-        if (response.data.success) {
-          setReviews(response.data.data);
-          setBestWorstRated([
-            {
-              label: "Top Rated",
-              icon: <GoTriangleUp className="text-primary-normal" />,
-              review: response.data.topRated,
-            },
-            {
-              label: "Worst Rated",
-              icon: <GoTriangleDown className="text-red-dark" />,
-              review: response.data.worstRated,
-            },
-          ]);
-          setTotalReviews(response.data?.pagination?.total);
-          setTotalPages(response.data?.pagination?.pages);
-        }
-      } catch (error) {
-        console.error("Error fetching reviews", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReviews();
-  }, [reviewType, activeFilters, currentPage]);
+  const bestWorstRated = [
+    {
+      label: "Top Rated",
+      icon: <GoTriangleUp className="text-primary-normal" />,
+      review: data?.topRated,
+    },
+    {
+      label: "Worst Rated",
+      icon: <GoTriangleDown className="text-red-dark" />,
+      review: data?.worstRated,
+    },
+  ];
+
+  const updateReviewStatus = useMutation({
+    mutationFn: ({ reviewId, newStatus }) =>
+      distributorAxiosInstance.patch(
+        `/food-amazon-database/review/update-review/${reviewId}/status`,
+        { status: newStatus },
+      ),
+    onSuccess: (response, { reviewId, newStatus }) => {
+      queryClient.setQueryData(
+        ["reviews", reviewType, activeFilters, currentPage],
+        (old) =>
+          old
+            ? {
+                ...old,
+                reviews: old.reviews.map((review) =>
+                  review._id === reviewId
+                    ? { ...review, status: newStatus }
+                    : review,
+                ),
+              }
+            : old,
+      );
+      const updatedReview = response.data.review;
+      setStatusModalData({
+        title:
+          updatedReview.status === "published"
+            ? "Review Published Successfully"
+            : "Review Unpublished Successfully",
+        message: `${updatedReview.reviewerName}'s review has been ${
+          updatedReview.status === "published" ? "published" : "unpublished"
+        }`,
+      });
+    },
+    onError: () =>
+      setStatusModalData({
+        title: "Couldn't update review",
+        message:
+          "Something went wrong while updating the review status. Please try again.",
+      }),
+  });
 
   const getPageNumbers = () => {
     if (totalPages <= 7) {
@@ -150,8 +203,8 @@ const Reviews = () => {
   };
 
   const fromItem =
-    totalReviews === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-  const toItem = Math.min(currentPage * itemsPerPage, totalReviews);
+    totalReviews === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const toItem = Math.min(currentPage * ITEMS_PER_PAGE, totalReviews);
 
   const handleFilterRowClick = (menuItem) => {
     setActiveSubfilter(menuItem);
@@ -188,35 +241,6 @@ const Reviews = () => {
 
   const resetAllFilters = () => setActiveFilters({});
 
-  const handleReviewStatusChange = async (reviewId, newStatus) => {
-    try {
-      const response = await distributorAxiosInstance.patch(
-        `/food-amazon-database/review/update-review/${reviewId}/status`,
-        { status: newStatus },
-      );
-
-      if (response.data.success) {
-        const updatedReview = response.data.review;
-        setReviews((prevReviews) =>
-          prevReviews.map((review) =>
-            review._id === reviewId ? { ...review, status: newStatus } : review,
-          ),
-        );
-        setStatusModalData({
-          title:
-            updatedReview.status === "published"
-              ? "Review Published Successfully"
-              : "Review Unpublished Successfully",
-          message: `${updatedReview.reviewerName}'s review has been ${
-            updatedReview.status === "published" ? "published" : "unpublished"
-          }`,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to update review status", error);
-    }
-  };
-
   const renderRatingStars = (rating) => {
     return [...Array(5)].map((_, index) => (
       <FaStar
@@ -241,53 +265,31 @@ const Reviews = () => {
   return (
     <>
       {loading ? (
-        <div className="d-flex flex-column justify-content-center align-items-center text-center py-5">
-          <div
-            className="d-flex justify-content-center align-items-center rounded-circle bg-white border border-2 border-primary mb-4"
-            style={{ width: 96, height: 96 }}
-          >
-            <FiRefreshCcw size={36} className="text-primary" />
-          </div>
-          <h3 className="fw-bold mb-2">Loading reviews…</h3>
-          <p className="text-secondary mb-0">
-            Hang tight while we fetch the latest review data for your dashboard.
-          </p>
-        </div>
+        <LoadingSpinner />
+      ) : error ? (
+        <ErrorBanner message={error.message} onRetry={refetch} />
       ) : !reviews || reviews.length === 0 ? (
-        <div className="d-flex flex-column justify-content-center align-items-center text-center py-5">
-          <div
-            className="d-flex justify-content-center align-items-center rounded-circle bg-white border border-2 border-primary mb-4"
-            style={{ width: 96, height: 96 }}
-          >
-            <BsRepeat1 size={36} className="text-primary-normal" />
-          </div>
-          <h3 className="fw-bold mb-2">No reviews found</h3>
-          <p className="text-content-dark mb-4">
-            There are no reviews to show for this distributor or selected
-            filters. Return to the default reviews view or refresh to try again.
-          </p>
-          <div className="d-flex flex-column flex-sm-row gap-2">
-            <button
-              type="button"
-              className="bg-primary-normal border-0 text-white fw-medium rounded-3 py-3 px-5"
-              onClick={() => {
+        <EmptyState
+          icon={BsRepeat1}
+          title="No reviews found"
+          description="There are no reviews to show for this distributor or selected filters. Return to the default reviews view or refresh to try again."
+          actions={[
+            {
+              label: "Clear filters",
+              onClick: () => {
                 setActiveFilters({});
                 setReviewType("latest");
                 setCurrentPage(1);
                 setFilterOptions(false);
-              }}
-            >
-              Clear filters
-            </button>
-            <button
-              type="button"
-              className="bg-secondary-normal border-0 text-white rounded-3 py-3 px-5 fw-medium "
-              onClick={() => setCurrentPage(1)}
-            >
-              Refresh reviews
-            </button>
-          </div>
-        </div>
+              },
+            },
+            {
+              label: "Refresh reviews",
+              onClick: () => refetch(),
+              variant: "secondary",
+            },
+          ]}
+        />
       ) : (
         <div>
           <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
@@ -475,12 +477,13 @@ const Reviews = () => {
                       <button
                         className={`w-100 border-0 py-3 rounded-2 ${review.status === "published" ? "bg-secondary-normal" : "bg-primary-normal"} font-inter text-white fw-semibold`}
                         onClick={() =>
-                          handleReviewStatusChange(
-                            review._id,
-                            review.status === "published"
-                              ? "rejected"
-                              : "published",
-                          )
+                          updateReviewStatus.mutate({
+                            reviewId: review._id,
+                            newStatus:
+                              review.status === "published"
+                                ? "rejected"
+                                : "published",
+                          })
                         }
                       >
                         {review.status === "published"

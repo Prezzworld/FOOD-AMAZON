@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import {
 	PieChart,
@@ -9,70 +10,82 @@ import {
 	Label,
 } from "recharts";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
+import { FiPackage } from "react-icons/fi";
 import formatToNaira from "../../utils/nairaFormatter";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorBanner from "./ErrorBanner";
+import EmptyState from "./EmptyState";
 
+const fetchBestSellingProducts = async (year, limit) => {
+	const response = await distributorAxiosInstance.get(
+		`/food-amazon-database/distributors/dashboard/best-selling?year=${year}&limit=${limit}`,
+	);
+	if (!response.data.success) {
+		throw new Error("Failed to load best selling products");
+	}
+	return {
+		products: response.data.data,
+		totalCount: response.data.totalCount,
+	};
+};
+
+// One hook, two consumers: the table (limit 5) and the doughnut chart
+// (limit 4) each get their own cached copy because the limit is part of
+// the query key.
 const useBestSellingData = (initialLimit = 5) => {
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
 	const [year, setYear] = useState(2026);
 	const [limit, setLimit] = useState(initialLimit);
-	const [bestSellingProducts, setBestSellingProducts] = useState([]);
-	const [totalCount, setTotalCount] = useState(0);
 
-	useEffect(() => {
-		const getBestSellingProducts = async (year, limit) => {
-			try {
-				setLoading(true);
-				const response = await distributorAxiosInstance.get(
-					`/food-amazon-database/distributors/dashboard/best-selling?year=${year}&limit=${limit}`,
-				);
-				if (response.data.success) {
-					setTotalCount(response.data.totalCount);
-					setBestSellingProducts(response.data.data);
-					setLoading(false);
-				}
-			} catch (error) {
-				console.error("Error fetching best selling products: ", error);
-				setError("An error occured, " + error.message);
-			} finally {
-				setLoading(false);
-			}
-		};
-		getBestSellingProducts(year, limit);
-	}, [year, limit]);
+	const {
+		data,
+		isPending: loading,
+		error,
+		refetch,
+	} = useQuery({
+		queryKey: ["best-selling", year, limit],
+		queryFn: () => fetchBestSellingProducts(year, limit),
+	});
 
 	return {
 		loading,
 		error,
+		refetch,
 		year,
 		setYear,
 		setLimit,
-		bestSellingProducts,
-		totalCount,
+		bestSellingProducts: data?.products ?? [],
+		totalCount: data?.totalCount ?? 0,
 	};
 };
 
 const BestSellingTable = () => {
-	const { loading, error, setLimit, bestSellingProducts, totalCount } =
-		useBestSellingData();
+	const {
+		loading,
+		error,
+		refetch,
+		setLimit,
+		bestSellingProducts,
+		totalCount,
+	} = useBestSellingData();
 
 	if (loading) {
-		return (
-			<div className="p-4">
-				<div className="flex items-center justify-center h-64">
-					<p className="text-gray-500">Loading...</p>
-				</div>
-			</div>
-		);
+		return <LoadingSpinner fullHeight />;
 	}
 
 	if (error) {
 		return (
-			<div className="p-4">
-				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-red-600">{error}</p>
-				</div>
-			</div>
+			<ErrorBanner fullHeight message={error.message} onRetry={refetch} />
+		);
+	}
+
+	if (bestSellingProducts.length === 0) {
+		return (
+			<EmptyState
+				icon={FiPackage}
+				title="No sales yet"
+				description="Your best selling products will appear here once orders start coming in."
+				compact
+			/>
 		);
 	}
 
@@ -112,11 +125,7 @@ const BestSellingTable = () => {
 							<th scope="col" className="" style={{ width: "20%" }}>
 								Amount
 							</th>
-							<th
-								scope="col"
-								className=""
-								style={{ borderRadius: "0 8px 8px 0" }}
-							>
+							<th scope="col" className="" style={{ borderRadius: "0 8px 8px 0" }}>
 								Status
 							</th>
 						</tr>
@@ -157,26 +166,27 @@ const BestSellingTable = () => {
 };
 
 const BestSellingChart = () => {
-	const { loading, error, year, setYear, bestSellingProducts } =
+	const { loading, error, refetch, year, setYear, bestSellingProducts } =
 		useBestSellingData(4);
 
 	if (loading) {
-		return (
-			<div className="p-4">
-				<div className="flex items-center justify-center h-64">
-					<p className="text-gray-500">Loading...</p>
-				</div>
-			</div>
-		);
+		return <LoadingSpinner fullHeight />;
 	}
 
 	if (error) {
 		return (
-			<div className="p-4">
-				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-red-600">{error}</p>
-				</div>
-			</div>
+			<ErrorBanner fullHeight message={error.message} onRetry={refetch} />
+		);
+	}
+
+	if (bestSellingProducts.length === 0) {
+		return (
+			<EmptyState
+				icon={FiPackage}
+				title="No sales yet"
+				description="Sales distribution across your products will appear here once orders start coming in."
+				compact
+			/>
 		);
 	}
 
@@ -193,7 +203,7 @@ const BestSellingChart = () => {
   const sortedColors = [...COLORS].reverse(); // Reverse colors to match sorted data
 
   const totalSales = chartData.reduce((sum, entry) => sum + entry.sales, 0);
-  
+
   const formatNumber = (num) => {
 		if (num >= 1000000) {
 			return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M"; // For millions, if needed

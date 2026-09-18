@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { FiPlus, FiSliders, FiDownload, FiRefreshCw } from "react-icons/fi";
+import React, { useState } from "react";
+import { keepPreviousData, useQuery, useMutation } from "@tanstack/react-query";
+import { FiPlus, FiSliders, FiDownload, FiRefreshCw, FiPackage } from "react-icons/fi";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import "./dashboard.css";
 import formatToNaira from "../../utils/nairaFormatter";
+import queryClient from "../../queryClient";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorBanner from "../components/ErrorBanner";
+import EmptyState from "../components/EmptyState";
 
 const AVAILABILITY_VISUALS = {
   inStock: { label: "In Stock", color: "#00a859" },
@@ -37,79 +42,79 @@ const COLUMN_WIDTHS = {
   availability: "13%",
 };
 
+const fetchOverview = async () => {
+  const response = await distributorAxiosInstance.get(
+    "/food-amazon-database/inventory/distributor/inventory-overview",
+  );
+  if (!response.data.success) {
+    throw new Error("Failed to fetch inventory overview");
+  }
+  return response.data.data;
+};
+
+const fetchProducts = async (page) => {
+  const response = await distributorAxiosInstance.get(
+    `/food-amazon-database/inventory/distributor/products?page=${page}&limit=${10}`,
+  );
+  if (!response.data.success) {
+    throw new Error("Failed to fetch products");
+  }
+  return {
+    products: response.data.data,
+    totalPages: response.data.pagination.pages || 1,
+  };
+};
+
 const Inventory = () => {
-  const [overview, setOverview] = useState(null);
-  const [overviewLoading, setOverviewLoading] = useState(false);
-
-  const [products, setProducts] = useState([]);
-  const [productsLoading, setProductsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchOverview = async () => {
-      try {
-        setOverviewLoading(true);
-        const response = await distributorAxiosInstance.get(
-          "/food-amazon-database/inventory/distributor/inventory-overview",
-        );
-        if (response.data.success) setOverview(response.data.data);
-      } catch (err) {
-        console.error("Error fetching inventory overview:", err);
-      } finally {
-        setOverviewLoading(false);
-      }
-    };
-    fetchOverview();
-  }, []);
+  const {
+    data: overview,
+    isPending: overviewLoading,
+    error: overviewError,
+    refetch: overviewRefetch,
+  } = useQuery({
+    queryKey: ["inventory-overview"],
+    queryFn: fetchOverview,
+  });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setProductsLoading(true);
-        setError("");
-        const response = await distributorAxiosInstance.get(
-          `/food-amazon-database/inventory/distributor/products?page=${currentPage}&limit=${itemsPerPage}`,
-        );
-        if (response.data.success) {
-          setProducts(response.data.data);
-          setTotalPages(response.data.pagination.pages || 1);
-        }
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError("Couldn't load products. Please try again.");
-      } finally {
-        setProductsLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [currentPage]);
+  const {
+    data,
+    isPending: productsLoading,
+    error,
+    refetch: productsRefetch,
+  } = useQuery({
+    queryKey: ["inventory-products", currentPage],
+    queryFn: () => fetchProducts(currentPage),
+    placeholderData: keepPreviousData,
+  });
+
+  const products = data?.products ?? [];
+  const totalPages = data?.totalPages || 1;
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
-  const toggleReorder = async (productId) => {
-    try {
-      const response = await distributorAxiosInstance.patch(
+  const toggleReorder = useMutation({
+    mutationFn: (productId) =>
+      distributorAxiosInstance.patch(
         `/food-amazon-database/products/distributor/products/${productId}/toggle-reorder`,
+      ),
+    onSuccess: (response, productId) => {
+      queryClient.setQueryData(["inventory-products", currentPage], (old) =>
+        old
+          ? {
+              ...old,
+              products: old.products.map((p) =>
+                p._id === productId ? response.data.data : p,
+              ),
+            }
+          : old,
       );
-      if (response.data.success) {
-        // Update just this one product locally instead of refetching
-        // the whole paginated list for a single boolean flip.
-        setProducts((prev) =>
-          prev.map((p) => (p._id === productId ? response.data.data : p)),
-        );
-      }
-    } catch (err) {
-      console.error("Error toggling reorder status:", err);
-    }
-  };
-
-  
+    },
+  });
 
   return (
     <div>
@@ -123,7 +128,12 @@ const Inventory = () => {
           Overall Inventory
         </h4>
         {overviewLoading ? (
-          <p className="text-content-dark">Loading...</p>
+          <LoadingSpinner message="Loading inventory overview..." />
+        ) : overviewError ? (
+          <ErrorBanner
+            message={overviewError.message}
+            onRetry={overviewRefetch}
+          />
         ) : (
           <div
             className="d-grid"
@@ -232,21 +242,16 @@ const Inventory = () => {
             Products
           </h4>
           <div className="d-flex gap-2">
-            <button
-             
-              className="d-flex align-items-center gap-2 bg-primary-normal border-0 text-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium"
-            >
+            <button className="d-flex align-items-center gap-2 bg-primary-normal border-0 text-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium">
               <FiPlus size={16} /> Add Product
             </button>
             <button
-              
               className="d-flex align-items-center gap-2 bg-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium text-dark-blue"
               style={{ border: "1px solid #e5e7eb" }}
             >
               <FiSliders size={16} /> Filters
             </button>
             <button
-              
               className="d-flex align-items-center gap-2 bg-white rounded-2 px-4 py-2 font-archivo fs-sm fw-medium text-dark-blue"
               style={{ border: "1px solid #e5e7eb" }}
             >
@@ -300,15 +305,16 @@ const Inventory = () => {
 
         {/* Rows */}
         {productsLoading ? (
-          <p className="text-content-dark text-center py-5">
-            Loading products...
-          </p>
+          <LoadingSpinner message="Loading products..." />
         ) : error ? (
-          <div className="alert alert-danger mt-3">{error}</div>
+          <ErrorBanner message={error.message} onRetry={productsRefetch} />
         ) : products.length === 0 ? (
-          <p className="text-content-dark text-center py-5">
-            No products found.
-          </p>
+          <EmptyState
+            icon={FiPackage}
+            title="No products found"
+            description="Your inventory is empty. Add your first product to start tracking stock levels and reorders."
+            compact
+          />
         ) : (
           products.map((product) => {
             const availability = getAvailability(
@@ -361,7 +367,7 @@ const Inventory = () => {
                   </span>
                   {isLowOrOut && (
                     <button
-                      onClick={() => toggleReorder(product._id)}
+                      onClick={() => toggleReorder.mutate(product._id)}
                       className="d-flex align-items-center gap-1 bg-transparent border-0 p-0 mt-1 font-archivo fs-xsm"
                       style={{
                         color: product.reorderRequested ? "#00a859" : "#9aa1ac",

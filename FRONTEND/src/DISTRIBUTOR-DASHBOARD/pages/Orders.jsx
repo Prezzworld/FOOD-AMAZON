@@ -13,6 +13,9 @@ import {
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import OrderDetails from "./OrderDetails";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorBanner from "../components/ErrorBanner";
+import EmptyState from "../components/EmptyState";
 
 const TABS = [
   { label: "All Orders", value: "all", statuses: null },
@@ -99,6 +102,7 @@ const Orders = () => {
     data,
     isPending: loading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["orders", activeTab, currentPage],
     queryFn: () => fetchOrders(activeTab, currentPage),
@@ -288,21 +292,16 @@ const Orders = () => {
 
         {/* Rows */}
         {loading ? (
-          <div className="d-flex justify-content-center align-items-center h-100">
-            <div className="spinner-border text-primary-normal" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
+          <LoadingSpinner />
         ) : error ? (
-          <div className="p-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-600">{error.message}</p>
-            </div>
-          </div>
+          <ErrorBanner message={error.message} onRetry={refetch} />
         ) : orders.length === 0 ? (
-          <p className="text-content-dark text-center py-5">
-            No orders found for this filter.
-          </p>
+          <EmptyState
+            icon={FiPackage}
+            title="No orders found"
+            description="There are no orders matching this filter yet. Try another tab or check back after your next sale."
+            compact
+          />
         ) : (
           orders.map((order) => {
             const visual = getStatusVisual(

@@ -11,7 +11,11 @@ import {
 } from "recharts";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import { FaEllipsisH } from "react-icons/fa";
+import { FiBarChart2 } from "react-icons/fi";
 import CustomTooltip from "./CustomTooltip";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorBanner from "./ErrorBanner";
+import EmptyState from "./EmptyState";
 // import { CustomLegends } from "./CustomLegends";
 
 const LEGEND_ITEMS = [
@@ -90,6 +94,7 @@ const VisitInsightsChart = () => {
     data: visitInsights = [],
     isPending: loading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["visit-insights", timePeriod],
     queryFn: () => fetchVisitInsights(timePeriod),
@@ -150,17 +155,16 @@ const VisitInsightsChart = () => {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         {loading ? (
-          <div className="d-flex justify-content-center align-items-center h-100">
-            <div className="spinner-border text-primary-normal" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
+          <LoadingSpinner fullHeight />
         ) : error ? (
-          <div className="p-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-600">{error.message}</p>
-            </div>
-          </div>
+          <ErrorBanner fullHeight message={error.message} onRetry={refetch} />
+        ) : visitInsights.length === 0 ? (
+          <EmptyState
+            icon={FiBarChart2}
+            title="No visits yet"
+            description="Visit insights will appear here once customers start browsing your storefront."
+            compact
+          />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={visitInsights} responsive>

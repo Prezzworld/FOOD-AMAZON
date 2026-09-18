@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { FiSearch, FiPlus, FiMinus, FiTrash2, FiUser } from "react-icons/fi";
+import {
+  FiSearch,
+  FiPlus,
+  FiMinus,
+  FiTrash2,
+  FiUser,
+  FiShoppingCart,
+} from "react-icons/fi";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import formatToNaira from "../../utils/nairaFormatter";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorBanner from "../components/ErrorBanner";
+import EmptyState from "../components/EmptyState";
 
 const AVAILABILITY_VISUALS = {
   inStock: { label: "In Stock", color: "#00a859" },
@@ -48,6 +58,7 @@ const PointOfSale = () => {
     data: cart,
     isPending: cartLoading,
     error: cartError,
+    refetch: cartRefetch,
   } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCart,
@@ -261,17 +272,20 @@ const PointOfSale = () => {
           )}
 
           {cartError ? (
-            <div className="alert alert-danger fs-sm">
-              Couldn't load the current ticket.{cartError.message}
-            </div>
+            <ErrorBanner
+              compact
+              message={`Couldn't load the current ticket. ${cartError.message}`}
+              onRetry={cartRefetch}
+            />
           ) : cartLoading ? (
-            <p className="font-archivo" style={{ color: MUTED_TEXT }}>
-              Loading ticket...
-            </p>
+            <LoadingSpinner compact message="Loading ticket..." />
           ) : !cart || cart.items.length === 0 ? (
-            <p className="font-archivo fs-sm" style={{ color: MUTED_TEXT }}>
-              No items yet — search for a product to add it.
-            </p>
+            <EmptyState
+              icon={FiShoppingCart}
+              title="No items yet"
+              description="Search for a product to start this sale."
+              compact
+            />
           ) : (
             <div className="d-flex flex-column gap-3 mb-3">
               {cart.items.map((item) => (

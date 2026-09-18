@@ -14,6 +14,10 @@ import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 // import { CustomLegends } from "./CustomLegends";
 import CustomTooltip from "./CustomTooltip";
 import CustomCursor from "./CustomCursor";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorBanner from "./ErrorBanner";
+import EmptyState from "./EmptyState";
+import { FiBarChart2 } from "react-icons/fi";
 
 const LEGEND_ITEMS = [
 	{ color: "#00a859", label: "Walk-in Sales" },
@@ -94,34 +98,29 @@ const transformDataForChart = (backendData, period) => {
 const SalesByChannelChart = () => {
 	const [timePeriod, setTimePeriod] = useState("monthly");
 
-	const {data: chartData = [], isPending: loading, error} = useQuery({
+	const {data: chartData = [], isPending: loading, error, refetch} = useQuery({
 		queryKey: ["sales-by-channel", timePeriod],
 		queryFn: () => fetchCharts(timePeriod)
 	})
 
 	
 	if (loading) {
-		return (
-      <div className="d-flex justify-content-center align-items-center h-100">
-        <div className="spinner-border text-primary-normal" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
+		return <LoadingSpinner fullHeight />;
 	}
 
 	if (error) {
-		return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error.message}</p>
-        </div>
-      </div>
-    );
+		return <ErrorBanner fullHeight message={error.message} onRetry={refetch} />;
 	}
 
 	if (!loading && !error && chartData.length === 0) {
-		return <p className="text-muted text-center">No data available</p>;
+		return (
+			<EmptyState
+				icon={FiBarChart2}
+				title="No data available"
+				description="Sales by channel will appear here once your first orders come in."
+				compact
+			/>
+		);
 	}
 
 	return (

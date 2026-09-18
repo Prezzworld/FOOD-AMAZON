@@ -2,6 +2,8 @@ import {useQuery} from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { FaEllipsisH, FaUser } from 'react-icons/fa';
 import distributorAxiosInstance from '../utils/DistributorAxiosInstance';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorBanner from './ErrorBanner';
 
 const fetchCustomers = async () => {
 	const response = await distributorAxiosInstance.get(
@@ -16,29 +18,17 @@ const fetchCustomers = async () => {
 const CustomerList = () => {
   const navigate = useNavigate();
 
-	const {data: customers = [], isPending: loading, error} = useQuery({
+	const {data: customers = [], isPending: loading, error, refetch} = useQuery({
 		queryKey: ["new-customer"],
 		queryFn: fetchCustomers
 	})
 
   if (loading) {
-		return (
-      <div className="d-flex justify-content-center align-items-center h-100">
-        <div className="spinner-border text-primary-normal" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
+		return <LoadingSpinner fullHeight />;
 	}
 
 	if (error) {
-		return (
-			<div className="p-4">
-				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-red-600">{error.message}</p>
-				</div>
-			</div>
-		);
+		return <ErrorBanner fullHeight message={error.message} onRetry={refetch} />;
 	}
 
   return (
