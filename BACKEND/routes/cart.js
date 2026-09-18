@@ -30,7 +30,11 @@ router.get("/get-cart", auth, async (req, res) => {
       await cart.save();
     }
 
-    res.send(cart);
+    res.json({
+      success: true,
+      message: "Cart retrieved successfully",
+      cart: cart,
+    });
   } catch (error) {
     console.error("get cart error:", error);
     res.status(500).send("Something went wrong: " + error.message);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { FiSearch, FiPlus, FiMinus, FiTrash2, FiUser } from "react-icons/fi";
 import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import formatToNaira from "../../utils/nairaFormatter";
@@ -18,44 +19,66 @@ const getAvailability = (inStock, threshold = 10) => {
 const MUTED_TEXT = "#8b93a7";
 const BORDER_COLOR = "#f1f1f5";
 
+const fetchCart = async () => {
+  const response = await distributorAxiosInstance.get(
+    "/food-amazon-database/cart/get-cart",
+  );
+  if (!response.data.success) {
+    throw new Error("Failed to get cart");
+  }
+  return response.data.cart;
+};
+
 const PointOfSale = () => {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
-
-  const [cart, setCart] = useState(null);
-  const [cartLoading, setCartLoading] = useState(true);
 
   // Optional — a customer can decline to give any of this, and checkout
   // works fine with all three left blank.
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-
-  const [checkingOut, setCheckingOut] = useState(false);
-  const [receipt, setReceipt] = useState(null);
   const [error, setError] = useState("");
+  const [receipt, setReceipt] = useState(null);
 
   const searchTimer = useRef(null);
 
-  const fetchCart = async () => {
-    try {
-      setCartLoading(true);
-      const response = await distributorAxiosInstance.get(
-        "/food-amazon-database/cart/get-cart",
-      );
-      setCart(response.data);
-    } catch (err) {
-      console.error("Error loading current ticket:", err);
-      setError("Couldn't load the current ticket.");
-    } finally {
-      setCartLoading(false);
-    }
-  };
+  const {
+    data: cart,
+    isPending: cartLoading,
+    error: cartError,
+  } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCart,
+  });
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
+  const queryClient = useQueryClient();
+
+  const checkoutMutation = useMutation({
+    mutationFn: ({ cartId, customerSnapshot }) =>
+      distributorAxiosInstance.post(`/food-amazon-database/order/create`, {
+        cartId,
+        orderChannel: "walk-in",
+        ...(customerSnapshot && { customerSnapshot }),
+      }),
+    onSuccess: (response) => {
+      setReceipt(response.data.order);
+      setCustomerName("");
+      setCustomerEmail("");
+      setCustomerPhone("");
+
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["sales-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["sales-by-channel"] });
+      queryClient.invalidateQueries({ queryKey: ["visit-insights"] });
+      queryClient.invalidateQueries({ queryKey: ["new-customer"] });
+    },
+    onError: (err) => {
+      setError(err.response?.data || "Sales could not be completed");
+    },
+  });
 
   // Distributor-scoped search — only ever returns products this distributor
   // actually owns, so there's no way to accidentally add someone else's
@@ -82,45 +105,46 @@ const PointOfSale = () => {
     return () => clearTimeout(searchTimer.current);
   }, [query]);
 
-  const addToCart = async (product) => {
-    try {
-      setError("");
-      const response = await distributorAxiosInstance.post(
-        "/food-amazon-database/cart/add-item",
-        { productId: product._id, quantity: 1 },
-      );
-      setCart(response.data.cart);
+  const addToCart = useMutation({
+    mutationFn: (product) =>
+      distributorAxiosInstance.post(`/food-amazon-database/cart/add-item`, {
+        productId: product._id,
+        quantity: 1,
+      }),
+    onSuccess: (response) => {
+      queryClient.setQueryData(["cart"], response.data.cart);
       setQuery("");
       setSearchResults([]);
-    } catch (err) {
-      setError(err.response?.data || "Couldn't add item to the ticket.");
-    }
-  };
+    },
+    onError: (err) => {
+      setError(err.response?.data || "Couldn't add items to cart");
+    },
+  });
 
-  const updateQuantity = async (productId, quantity) => {
-    if (quantity < 1) return;
-    try {
-      setError("");
-      const response = await distributorAxiosInstance.put(
+  const updateQuantity = useMutation({
+    mutationFn: ({ productId, quantity }) =>
+      distributorAxiosInstance.put(
         `/food-amazon-database/cart/update-item/${productId}`,
         { quantity },
-      );
-      setCart(response.data.cart);
-    } catch (err) {
-      setError(err.response?.data || "Couldn't update quantity.");
-    }
-  };
+      ),
+    onSuccess: (response) => {
+      queryClient.setQueryData(["cart"], response.data.cart);
+    },
+    onError: (err) =>
+      setError(err.response?.data || "Couldn't update items in cart"),
+  });
 
-  const removeItem = async (itemId) => {
-    try {
-      const response = await distributorAxiosInstance.delete(
+  const removeItem = useMutation({
+    mutationFn: (itemId) =>
+      distributorAxiosInstance.delete(
         `/food-amazon-database/cart/remove-item/${itemId}`,
-      );
-      setCart(response.data.cart);
-    } catch (err) {
-      console.error("Error removing item:", err);
-    }
-  };
+      ),
+    onSuccess: (response) => {
+      queryClient.setQueryData(["cart"], response.data.cart);
+    },
+    onError: (err) =>
+      setError(err.response?.data || "Couldn't update items in cart"),
+  });
 
   // Only include fields the distributor actually filled in — the walk-in
   // order schema treats each customerSnapshot field as individually
@@ -138,32 +162,6 @@ const PointOfSale = () => {
     if (customerPhone.trim()) snapshot.phone = customerPhone.trim();
     if (customerEmail.trim()) snapshot.email = customerEmail.trim();
     return Object.keys(snapshot).length > 0 ? snapshot : undefined;
-  };
-
-  const completeSale = async () => {
-    if (!cart || cart.items.length === 0) return;
-    try {
-      setCheckingOut(true);
-      setError("");
-      const customerSnapshot = buildCustomerSnapshot();
-      const response = await distributorAxiosInstance.post(
-        "/food-amazon-database/order/create",
-        {
-          cartId: cart._id,
-          orderChannel: "walk-in",
-          ...(customerSnapshot && { customerSnapshot }),
-        },
-      );
-      setReceipt(response.data.order);
-      setCustomerName("");
-      setCustomerPhone("");
-      setCustomerEmail("");
-      await fetchCart(); // server already deleted the old cart; this loads the fresh empty one
-    } catch (err) {
-      setError(err.response?.data || "Sale could not be completed.");
-    } finally {
-      setCheckingOut(false);
-    }
   };
 
   return (
@@ -204,7 +202,7 @@ const PointOfSale = () => {
               return (
                 <button
                   key={product._id}
-                  onClick={() => addToCart(product)}
+                  onClick={() => addToCart.mutate(product)}
                   disabled={isOutOfStock}
                   className="d-flex align-items-center justify-content-between border-0 rounded-3 px-3 py-2 text-start"
                   style={{ backgroundColor: "#f8f9fa" }}
@@ -262,7 +260,11 @@ const PointOfSale = () => {
             </div>
           )}
 
-          {cartLoading ? (
+          {cartError ? (
+            <div className="alert alert-danger fs-sm">
+              Couldn't load the current ticket.{cartError.message}
+            </div>
+          ) : cartLoading ? (
             <p className="font-archivo" style={{ color: MUTED_TEXT }}>
               Loading ticket...
             </p>
@@ -301,7 +303,11 @@ const PointOfSale = () => {
                   <div className="d-flex align-items-center gap-2">
                     <button
                       onClick={() =>
-                        updateQuantity(item.product._id, item.quantity - 1)
+                        item.quantity > 1 &&
+                        updateQuantity.mutate({
+                          productId: item.product._id,
+                          quantity: item.quantity - 1,
+                        })
                       }
                       className="border-0 rounded-circle d-flex align-items-center justify-content-center"
                       style={{
@@ -320,7 +326,10 @@ const PointOfSale = () => {
                     </span>
                     <button
                       onClick={() =>
-                        updateQuantity(item.product._id, item.quantity + 1)
+                        updateQuantity.mutate({
+                          productId: item.product._id,
+                          quantity: item.quantity + 1,
+                        })
                       }
                       className="border-0 rounded-circle d-flex align-items-center justify-content-center"
                       style={{
@@ -332,7 +341,7 @@ const PointOfSale = () => {
                       <FiPlus size={12} />
                     </button>
                     <button
-                      onClick={() => removeItem(item._id)}
+                      onClick={() => removeItem.mutate(item._id)}
                       className="border-0 bg-transparent"
                       style={{ color: "#eb5757" }}
                     >
@@ -405,11 +414,20 @@ const PointOfSale = () => {
               </span>
             </div>
             <button
-              onClick={completeSale}
-              disabled={!cart || cart.items.length === 0 || checkingOut}
+              onClick={() =>
+                checkoutMutation.mutate({
+                  cartId: cart._id,
+                  customerSnapshot: buildCustomerSnapshot(),
+                })
+              }
+              disabled={
+                !cart || cart.items.length === 0 || checkoutMutation.isPending
+              }
               className="bg-primary-normal text-white border-0 rounded-2 w-100 py-3 font-archivo fw-semibold"
             >
-              {checkingOut ? "Processing..." : "Complete Sale (Cash)"}
+              {checkoutMutation.isPending
+                ? "Processing..."
+                : "Complete Sale (Cash)"}
             </button>
           </div>
         </div>

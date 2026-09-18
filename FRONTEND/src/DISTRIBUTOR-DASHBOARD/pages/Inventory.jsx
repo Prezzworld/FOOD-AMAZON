@@ -109,6 +109,8 @@ const Inventory = () => {
     }
   };
 
+  
+
   return (
     <div>
       <h2 className="font-archivo text-dark-blue fw-semibold fs-2 mb-3">
