@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MdOutlineVisibility, MdVisibilityOff } from "react-icons/md";
-import axios from "axios";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
 import {GoogleImg} from '../../LANDING-PAGES/pages/Images'
 import "./distributorAuth.css";
 import useDistributorStore from "../../store/distributorStore";
+import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 
 const Login = () => {
-	const BASE_URL = import.meta.env.VITE_API_URL;
-	const api_endpoint = `${BASE_URL}/api/food-amazon-database/distributors/login`;
 	const { showToast } = useToast();
 	const { showAlert } = useAlert();
 	const [visiblePassword, setVisiblePassword] = useState(false);
@@ -52,23 +50,14 @@ const Login = () => {
 		}
 
 		try {
-			const response = await axios.post(`${api_endpoint}`, {
-				...loginData,
-			});
+			const response = await distributorAxiosInstance.post(
+				"/food-amazon-database/distributors/login",
+				{ ...loginData },
+			);
 			const data = response.data;
 			if (response.data.success) {
 
 				const { accessToken, refreshToken, user } = data;
-				// if (!accessToken) {
-				// 	console.error("Missing tokens in response:", data);
-				// 	throw new Error("No authentication tokens received");
-				// }
-				// localStorage.setItem("disToken", accessToken);
-				// localStorage.setItem("disRefreshToken", refreshToken);
-
-				// if (user) {
-				// 	localStorage.setItem("distributor", JSON.stringify(user));
-				// }
 				useDistributorStore.getState().login(accessToken, refreshToken, user)
 				showToast("Login successful!", "success", 2000);
 				setTimeout(() => {

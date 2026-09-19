@@ -9,7 +9,7 @@ const getInitialAuth = () => {
 };
 
 const useDistributorStore = create(
-  devtools((set, get) => {
+  devtools((set) => {
     const initial = getInitialAuth();
 
     return {

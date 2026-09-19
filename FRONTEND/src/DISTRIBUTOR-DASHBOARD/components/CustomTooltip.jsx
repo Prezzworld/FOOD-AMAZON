@@ -2,7 +2,7 @@ import React from "react";
 import "../pages/dashboard.css";
 import formatToNaira from "../../utils/nairaFormatter";
 
-const CustomTooltip = ({ active, payload, label, coordinate, viewBox, showLine = true, formatValue }) => {
+const CustomTooltip = ({ active, payload, label, viewBox, showLine = true, formatValue }) => {
 	if (active && payload && payload.length) {
 		const deliveryData = payload.find((p) => p.dataKey === "delivery");
 		const walkInData = payload.find((p) => p.dataKey === "walkIn");
@@ -16,7 +16,6 @@ const CustomTooltip = ({ active, payload, label, coordinate, viewBox, showLine =
 
 		// These are only used when showLine is true — no wasted calculation otherwise
 		const chartHeight = viewBox?.height || 260;
-		const mouseY = coordinate?.y || 0;
 		// Tooltip dimensions (approximate)
 		const tooltipHeight = 100; // Adjust based on your actual tooltip height
 		const triangleHeight = 10;

@@ -1,8 +1,6 @@
 import axios from "axios";
 import useDistributorStore from "../../store/distributorStore";
 
-// const API_BASE_URL = "http://localhost:3004/api";
-
 // Create axios instance
 const distributorAxiosInstance = axios.create({
 	baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -59,7 +57,6 @@ distributorAxiosInstance.interceptors.response.use(
 		}
 
 		// If error is 401 (Unauthorized) and we haven't tried to refresh yet
-		// if (error.response?.status === 401 && !originalRequest._retry) {
 		originalRequest._retry = true;
 		isRefreshing = true;
 		// Get refresh token

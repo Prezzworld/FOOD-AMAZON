@@ -1,7 +1,7 @@
 import React from 'react';
 
 const CustomCursor = (props) => {
-  const { points, height, payload, chartHeight } = props;
+  const { points, height, payload } = props;
   if (!payload || payload.length === 0) return null;
   const x = points[0].x;
   const dataPoint = payload[0].payload;

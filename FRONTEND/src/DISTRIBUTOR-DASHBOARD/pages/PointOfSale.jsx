@@ -85,6 +85,12 @@ const PointOfSale = () => {
       queryClient.invalidateQueries({ queryKey: ["sales-by-channel"] });
       queryClient.invalidateQueries({ queryKey: ["visit-insights"] });
       queryClient.invalidateQueries({ queryKey: ["new-customer"] });
+      // A sale decrements stock and creates an order — refresh everything
+      // derived from stock levels or order history too.
+      queryClient.invalidateQueries({ queryKey: ["inventory-products"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["best-selling"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-orders"] });
     },
     onError: (err) => {
       setError(err.response?.data || "Sales could not be completed");

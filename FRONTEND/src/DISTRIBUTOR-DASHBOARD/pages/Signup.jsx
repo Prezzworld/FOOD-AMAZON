@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { MdOutlineVisibility, MdVisibilityOff } from "react-icons/md";
-import axios from "axios";
+import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import "./distributorAuth.css";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
@@ -14,19 +14,14 @@ const Signup = () => {
 	const [visiblePassword, setVisiblePassword] = useState(false);
 	const [searchParams] = useSearchParams();
 	const token = searchParams.get("token");
-	const navigate = useNavigate();
-	const [invitationData, setInvitationData] = useState(null);
+	const	navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
-	// const [success, setSuccess] = useState(false);
-	// const [error, setError] = useState("");
 	const [formData, setFormData] = useState({
 		fullName: "",
 		email: "",
 		password: "",
 	});
-	const BASE_URL = import.meta.env.VITE_API_URL;
-	const api_endpoint = `${BASE_URL}/api/food-amazon-database`;
 	const handlePasswordVisibility = () => setVisiblePassword(!visiblePassword);
 	const handleChange = (e) => {
 		setFormData({
@@ -47,12 +42,11 @@ const Signup = () => {
 
 		const verifyToken = async () => {
 			try {
-				const response = await axios.get(
-					`${api_endpoint}/invitation/verify-invitation/${token}`,
+				const response = await distributorAxiosInstance.get(
+					`/food-amazon-database/invitation/verify-invitation/${token}`,
 				);
 				if (response.data.success) {
-					setInvitationData(response.data);
-					// setError("");
+					// Token is valid — render the signup form.
 				} else {
 					showAlert(
 						response.data.error || "Invalid or expired invitation",
@@ -87,7 +81,7 @@ const Signup = () => {
 			}
 		};
 		verifyToken();
-	}, [token, api_endpoint, showAlert]);
+	}, [token, showAlert]);
 
 	const handleSubmit = async (e) => {
 		e?.preventDefault?.();
@@ -107,10 +101,13 @@ const Signup = () => {
 		}
 		setSubmitting(true);
 		try {
-			const response = await axios.post(`${api_endpoint}/distributors/signup`, {
-				token: token,
-				...formData,
-			});
+			const response = await distributorAxiosInstance.post(
+				"/food-amazon-database/distributors/signup",
+				{
+					token: token,
+					...formData,
+				},
+			);
 			if (response.data.success) {
 				useDistributorStore.getState().login(response.data.token, null, response.data.user)
 				showToast("Account created successfully, welcome aboard!", "success", 2000);
@@ -163,10 +160,6 @@ const Signup = () => {
 			</div>
 		);
 	}
-
-	// if (error && !invitationData) {
-	// 	return showAlert("Invali")
-	// }
 
 	return (
 		<>
@@ -273,14 +266,7 @@ const Signup = () => {
 									)}
 								</button>
 							</div>
-							{/* {error && (
-								<>
-									<div className="alert alert-danger mb-3" role="alert">
-										{error}
-									</div>
-								</>
-							)} */}
-							<div className="mb-4">
+						<div className="mb-4">
 								<button className="bg-transparent google-signin-btn border-1 font-archivo fw-semibold fs-6 text-dark-blue rounded-2 d-inline-flex justify-content-center gap-3 w-100 py-3">
 									<img src={GoogleImg} alt="" />
 									<p>Sign Up with Google</p>

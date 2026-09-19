@@ -4,20 +4,7 @@ import { GoTriangleRight } from "react-icons/go";
 
 const FILTER_MENU = ["Date", "Rating", "Product", "Status"];
 
-const FilterDropdown = ({
-  activeFilters,
-  onFilterClick,
-  onReset,
-  onClose,
-  activeSubFilter,
-}) => {
-  const FILTER_KEY_MAP = {
-    Date: "days",
-    Rating: "rating",
-    Product: "productId",
-    Status: "status",
-  };
-
+const FilterDropdown = ({ onFilterClick, onReset, onClose, activeSubFilter }) => {
   return (
 		<div className="filter-dropdown-card position-absolute bg-white shadow rounded">
 			<div className="filter-dropdown-header d-flex align-items-center justify-content-between px-4 pt-4 pb-2">
@@ -38,8 +25,6 @@ const FilterDropdown = ({
 			<hr className="my-0" />
 			<div className="filter-dropdown-body py-4 px-3">
 				{FILTER_MENU.map((menu) => {
-					const key = FILTER_KEY_MAP[menu];
-					const hasActiveFilter = activeFilters[key] !== undefined;
 					return (
 						<button
 							key={menu}

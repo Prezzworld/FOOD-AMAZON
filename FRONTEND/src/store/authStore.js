@@ -9,7 +9,7 @@ const getInitialAuth = () => {
 }
 
 const useAuthStore = create(
-  devtools((set, get) => {
+  devtools((set) => {
     const initial = getInitialAuth();
 
     return {

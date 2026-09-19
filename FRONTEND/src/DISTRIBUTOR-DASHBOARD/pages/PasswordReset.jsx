@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
+import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import VerifyAuth from "../components/VerifyAuth";
 
 const PasswordReset = () => {
@@ -11,11 +11,10 @@ const PasswordReset = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { showAlert } = useAlert();
-  const BASE_URL = import.meta.env.VITE_API_URL;
   const resetEndpoints = [
-    `${BASE_URL}/api/food-amazon-database/distributors/forgot-password`,
-    `${BASE_URL}/api/food-amazon-database/distributors/request-password-reset`,
-    `${BASE_URL}/api/food-amazon-database/distributors/password-reset/request`,
+    "/food-amazon-database/distributors/forgot-password",
+    "/food-amazon-database/distributors/request-password-reset",
+    "/food-amazon-database/distributors/password-reset/request",
   ];
 
   const handleSubmit = async (e) => {
@@ -42,7 +41,9 @@ const PasswordReset = () => {
     let lastError = null;
     for (const endpoint of resetEndpoints) {
       try {
-        const response = await axios.post(endpoint, { email: normalizedEmail });
+        const response = await distributorAxiosInstance.post(endpoint, {
+          email: normalizedEmail,
+        });
         if (response.data?.success || response.data?.message) {
           showToast(
             response.data.message ||

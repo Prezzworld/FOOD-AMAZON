@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
 import { useToast } from '../../toast/ToastContext';
 import useDistributorStore from '../../store/distributorStore';
+import distributorAxiosInstance from '../utils/DistributorAxiosInstance';
 
 const AuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -27,8 +27,8 @@ const AuthCallback = () => {
       // Fetch the distributor profile so the dashboard header/sidebar have it in the store
       const fetchProfile = async () => {
         try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_API_URL}/api/food-amazon-database/distributors/me`,
+          const response = await distributorAxiosInstance.get(
+            "/food-amazon-database/distributors/me",
             { headers: { "x-auth-token": accessToken } }
           );
           if (response.data.success) {
@@ -43,7 +43,7 @@ const AuthCallback = () => {
       showToast("Signed in with google successfully", "success");
       setTimeout(() => navigate("/distributor/dashboard"), 1500);
     }
-  }, [])
+  }, [searchParams, navigate, showToast])
 
   return (
     <div className="text-center py-5">

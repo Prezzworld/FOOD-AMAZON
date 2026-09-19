@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
+import distributorAxiosInstance from "../utils/DistributorAxiosInstance";
 import VerifyAuth from "../components/VerifyAuth";
 
 const ConfirmEmail = () => {
@@ -11,8 +11,6 @@ const ConfirmEmail = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { showAlert } = useAlert();
-  const BASE_URL = import.meta.env.VITE_API_URL;
-  const api_endpoint = `${BASE_URL}/api/food-amazon-database/distributors/confirm-email`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,9 +27,10 @@ const ConfirmEmail = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(api_endpoint, {
-        code: confirmationCode,
-      });
+      const response = await distributorAxiosInstance.post(
+        "/food-amazon-database/distributors/confirm-email",
+        { code: confirmationCode },
+      );
 
       if (response.data.success) {
         showToast("Email confirmed successfully!", "success", 2000);
