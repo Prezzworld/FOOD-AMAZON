@@ -25,7 +25,7 @@ router.get("/get-cart", auth, async (req, res) => {
         },
         items: [],
         totalAmount: 0,
-        totalItems: 0,
+        totalItems: 0, 
       });
       await cart.save();
     }

@@ -65,7 +65,7 @@ const Checkout = () => {
 				"/food-amazon-database/cart/get-cart",
 			);
 			setCart(response.data);
-			setCartId(response.data._id);
+			setCartId(response.data.cart._id);
 			setLoading(false);
 		} catch (error) {
 			console.error("Error fetching cart: ", error);

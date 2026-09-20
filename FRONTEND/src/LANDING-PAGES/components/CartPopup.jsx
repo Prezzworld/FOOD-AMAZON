@@ -5,6 +5,7 @@ import CartItems from "./CartItems";
 import { BsX } from "react-icons/bs";
 import "../pages/cart.css";
 import { formatToNaira } from "../../utils/nairaFormatter";
+import { computeTotals, normalizeCart } from "../utils/cartUtils";
 
 const CartPopup = () => {
   const navigate = useNavigate();
@@ -69,21 +70,22 @@ const CartPopup = () => {
       setLoading(true);
       const savedCart = await cartService.getCart();
 
-      const normalizedCart = savedCart.map((item) => {
-        if (item.product) {
-          return {
-            itemId: item._id,
-            _id: item.product._id,
-            name: item.product.name,
-            price: item.product.price,
-            productImg: item.product.productImg,
-            quantity: item.quantity,
-            variety: item.variety,
-            cartItemId: item.cartItemId,
-          };
-        }
-        return item;
-      });
+      // const normalizedCart = savedCart.map((item) => {
+      //   if (item.product) {
+      //     return {
+      //       itemId: item._id,
+      //       _id: item.product._id,
+      //       name: item.product.name,
+      //       price: item.product.price,
+      //       productImg: item.product.productImg,
+      //       quantity: item.quantity,
+      //       variety: item.variety,
+      //       cartItemId: item.cartItemId,
+      //     };
+      //   }
+      //   return item;
+      // });
+      const normalizedCart = normalizeCart(savedCart)
       // const cartArray = Array.isArray(savedCart) ? savedCart : [];
       setCart(normalizedCart);
       const total = await cartService.getCartTotal();
@@ -211,7 +213,6 @@ const CartPopup = () => {
     setSubtotal(newSubtotal);
   };
 
-  // const subtotal = cartService.getCartTotal();
 
   return (
     <>
@@ -270,7 +271,7 @@ const CartPopup = () => {
                           <div className="w-100">
                             <div className="d-flex justify-content-between mb-3 border-bottom pb-2">
                               <h3 className="fw-bold font-inter text-main-accent fs-4">
-                                Cart Order Total ({cart.length})
+                                Cart Order Total ({computeTotals(cart).totalItems})
                               </h3>
                               <span className="fw-bold fs-4 text-main-accent font-inter">
                                 {formatToNaira(subTotal)}

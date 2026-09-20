@@ -5,6 +5,7 @@ import { MdOutlineShoppingBag } from "react-icons/md";
 import { Logo } from "../pages/Images";
 import CartPopup from "./CartPopup";
 import { cartService } from "../utils/cartService";
+// import useCartStore from "../../store/cartStore";
 
 const Header = ({ shadow }) => {
 	const [active, setActive] = useState(0);

@@ -20,7 +20,7 @@ class CartService {
       return this._cartCache;
     }
     const response = await axiosInstance.get(`/${endpointUrl}get-cart`);
-    this._cartCache = response.data;
+    this._cartCache = response.data.cart;
     this._cartCacheTime = now;
     return this._cartCache;
   }
@@ -94,7 +94,7 @@ class CartService {
 						`/${endpointUrl}get-cart`
 						// this.getAxiosConfig()
 					);
-					const items = response.data.items || [];
+					const items = response.data.cart.items || [];
 					localStorage.setItem("foodAmazonCart", JSON.stringify(items));
 					return items;
 				});
