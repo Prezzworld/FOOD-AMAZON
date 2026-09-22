@@ -28,4 +28,6 @@ const normalizeCart = (cartItems) => {
   });
 };
 
-export {computeTotals, normalizeCart}
+const cartKey = (userId) => ["cart", userId];
+
+export {computeTotals, normalizeCart, cartKey}
