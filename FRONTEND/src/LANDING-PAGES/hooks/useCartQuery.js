@@ -1,7 +1,7 @@
 import useAuthStore from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCart, addToCart, updateCartItem, removeCartItem, clearCart } from "../utils/cartApi";
-import { cartKey } from "../utils/cartUtils";
+import { cartKey, normalizeCart } from "../utils/cartUtils";
 
 const useGetCart = () => {
   const user = useAuthStore((state) => state.user);
@@ -12,6 +12,10 @@ const useGetCart = () => {
     queryFn: getCart,
     enabled: isAuthenticated && !!userId,
     staleTime: 0,
+    select: (cart) => ({
+      ...cart,
+      items: normalizeCart(cart.items),
+    }),
   });
 };
 

@@ -14,8 +14,6 @@ const useCartStore = create(
     persist((set, get) => {
       return {
         items: [],
-        totalItems: 0,
-        totalAmount: 0,
 
         addToCart: (product, quantity, variety) => {
           const existingItemIndex = get().items.findIndex(
@@ -63,7 +61,7 @@ const useCartStore = create(
           set({ items: itemAfterRemove });
         },
         clearCart: () => {
-          set({ items: [], totalItems: 0, totalAmount: 0 });
+          set({ items: [] });
         },
       };
     }, {name: "guest-cart-storage", storage: createJSONStorage(() => localStorage), partialize: (state) => ({items: state.items})}),
