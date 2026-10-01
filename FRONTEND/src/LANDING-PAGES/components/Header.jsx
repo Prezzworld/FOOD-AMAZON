@@ -1,56 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaSearch, FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingBag } from "react-icons/md";
 import { Logo } from "../pages/Images";
 import CartPopup from "./CartPopup";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart"
 // import useCartStore from "../../store/cartStore";
 
 const Header = ({ shadow }) => {
 	const [active, setActive] = useState(0);
 	const navItems = ["Home", "Our Products", "Health Benefits", "Blog", "FAQs"];
 	const [iconOpen, setIconOpen] = useState(false);
-	const [cartCount, setCartCount] = useState(0);
-	const isLoadingCountRef = useRef(false);
+	const {totalItems} = useCart()
 
-	useEffect(() => {
-		const updateCartCount = async () => {
-			if(isLoadingCountRef.current) return;
-			try {
-				isLoadingCountRef.current = true;
-				const count = await cartService.getCartCount();
-				setCartCount(count);
-			} catch (error) {
-				console.error("Error updating cart count:", error);
-			} finally {
-				isLoadingCountRef.current = false
-			}
-		};
-
-		updateCartCount();
-
-		// Listen for storage changes from other tabs
-		const handleStorageChange = (e) => {
-			if (e.key === "foodAmazonCart") {
-				updateCartCount();
-			}
-		};
-
-		// Listen for cart updates
-		const handleCartUpdate = () => {
-			updateCartCount();
-		};
-
-		window.addEventListener("storage", handleStorageChange);
-		window.addEventListener("cartUpdated", handleCartUpdate);
-
-		return () => {
-			window.removeEventListener("storage", handleStorageChange);
-			window.removeEventListener("cartUpdated", handleCartUpdate);
-			// clearInterval(interval);
-		};
-	}, []);
 
 	return (
 		<>
@@ -109,12 +71,12 @@ const Header = ({ shadow }) => {
 								style={{ cursor: "pointer" }}
 							>
 								<MdOutlineShoppingBag size={20} />
-								{cartCount > 0 && (
+								{totalItems > 0 && (
 									<span
 										className="position-absolute start-100 translate-middle badge rounded-circle text-white bg-secondary-normal p-1"
 										style={{ fontSize: "0.65rem", top: "5px" }}
 									>
-										{cartCount}
+										{totalItems}
 									</span>
 								)}
 							</button>

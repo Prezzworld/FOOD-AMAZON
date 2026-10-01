@@ -23,7 +23,7 @@ const useCart = () => {
 
   const loading = isAuthenticated ? serverCart.isPending : false
   const items = isAuthenticated ? serverCart.data?.items || [] : guestCart
-  const totals = isAuthenticated ? {totalItems: serverCart.data?.totalItems ?? 0, totalAmount: serverCart.data?.totalAmount} : computeTotals(guestCart) 
+  const totals = isAuthenticated ? {totalItems: serverCart.data?.totalItems ?? 0, totalAmount: serverCart.data?.totalAmount ?? 0} : computeTotals(guestCart) 
   const isAdding = isAuthenticated ? serverAddToCart.isPending : false;
   const isUpdating = isAuthenticated ? serverUpdateCartItem.isPending : false;
   const isRemoving = isAuthenticated ? serverRemoveCartItem.isPending : false;
@@ -31,37 +31,37 @@ const useCart = () => {
 
   const addToCart = (product, quantity, variety) => {
     if(isAuthenticated) {
-      serverAddToCart.mutate({product, quantity, variety})
+      return serverAddToCart.mutateAsync({product, quantity, variety})
     } else {
-      guestAddToCart(product, quantity, variety)
+      return guestAddToCart(product, quantity, variety)
     }
   }
 
   const updateCartItem = (item, quantity) => {
     if(isAuthenticated) {
-      serverUpdateCartItem.mutate({productId: item._id, quantity})
+      return serverUpdateCartItem.mutateAsync({productId: item._id, quantity})
     } else {
-      guestUpdateCartItem(item.itemId, quantity)
+      return guestUpdateCartItem(item.itemId, quantity)
     }
   }
 
   const removeCartItem = (item) => {
     if(isAuthenticated) {
-      serverRemoveCartItem.mutate(item.itemId)
+      return serverRemoveCartItem.mutateAsync(item.itemId)
     } else {
-      guestRemoveCartItem(item.itemId)
+      return guestRemoveCartItem(item.itemId)
     }
   }
 
   const clearCart = () => {
     if(isAuthenticated) {
-      serverClearCart.mutate()
+      return serverClearCart.mutateAsync()
     } else {
-      guestClearCart()
+      return guestClearCart()
     }
   }
 
-  return {items, loading, totalItems: totals.totalItems, totalAmount: totals.totalAmount, isAdding, isUpdating, isRemoving, isClearing, addToCart, updateCartItem, removeCartItem, clearCart}
+  return {items, loading, cartId: serverCart.data?._id ?? null, totalItems: totals.totalItems, totalAmount: totals.totalAmount, isAdding, isUpdating, isRemoving, isClearing, addToCart, updateCartItem, removeCartItem, clearCart}
 }
 
 export {useCart}

@@ -1,35 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { cartService } from "../utils/cartService";
+import { useCart } from "../hooks/useCart";
+import { useToast } from "../../toast/ToastContext";
 import CartItems from "./CartItems";
 import { BsX } from "react-icons/bs";
 import "../pages/cart.css";
 import { formatToNaira } from "../../utils/nairaFormatter";
-import { computeTotals, normalizeCart } from "../utils/cartUtils";
 
 const CartPopup = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [cart, setCart] = useState([]);
-  const [subTotal, setSubtotal] = useState(0);
+  const {items, loading, totalItems, totalAmount, updateCartItem, removeCartItem} = useCart()
+  const {showToast} = useToast()
 
   useEffect(() => {
-    loadCart();
-    // Listen for storage changes from other tabs
-    const handleStorageChange = (e) => {
-      if (e.key === "foodAmazonCart") {
-        loadCart();
-      }
-    };
-
-    const handleCartUpdate = () => {
-      loadCart();
-    };
-
     // Listen for modal shown event to refresh cart
     const modalElement = document.getElementById("cartModal");
     const handleModalShown = () => {
-      loadCart();
       setTimeout(() => {
         const backdrop = document.querySelector(".modal-backdrop");
         if (backdrop) {
@@ -46,16 +32,12 @@ const CartPopup = () => {
       }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleCartUpdate);
     if (modalElement) {
       modalElement.addEventListener("shown.bs.modal", handleModalShown);
       modalElement.addEventListener("hidden.bs.modal", handleModalHidden);
     }
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.addEventListener("cartUpdated", handleCartUpdate);
       if (modalElement) {
         modalElement.removeEventListener("shown.bs.modal", handleModalShown);
         modalElement.removeEventListener("hidden.bs.modal", handleModalHidden);
@@ -65,38 +47,6 @@ const CartPopup = () => {
     };
   }, []);
 
-  const loadCart = async () => {
-    try {
-      setLoading(true);
-      const savedCart = await cartService.getCart();
-
-      // const normalizedCart = savedCart.map((item) => {
-      //   if (item.product) {
-      //     return {
-      //       itemId: item._id,
-      //       _id: item.product._id,
-      //       name: item.product.name,
-      //       price: item.product.price,
-      //       productImg: item.product.productImg,
-      //       quantity: item.quantity,
-      //       variety: item.variety,
-      //       cartItemId: item.cartItemId,
-      //     };
-      //   }
-      //   return item;
-      // });
-      const normalizedCart = normalizeCart(savedCart)
-      // const cartArray = Array.isArray(savedCart) ? savedCart : [];
-      setCart(normalizedCart);
-      const total = await cartService.getCartTotal();
-      setSubtotal(total);
-    } catch (error) {
-      console.error("Error loading cart", error);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleViewCart = () => {
     // Get the modal element
@@ -150,68 +100,23 @@ const CartPopup = () => {
     }, 300);
   };
 
-  const handleRemoveItem = async (productId) => {
+  const handleRemoveItem = async (item) => {
     try {
-      const updatedCart = await cartService.removeFromCart(productId);
-
-      const normalizedCart = updatedCart.map((item) => {
-        if (item.product) {
-          return {
-            itemId: item._id,
-            _id: item.product._id,
-            name: item.product.name,
-            price: item.product.price,
-            productImg: item.product.productImg, // Don't forget this!
-            quantity: item.quantity,
-            variety: item.variety,
-            cartItemId: item.cartItemId,
-          };
-        }
-        return item;
-      });
-
-      setCart(normalizedCart);
-
-      // Recalculate the subtotal based on the normalized cart
-      const newSubtotal = normalizedCart.reduce((total, item) => {
-        return total + item.price * item.quantity;
-      }, 0);
-      setSubtotal(newSubtotal);
-    } catch (error) {
-      console.error("❌ Error removing item:", error);
-      console.error("  - Error message:", error.message);
-      console.error("  - Error response:", error.response?.data);
+      await removeCartItem(item)
+      showToast("Cart item removed successfully", "success")
+    } catch {
+      showToast("Couldn't remove item from cart, please try again later", "error")
     }
-  };
+  }
 
-  const updateCart = async (productId, quantity) => {
-    const updatedCart = await cartService.updateQuantity(productId, quantity);
-
-    // Normalize before setting state
-    const normalizedCart = updatedCart.map((item) => {
-      if (item.product) {
-        return {
-          itemId: item._id,
-          _id: item.product._id,
-          name: item.product.name,
-          price: item.product.price,
-          productImg: item.product.productImg,
-          quantity: item.quantity,
-          variety: item.variety,
-          cartItemId: item.cartItemId,
-        };
-      }
-      return item;
-    });
-
-    setCart(normalizedCart);
-
-    // Recalculate subtotal
-    const newSubtotal = normalizedCart.reduce((total, item) => {
-      return total + item.price * item.quantity;
-    }, 0);
-    setSubtotal(newSubtotal);
-  };
+  const updateCart = async (item, quantity) => {
+    try {
+      await updateCartItem(item, quantity);
+      showToast("Cart updated successfully", "success");
+    } catch {
+      showToast("Couldn't update cart, please try again later", "error");
+    }
+  }; 
 
 
   return (
@@ -245,7 +150,7 @@ const CartPopup = () => {
                     <span className="visually-hidden">Loading</span>
                   </div>
                 </div>
-              ) : cart.length === 0 ? (
+              ) : items.length === 0 ? (
                 <div className="text-center py-5">
                   <p className="fs-5 text-muted">Your cart is empty</p>
                 </div>
@@ -253,7 +158,7 @@ const CartPopup = () => {
                 <>
                   <div className="row align-items-start">
                     <div className="col-lg-5 col-12">
-                      {cart.map((item, index) => (
+                      {items.map((item, index) => (
                         <CartItems
                           key={item.itemId}
                           item={item}
@@ -266,15 +171,15 @@ const CartPopup = () => {
                       ))}
                     </div>
                     <div className="col-lg-6 col-12 d-flex flex-column justify-content-between ms-auto">
-                      {cart.length > 0 && (
+                      {items.length > 0 && (
                         <div className="cart-summary">
                           <div className="w-100">
                             <div className="d-flex justify-content-between mb-3 border-bottom pb-2">
                               <h3 className="fw-bold font-inter text-main-accent fs-4">
-                                Cart Order Total ({computeTotals(cart).totalItems})
+                                Cart Order Total ({totalItems})
                               </h3>
                               <span className="fw-bold fs-4 text-main-accent font-inter">
-                                {formatToNaira(subTotal)}
+                                {formatToNaira(totalAmount)}
                               </span>
                             </div>
                             <div className="congrat font-inter fw-normal fs-5 my-4">

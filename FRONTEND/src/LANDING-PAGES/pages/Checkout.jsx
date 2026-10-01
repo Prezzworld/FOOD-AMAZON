@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import OrderSummary from "../components/OrderSummary";
 import "./checkout.css";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart"
 import { useAlert } from "../../alert/AlertContext";
 import { useToast } from "../../toast/ToastContext";
 import axiosInstance from "../utils/axiosInstance";
@@ -33,53 +33,18 @@ const Checkout = () => {
 			[id]: value,
 		}));
 	};
-	const [cart, setCart] = useState(null);
-	const [cartId, setCartId] = useState("");
-	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState("");
+	const {items, loading, cartId} = useCart()
 	// const navigate = useNavigate();
 
 	useEffect(() => {
-		fetchCartData();
-	}, []);
-
-	const fetchCartData = async () => {
-		try {
-			setLoading(true);
-			setError("");
-			const cartItems = await cartService.getCart();
-			if (!cartItems || cartItems.length === 0) {
-				setError(
-					"Your cart is empty. Please add items to cart before checkout",
-				);
-				showAlert(
-					"Your cart is empty. Please add items to cart before checkout",
-					"error",
-					{ mode: "inline" },
-				);
-				setLoading(false);
-				return;
-			}
-			const response = await axiosInstance.get(
-				"/food-amazon-database/cart/get-cart",
-			);
-			setCart(response.data);
-			setCartId(response.data.cart._id);
-			setLoading(false);
-		} catch (error) {
-			console.error("Error fetching cart: ", error);
-			setError("Failed to load cart. Please try again.");
-			showAlert("Failed to load cart. Please try again.", "error", {
-				mode: "confirm",
-				confirmText: "Try again",
-				onConfirm: () => {
-					setLoading(false);
-					fetchCartData();
-				},
-			});
+		if(!loading && items.length === 0) {
+			showAlert("Your cart is empty. Please add items to cart before checkout", "error", {mode: "inline"})
 		}
-	};
+	}, [loading, items.length])
+
+
 	const validateForm = () => {
 		const required = [
 			"email",
@@ -95,7 +60,6 @@ const Checkout = () => {
 		];
 		for (let field of required) {
 			if (!formData[field] || formData[field].trim() === "") {
-				setLoading(false);
 				setError(
 					`Please fill in your ${field
 						.replace(/([A-Z])/g, ` $1`)
@@ -111,7 +75,6 @@ const Checkout = () => {
 		}
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(formData.email)) {
-			setLoading(false);
 			setError("Please enter a valid email address");
 			showAlert("Please enter a valid email address", "error", {
 				mode: "inline",
@@ -173,7 +136,6 @@ const Checkout = () => {
 					error.message ||
 					"Failed to create order. Please try again.",
 			);
-			setLoading(false);
 			setSubmitting(false)
 			showAlert(
 					"Failed to create order. Please try again.",
@@ -184,7 +146,6 @@ const Checkout = () => {
 					confirmText: "Try again",
 					onConfirm: () => {
 						setSubmitting(false);
-						setLoading(false);
 					},
 				},
 			);

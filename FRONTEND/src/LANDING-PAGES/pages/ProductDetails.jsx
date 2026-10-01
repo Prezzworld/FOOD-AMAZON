@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import axiosInstance from "../utils/axiosInstance";
@@ -6,7 +6,8 @@ import Footer from "../components/Footer";
 import { stringToArray } from "../helper/Helper";
 import { FaCheck, FaStar } from "react-icons/fa";
 import ProductShowcase from "../components/ProductShowcase";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart";
+import useAuthStore from "../../store/authStore"
 import { useAlert } from "../../alert/AlertContext";
 import "../pages/productDetails.css";
 import { useToast } from "../../toast/ToastContext";
@@ -19,7 +20,8 @@ const ProductDetails = () => {
 	const [quantity, setQuantity] = useState(1);
 	const [loading, setLoading] = useState(false);
 	const [added, setIsAdded] = useState(false);
-	const [isAddingToCart, setIsAddingToCart] = useState(false);
+	const {addToCart, isAdding} = useCart()
+	const isAuthenticated = useAuthStore(state => state.isAuthenticated)
 	const [product, setProduct] = useState([]);
 	const [reviewData, setReviewData] = useState({
 		headline: "",
@@ -190,9 +192,7 @@ const ProductDetails = () => {
 
 	const handleAddToCart = async () => {
 		try {
-			setIsAddingToCart(true);
-
-			await cartService.addToCart(product, quantity);
+			await addToCart(product, quantity);
 			setIsAdded(true);
 			showToast(
 				`${quantity} ${quantity > 1 ? "items" : "item"} added to cart`,
@@ -213,14 +213,10 @@ const ProductDetails = () => {
 					},
 				);
 			}
-		} finally {
-			setIsAddingToCart(false);
 		}
 	};
 
 	const handleCheckOut = async () => {
-		const isAuthenticated = await cartService.checkAuthStatus();
-
 		if (!isAuthenticated) {
 			showAlert("You need to be logged in to checkout", "info", {
 				confirmText: "Login",
@@ -232,7 +228,7 @@ const ProductDetails = () => {
 		}
 
 		try {
-			await cartService.addToCart(product, quantity);
+			await addToCart(product, quantity);
 			navigate("/checkout");
 		} catch (error) {
 			console.error("Error during checkout:", error);
@@ -454,9 +450,12 @@ const ProductDetails = () => {
 							<div className="d-flex flex-column gap-3">
 								<button
 									onClick={handleAddToCart}
+									disabled={isAdding}
 									className="bg-primary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5 py-3"
 								>
-									{added ? (
+									{isAdding ? (
+										"Adding item to cart..."
+									) : added ? (
 										<>
 											<FaCheck className="text-white" /> Added
 										</>
@@ -466,6 +465,7 @@ const ProductDetails = () => {
 								</button>
 								<button
 									onClick={handleCheckOut}
+									disabled={isAdding}
 									className="bg-secondary-normal bg-transparent border-0 rounded-1 text-white font-inter fw-semibold fs-5 py-3"
 								>
 									Check Out

@@ -8,7 +8,7 @@ import {
 	FaCheck,
 } from "react-icons/fa";
 import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
-import { cartService } from "../utils/cartService";
+import { useCart } from "../hooks/useCart";
 import { useAlert } from "../../alert/AlertContext";
 import { useToast } from "../../toast/ToastContext";
 import formatToNaira from "../../utils/nairaFormatter";
@@ -16,8 +16,8 @@ import formatToNaira from "../../utils/nairaFormatter";
 const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 	const { showAlert } = useAlert()
 	const { showToast } = useToast();
+	const {addToCart, isAdding}  = useCart()
 	const [added, setIsAdded] = useState(false);
-	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [isFavorite, setIsFavorite] = useState(false);
 	const navigate = useNavigate();
 
@@ -28,26 +28,21 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 
 	const handleAddToCart = async (e) => {
 		e.preventDefault();
-		e.stopPropagation();
-		if (isAddingToCart) return; // Prevent multiple clicks
+		e.stopPropagation(); // Prevent multiple clicks
 
 		try {
-			setIsAddingToCart(true);
-
-			await cartService.addToCart(product, 1);
+			await addToCart(product, 1);
 			setIsAdded(true);
 			showToast("Product added to cart", "success")
 	
 			// Reset after 3 seconds
-			setTimeout(() => setIsAdded(false), 3000);
+			setTimeout(() => setIsAdded(false), 2000);
 		} catch (error) {
 			console.error("Error adding to cart:", error);
 			showAlert("Failed to add product to cart", "error", {
 				mode: "confirm",
 				confirmText: "Ok",
 			});
-		} finally {
-			setIsAddingToCart(false);
 		}
 	};
 
@@ -203,8 +198,10 @@ const ProductsCard = ({ product, layoutMode = "flex", variant = "full" }) => {
 					</div>
 				</div>
 				<div>
-						<button onClick={handleAddToCart} className="bg-transparent border-0 rounded-2 browse-btn w-100 text-primary-normal fs-6 fw-semibold font-inter">
-							{added ? (
+						<button onClick={handleAddToCart} className="bg-transparent border-0 rounded-2 browse-btn w-100 text-primary-normal fs-6 fw-semibold font-inter" disabled={isAdding}>
+							{isAdding ? (
+								"Adding to cart..."
+							) : added ? (
 								<>
 									<FaCheck className="text-white me-1" /> Added
 								</>

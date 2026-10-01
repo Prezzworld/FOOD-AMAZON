@@ -29,13 +29,13 @@ const CartItems = ({
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity >= 1) {
-      onUpdate(item._id, newQuantity);
+      onUpdate(item, newQuantity);
     }
   };
 
   const handleRemove = (e) => {
     e.preventDefault();
-    onRemove(item.itemId);
+    onRemove(item);
   };
 
   const handleAddToWishlist = (e) => {

@@ -1,86 +1,33 @@
-import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductShowcase from "../components/ProductShowcase";
 import CartItems from "../components/CartItems";
 import OrderSummary from "../components/OrderSummary";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart"
+import {useToast} from "../../toast/ToastContext"
 import "./cart.css";
-// import { cartLocalStorage } from "../utils/cartLocalStorage";
-// import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
-
-const normalizeCart = (cartItems) => {
-	return cartItems.map(item => {
-		if (item.product) {
-      return {
-        itemId: item._id,
-        _id: item.product._id,
-        name: item.product.name,
-        price: item.product.price,
-        productImg: item.product.productImg,
-        quantity: item.quantity,
-        variety: item.variety,
-        cartItemId: item.cartItemId,
-      };
-    }
-    return item;
-	})
-}
 
 const Cart = () => {
-	const [cart, setCart] = useState([]);
-	const [loading, setLoading] = useState(false);
+	const {items, loading, updateCartItem, removeCartItem} = useCart()
+	const{showToast} = useToast()
 
-	useEffect(() => {
-		fetchCart();
-
-		const handleCartUpdate = () => {
-			fetchCart();
-		};
-
-		window.addEventListener("cartUpdated", handleCartUpdate);
-
-		return () => {
-			window.removeEventListener("cartUpdated", handleCartUpdate);
-		};
-	}, []);
-
-	const fetchCart = async () => {
+	const handleRemoveItem = async (item) =>  {
 		try {
-			setLoading(true);
-			const savedCart = await cartService.getCart();
-
-			const normalizedCart = normalizeCart(savedCart)
-			setCart(normalizedCart);
-		} catch (error) {
-			console.error("Error fetching cart", error);
-		} finally {
-			setLoading(false);
+			await removeCartItem(item)
+			showToast("Cart item removed successfully", "success")
+		} catch {
+			showToast("Couldn't remove item from cart, please try again later", "error")
 		}
-	};
+	}
 
-	const handleRemoveItem = async (productId) => {
+	const updateCart = async (item, quantity) => {
 		try {
-			const updatedCart = await cartService.removeFromCart(productId);
-
-			const normalizedCart = normalizeCart(updatedCart)
-
-			setCart(normalizedCart);
-		} catch (error) {
-			console.error("❌ Error removing item:", error);
-			console.error("  - Error message:", error.message);
-			console.error("  - Error response:", error.response?.data);
+			await updateCartItem(item, quantity)
+			showToast("Cart updated successfully", "success")
+		} catch {
+			showToast("Couldn't update cart, please try again later", "error")
 		}
-	};
-
-	const updateCart = async (productId, quantity) => {
-		const updatedCart = await cartService.updateQuantity(productId, quantity);
-
-		// Normalize before setting state
-		const normalizedCart = normalizeCart(updatedCart)
-
-		setCart(normalizedCart);
-	};
+	} 
 	return (
 		<>
 			<Header shadow="shadow" />
@@ -92,7 +39,7 @@ const Cart = () => {
 						</div>
 					</div>
 				</>
-			) : cart.length === 0 ? (
+			) : items.length === 0 ? (
 				<>
 					<div className="text-center py-5">
 						<p className="ps-5 text-muted">
@@ -106,7 +53,7 @@ const Cart = () => {
 						<div className="cart-page">
 							<div className="row d-flex g-4">
 								<div className="col-12 col-lg-6">
-									{cart.map((item, index) => (
+									{items.map((item, index) => (
 										<CartItems
 											key={item.itemId}
 											item={item}

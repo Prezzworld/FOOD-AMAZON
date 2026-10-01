@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 // import { stringToArray } from '../helper/Helper';
 import { BsX } from "react-icons/bs";
 import { wishlistLocalStorage } from "../utils/wishlistLocalStorage";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart"
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "../pages/wishlist.css";
@@ -18,7 +18,8 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState({});
   const [addedItem, setAddedItem] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [addingToCart, setAddingToCart] = useState(false);
+  const [addingToCart, setAddingToCart] = useState({});
+  const {addToCart} = useCart()
 
   useEffect(() => {
     try {
@@ -53,8 +54,9 @@ const Wishlist = () => {
 
   const handleAddToCart = async (product) => {
     if (addingToCart[product._id]) return; // Prevent multiple clicks
+    setAddingToCart(prev => ({...prev, [product._id]: true}))
     try {
-      await cartService.addToCart(product, 1);
+      await addToCart(product, 1);
       setAddedItem((prev) => ({ ...prev, [product._id]: true }));
 
       showToast("Product added to cart", "success");
@@ -66,12 +68,9 @@ const Wishlist = () => {
     } catch (error) {
       console.error("Error adding to cart:", error);
 
-      showAlert(error.message || "Failed to add product to cart", "error", {
-        mode: "confirm",
-        confirmText: "Ok",
-      });
+      showToast("Couldn't add product to cart", "error")
     } finally {
-      setAddedItem((prev) => ({ ...prev, [product._id]: false }));
+      setAddingToCart((prev) => ({ ...prev, [product._id]: false }));
     }
   };
 
@@ -83,49 +82,47 @@ const Wishlist = () => {
       return;
     }
 
-    try {
-      const loadingState = {};
-      inStockItems.forEach((item) => {
-        loadingState[item._id] = true;
-      });
-      setAddingToCart(loadingState);
+    const loadingState = {};
+    inStockItems.forEach((item) => {
+      loadingState[item._id] = true;
+    });
+    setAddingToCart(loadingState);
 
-      const results = await Promise.allSettled(
-        inStockItems.map((item) => cartService.addToCart(item, 1)),
-      );
+    let successCount = 0
+    let failCount = 0
+    const addedIds = []
 
-      const successCount = results.filter(
-        (r) => r.status === "fulfilled",
-      ).length;
-      const failCount = results.filter((r) => r.status === "rejected").length;
-
-      const newAddedItems = {};
-      inStockItems.forEach((item) => {
-        newAddedItems[item._id] = true;
-      });
-      setAddedItem(newAddedItems);
-
-      if (failCount === 0) {
-        showToast(`${successCount} items added to cart`, "success");
-      } else {
-        showAlert(`${successCount} added, ${failCount} failed`, "warning", {
-          mode: "confirm",
-          confirmText: "Ok",
-        });
+    for (const item of inStockItems) {
+      try {
+        await addToCart(item, 1)
+        successCount++
+        addedIds.push(item._id)
+      } catch (error) {
+        showToast("Error adding item to cart", "error")
+        failCount++
       }
-
-      setTimeout(() => {
-        setAddedItem({});
-      }, 2000);
-    } catch (error) {
-      console.error("Error adding all to cart", error);
-      showAlert("Failed to add all items to cart", "error", {
-        mode: "confirm",
-        confirmText: "Ok",
-      });
-    } finally {
-      setAddingToCart({});
     }
+
+    const newAddedItems = {}
+    addedIds.forEach(id => {
+      newAddedItems[id] = true
+    })
+    setAddedItem(newAddedItems)
+
+    if(failCount === 0) {
+      showToast(`${successCount} items added to cart`, "success")
+    } else {
+      showAlert(`${successCount} added, ${failCount} failed`, "warning", {
+        mode: "confirm",
+        confirmText: "Ok"
+      })
+    }
+
+    setTimeout(() => {
+      setAddedItem({})
+    }, 2000)
+
+    setAddingToCart({})
   };
 
   const handleRemove = (productId) => {

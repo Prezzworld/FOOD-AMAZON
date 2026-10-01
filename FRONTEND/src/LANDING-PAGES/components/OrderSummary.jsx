@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { cartService } from "../utils/cartService";
+import {useCart} from "../hooks/useCart"
 import { formatToNaira } from "../../utils/nairaFormatter";
 
 const OrderSummary = ({
@@ -10,39 +9,11 @@ const OrderSummary = ({
   disabled = false,
 }) => {
   const navigate = useNavigate();
-  const [originalPrice, setOriginalPrice] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const {totalAmount, loading} = useCart()
   const savings = 0;
   const shipping = 0;
   const tax = 0;
-  const totalPrice = originalPrice + shipping + tax - savings;
-
-  useEffect(() => {
-    const fetchCartTotal = async () => {
-      try {
-        setLoading(true);
-        const total = await cartService.getCartTotal();
-        setOriginalPrice(total);
-      } catch (error) {
-        console.error("Error fetching cart total:", error);
-        setOriginalPrice(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartTotal();
-
-    const handleCartUpdate = () => {
-      fetchCartTotal();
-    };
-
-    window.addEventListener("cartUpdated", handleCartUpdate);
-
-    return () => {
-      window.removeEventListener("cartUpdated", handleCartUpdate);
-    };
-  }, []);
+  const totalPrice = totalAmount + shipping + tax - savings;
 
   const handleButtonClick = (e) => {
     if (onPlaceOrder) {
@@ -72,7 +43,7 @@ const OrderSummary = ({
             <div className="order-summary-details border-top border-bottom py-3 d-flex flex-column gap-3">
               <div className="d-flex align-items-center justify-content-between font-inter fw-normal">
                 <p>Original Price</p>
-                <p>{formatToNaira(originalPrice)}</p>
+                <p>{formatToNaira(totalAmount)}</p>
               </div>
               <div className="d-flex align-items-center justify-content-between font-inter fw-normal">
                 <p>Savings</p>
