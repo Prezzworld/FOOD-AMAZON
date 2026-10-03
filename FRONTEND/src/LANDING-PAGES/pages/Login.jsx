@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { cartService } from "../utils/cartService";
 import "../pages/signin.css";
 import { useToast } from "../../toast/ToastContext";
 import { useAlert } from "../../alert/AlertContext";
 import AuthLayout from "../components/AuthLayout";
 import useAuthStore from "../../store/authStore";
+import {mergeGuestCartOnLogin} from "../utils/cartApi"
 
 const Login = () => {
   const { showToast } = useToast();
@@ -108,9 +108,23 @@ const Login = () => {
       useAuthStore.getState().login(finalToken, refreshToken, user)
      
       try {
-        await cartService.syncCartOnLogin(accessToken || token);
+        const {total, successCount, failCount} = await mergeGuestCartOnLogin(user._id)
 
-        window.dispatchEvent(new CustomEvent("cartUpdated"));
+        if (total > 0) {
+          if (failCount === 0) {
+            showToast(
+              `${successCount} ${successCount > 1 ? "items" : "item"} restored to your cart`,
+              "success",
+            );
+          } else if (successCount === 0) {
+            showToast("Couldn't restore your cart items, please add them again", "error");
+          } else {
+            showToast(
+              `${successCount} of ${total} cart items restored, ${failCount} couldn't be added`,
+              "warning",
+            );
+          }
+        }
       } catch (error) {
         console.error("Error syncing cart after login (non-critical):", error);
       }

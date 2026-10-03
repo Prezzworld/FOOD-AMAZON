@@ -1,4 +1,7 @@
 import axiosInstance from "./axiosInstance";
+import useCartStore from "../../store/cartStore"
+import queryClient from "../../queryClient"
+import {cartKey} from "./cartUtils"
 
 const endpointUrl = "food-amazon-database/cart/";
 
@@ -45,4 +48,33 @@ const clearCart = async () => {
   return checkDataExists(response, "clearCart");
 }
 
-export {getCart, addToCart, updateCartItem, removeCartItem, clearCart}
+const mergeGuestCartOnLogin = async (userId) => {
+  const items = useCartStore.getState().items
+  if(!items || items.length === 0) {
+    return { total: 0, successCount: 0, failCount: 0, failedItems: [] };
+  }
+
+  let successCount = 0;
+  const failedItems = [];
+
+  for(const item of items) {
+    try {
+      await addToCart(item, item.quantity, item.variety)
+      successCount++
+    } catch(err) {
+      console.error("Failed to merge guest cart with server ", err)
+      failedItems.push(item)
+    }
+  }
+  useCartStore.getState().clearCart();
+  queryClient.invalidateQueries({queryKey: cartKey(userId)});
+
+  return {
+    total: items.length,
+    successCount,
+    failCount: failedItems.length,
+    failedItems
+  }
+}
+
+export {getCart, addToCart, updateCartItem, removeCartItem, clearCart, mergeGuestCartOnLogin}

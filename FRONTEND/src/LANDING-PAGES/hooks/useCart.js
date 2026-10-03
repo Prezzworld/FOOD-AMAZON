@@ -28,6 +28,7 @@ const useCart = () => {
   const isUpdating = isAuthenticated ? serverUpdateCartItem.isPending : false;
   const isRemoving = isAuthenticated ? serverRemoveCartItem.isPending : false;
   const isClearing = isAuthenticated ? serverClearCart.isPending : false;
+  const cartId = isAuthenticated ? serverCart.data?._id ?? null : null;
 
   const addToCart = (product, quantity, variety) => {
     if(isAuthenticated) {
@@ -61,7 +62,7 @@ const useCart = () => {
     }
   }
 
-  return {items, loading, cartId: serverCart.data?._id ?? null, totalItems: totals.totalItems, totalAmount: totals.totalAmount, isAdding, isUpdating, isRemoving, isClearing, addToCart, updateCartItem, removeCartItem, clearCart}
+  return {items, loading, cartId, totalItems: totals.totalItems, totalAmount: totals.totalAmount, isAdding, isUpdating, isRemoving, isClearing, addToCart, updateCartItem, removeCartItem, clearCart}
 }
 
 export {useCart}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { FaCheck } from "react-icons/fa";
-// import { cartLocalStorage } from "../utils/cartLocalStorage";
 import { BsDashLg, BsPlusLg } from "react-icons/bs";
 import "../pages/cart.css";
 import { formatToNaira } from "../../utils/nairaFormatter";
